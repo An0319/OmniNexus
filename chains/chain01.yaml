@@ -1,0 +1,27 @@
+# 链1（首链）：AI学术热度 → 光模块板块 —— 已判定 ❌（尝试1/3，2026-09-25）
+# 预注册协议：phase0/preregistration_protocol.md 第1~4节（v1.0）
+chain_id: chain01
+title: "AI学术热度(LLM/推理优化) → 光模块板块"
+lead:
+  source: openalex
+  params:
+    keywords: ["large language model", "inference optimization"]
+    weeks_back: 260
+    cache_file: openalex_weekly.csv   # M0回归：复用现有缓存，命中后零网络
+lag:
+  source: em_sector
+  params:
+    sector: 光模块
+    proxy_stock: sz300308             # 中际旭创（东财反爬时的个股代理）
+    proxy_name: 中际旭创
+    weeks_back: 260
+judgement:                            # 跑数据前锁定，不可静默修改
+  lag_range: [0, 8]
+  pass_window: [1, 4]
+  pass_corr: 0.3
+  noise_band: 0.15
+budget:
+  max_attempts: 3
+  used: 1
+output:
+  prefix: chain01

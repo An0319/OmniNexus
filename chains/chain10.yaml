@@ -1,0 +1,27 @@
+# 链10（换链#1）：人形机器人学术热度 → 机器人板块 —— 已判定 未通过（尝试2/3，2026-09-25）
+# 预注册协议：phase0/preregistration_protocol.md 第6节（v1.1，端到端口径，专利环节不进入判定）
+chain_id: chain10
+title: "人形机器人学术热度(humanoid robot/embodied intelligence) → 机器人板块"
+lead:
+  source: openalex
+  params:
+    keywords: ["humanoid robot", "embodied intelligence"]
+    weeks_back: 312
+    cache_file: openalex_weekly_chain10.csv   # M0回归：复用现有缓存
+lag:
+  source: em_sector
+  params:
+    sector: 机器人
+    proxy_stock: sh688017                     # 绿的谐波（科创板核心部件）
+    proxy_name: 绿的谐波
+    weeks_back: 312
+judgement:
+  lag_range: [0, 26]
+  pass_window: [4, 13]
+  pass_corr: 0.3
+  noise_band: 0.15
+budget:
+  max_attempts: 3
+  used: 2
+output:
+  prefix: chain10
