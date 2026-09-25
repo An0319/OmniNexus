@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-阶段0生死验证 v2：AI学术热度是否领先 光模块板块 资金流/价格？
+阶段0生死验证 v3 · 尝试#2（H2·链10端到端）：
+人形机器人学术热度是否领先 A股机器人板块？
 ==========================================================
-v2 改进：
-  - OpenAlex 抓完立即落盘缓存，支持断点续传（不再怕中途崩）
-  - 板块取数三级降级：akshare板块 -> 裸requests东财 -> 新浪个股代理（中际旭创300308）
+链10端到端口径：OpenAlex(humanoid robot | embodied intelligence) -> 东财机器人板块
+（三级链中的"专利"环节不进入判定，理由见协议第6.2节）
+v3 变更（协议 v1.1，2026-09-25 生效）：
+  - 关键词/板块/代理股更换，样本窗口 260 -> 312 周
+  - 滞后范围 0~8 -> 0~26 周，通过窗口 k∈[4,13]（突现主题传导期更长）
+  - 缓存与输出改用 chain10 前缀，首链结果原样保留
 判定（预注册，跑之前写死，不许改参再试）：
-  - 峰值出现在超前1~4周且 corr > 0.3 -> 传导迹象成立
-  - |corr| < 0.15 -> 首链逻辑存疑，换链（上限2次）
+  - 峰值 corr > 0.3 且 k∈[4,13] -> 传导迹象成立
+  - 全 k |corr| < 0.15 -> 无传导
 """
 import time
 import datetime as dt
@@ -20,13 +24,14 @@ import requests
 OUT_DIR = Path(__file__).parent / "output"
 OUT_DIR.mkdir(exist_ok=True)
 
-# ---------------- 预注册参数 ----------------
-KEYWORDS = ["large language model", "inference optimization"]
-WEEKS_BACK = 260
-LAG_RANGE = range(0, 9)
+# ---------------- 预注册参数（协议 v1.1 第6节，尝试#2） ----------------
+KEYWORDS = ["humanoid robot", "embodied intelligence"]
+WEEKS_BACK = 312
+LAG_RANGE = range(0, 27)   # 0~26 周：突现主题传导期更长（协议 6.4）
 Z_ROLL = 52
-SECTOR_NAME = "光模块"
-PROXY_STOCK = ("sz300308", "中际旭创")   # 三级降级：光模块龙头个股
+SECTOR_NAME = "机器人"
+PROXY_STOCK = ("sh688017", "绿的谐波")   # 三级降级：科创板机器人核心部件股
+CHAIN_TAG = "chain10"      # 缓存/输出前缀：不同链互不覆盖
 MAILTO = "omninexus.phase0@example.com"
 
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
@@ -34,7 +39,7 @@ UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.3
 
 # ---------------- 领先面：OpenAlex（带断点缓存） ----------------
 def fetch_openalex_weekly() -> pd.Series:
-    cache = OUT_DIR / "openalex_weekly.csv"
+    cache = OUT_DIR / f"openalex_weekly_{CHAIN_TAG}.csv"
     counts = {}
     if cache.exists():
         s = pd.read_csv(cache, index_col=0, parse_dates=True).iloc[:, 0]
@@ -129,19 +134,22 @@ def fetch_via_akshare() -> pd.DataFrame | None:
 def fetch_via_em_direct() -> pd.DataFrame | None:
     """裸requests：先从东财板块列表找到目标板块代码，再拉历史K线。"""
     try:
-        # 列出全部行业板块（fs=m:90+t:2），翻页取全
+        # 依次搜行业板块（t:2）与概念板块（t:3），翻页取全
         bk_code, bk_name = None, None
-        for page in range(1, 6):
-            r = requests.get(
-                "https://push2.eastmoney.com/api/qt/clist/get",
-                params={"fs": "m:90+t:2", "pn": page, "pz": 100,
-                        "fields": "f12,f14", "po": 1},
-                headers=UA, timeout=20)
-            data = r.json().get("data", {}).get("diff", {})
-            items = data.values() if isinstance(data, dict) else data
-            for it in items:
-                if SECTOR_NAME in str(it.get("f14", "")):
-                    bk_code, bk_name = it["f12"], it["f14"]
+        for fs in ("m:90+t:2", "m:90+t:3"):
+            for page in range(1, 6):
+                r = requests.get(
+                    "https://push2.eastmoney.com/api/qt/clist/get",
+                    params={"fs": fs, "pn": page, "pz": 100,
+                            "fields": "f12,f14", "po": 1},
+                    headers=UA, timeout=20)
+                data = r.json().get("data", {}).get("diff", {})
+                items = data.values() if isinstance(data, dict) else data
+                for it in items:
+                    if SECTOR_NAME in str(it.get("f14", "")):
+                        bk_code, bk_name = it["f12"], it["f14"]
+                        break
+                if bk_code:
                     break
             if bk_code:
                 break
@@ -215,7 +223,7 @@ def xcorr(lead: pd.Series, lag: pd.Series, lags) -> pd.Series:
 
 
 def main():
-    print("== 阶段0 v2：AI学术热度 -> 光模块板块 领先滞后验证 ==", flush=True)
+    print("== 阶段0 v3 · 尝试#2（H2·链10端到端）：人形机器人学术热度 -> 机器人板块 ==", flush=True)
 
     print("[1/4] OpenAlex 周度论文计数（窄口径：" + " | ".join(KEYWORDS) + "）", flush=True)
     papers = fetch_openalex_weekly()
@@ -254,7 +262,7 @@ def main():
             continue
         k_best = c.abs().idxmax()
         c_best = c.loc[k_best]
-        if 1 <= k_best <= 4 and c_best > 0.3:
+        if 4 <= k_best <= 13 and c_best > 0.3:
             v = "✅ 传导迹象成立"
         elif abs(c_best) < 0.15:
             v = "❌ 无传导迹象"
@@ -264,9 +272,9 @@ def main():
     print("\n== 预注册判定 ==")
     print("\n".join(verdict_lines))
 
-    wk.to_csv(OUT_DIR / "sector_weekly.csv")
-    corr_tbl.to_csv(OUT_DIR / "xcorr.csv")
-    pd.DataFrame(series).to_csv(OUT_DIR / "zseries.csv")
+    wk.to_csv(OUT_DIR / f"sector_weekly_{CHAIN_TAG}.csv")
+    corr_tbl.to_csv(OUT_DIR / f"xcorr_{CHAIN_TAG}.csv")
+    pd.DataFrame(series).to_csv(OUT_DIR / f"zseries_{CHAIN_TAG}.csv")
 
     try:
         import matplotlib
@@ -285,8 +293,8 @@ def main():
         corr_tbl.plot.bar(ax=ax)
         ax.set_title("交叉相关：lead 超前 k 周"); ax.set_xlabel("超前周数"); ax.axhline(0, c="k", lw=0.5)
         plt.tight_layout()
-        plt.savefig(OUT_DIR / "lead_lag.png", dpi=150)
-        print(f"\n图已保存：{OUT_DIR / 'lead_lag.png'}")
+        plt.savefig(OUT_DIR / f"lead_lag_{CHAIN_TAG}.png", dpi=150)
+        print(f"\n图已保存：{OUT_DIR / f'lead_lag_{CHAIN_TAG}.png'}")
     except Exception as e:
         print(f"[warn] 画图失败（不影响结果）：{e}")
 
