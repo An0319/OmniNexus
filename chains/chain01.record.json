@@ -1,0 +1,9 @@
+{
+  "event": "init_ledger",
+  "at": "2026-09-26T02:32:44",
+  "note": "按 phase0/preregistration_protocol.md 修订记录表的历史状态建档",
+  "fingerprint": "d47844cc9ccef400ec914f3d2fa17b7e43397de45da41056b9c45c49dfcaf53d",
+  "substantive_fingerprint": "82ca0f43ac6dd794815af33d652a9b69c8be3fe65459318c5e02cbee58a2e9c2",
+  "budget_used": 1,
+  "revisions_seen": 0
+}

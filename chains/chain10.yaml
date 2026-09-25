@@ -23,5 +23,13 @@ judgement:
 budget:
   max_attempts: 3
   used: 2
+# 修订历史（与 phase0/preregistration_protocol.md 第7节双账；判定参数改动必须在此登记）
+revisions:
+  - date: "2026-09-25"
+    reason: "换链#1 修订案生效（协议 v1.1 第6节：H2·链10端到端口径）"
+    counts_as_attempt: true
+  - date: "2026-09-25"
+    reason: "有效尝试 #2 执行：机器人学术→A股机器人板块，未通过（收益 ❌ / 成交额 ⚠️灰区）"
+    counts_as_attempt: false   # 上一条已计入尝试#2；此条为结果登记，不重复计数
 output:
   prefix: chain10

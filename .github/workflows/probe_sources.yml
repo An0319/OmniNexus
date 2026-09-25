@@ -1,0 +1,50 @@
+name: P0-2 数据源连通性探针（云 IP）
+
+# 目的：验证"三级降级链在 GitHub Actions 云 IP 上是否可用"。
+# 背景：本地跑链10 时滞后面被反爬一路降级到第 3 级（新浪个股代理）。
+#       M3 验收是"30 天无人值守"，若云上取数不可用，M3 就是空头承诺。
+on:
+  push:
+    paths:
+      - ".github/workflows/probe_sources.yml"
+      - "tools/probe_sources.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pandas numpy pyyaml
+          pip install akshare || echo "::warning::akshare 安装失败（这本身是一个发现）"
+
+      - name: 运行探针
+        run: python tools/probe_sources.py 2>&1 | tee probe-output.txt
+
+      - name: 回传结果到 probe-results 分支
+        if: always()
+        run: |
+          set -x
+          mkdir -p /tmp/out
+          cp probe-output.txt /tmp/out/ 2>/dev/null || true
+          cp probe_result.json /tmp/out/ 2>/dev/null || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch --orphan probe-out
+          git rm -rf . --quiet || true
+          cp /tmp/out/* . 2>/dev/null || true
+          git add -A
+          git commit -m "P0-2 探针结果（run ${{ github.run_id }}）" || echo "no changes"
+          git push -f origin probe-out:probe-results

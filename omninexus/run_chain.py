@@ -15,11 +15,11 @@ import pandas as pd
 import yaml
 
 from .core import STATUS_CN, align_weekday, judge, roll_z, to_weekly, xcorr
-from .guard import check_discipline, write_record
+from .guard import check_discipline, init_ledger, write_record
 from .sources import fetch_openalex_weekly, fetch_sector_daily
 
 
-def run_chain(config_path: str) -> int:
+def run_chain(config_path: str, init: bool = False) -> int:
     config_path = str(config_path)
     cfg = yaml.safe_load(Path(config_path).read_text(encoding="utf-8"))
     chain_id = cfg["chain_id"]
@@ -28,6 +28,20 @@ def run_chain(config_path: str) -> int:
 
     # 预注册纪律锁：判定参数被修改而未登记修订 -> 拒绝运行
     record_path = Path(config_path).parent / f"{chain_id}.record.json"
+
+    # --init-ledger：为「已有历史但还没台账」的链建档（P0-3 加固后首次运行前需要）
+    if init:
+        if record_path.exists():
+            print(f"[台账] {record_path.name} 已存在，无需初始化。")
+            return 0
+        init_ledger(record_path, cfg,
+                    note="按 phase0/preregistration_protocol.md 修订记录表的历史状态建档")
+        print(f"[台账] 已为 {chain_id} 建档：budget.used="
+              f"{(cfg.get('budget') or {}).get('used', 0)}、"
+              f"revisions_seen={len(cfg.get('revisions') or [])}。"
+              f"运行日志 {record_path.with_suffix('.runs.jsonl').name} 已留首行。")
+        return 0
+
     guard = check_discipline(cfg, record_path)
     print(guard.message, flush=True)
     if not guard.ok:
@@ -87,4 +101,5 @@ def run_chain(config_path: str) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(run_chain(sys.argv[1]))
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    sys.exit(run_chain(args[0], init="--init-ledger" in sys.argv))

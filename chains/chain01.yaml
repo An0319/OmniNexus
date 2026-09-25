@@ -23,5 +23,13 @@ judgement:                            # 跑数据前锁定，不可静默修改
 budget:
   max_attempts: 3
   used: 1
+# 修订历史（与 phase0/preregistration_protocol.md 第7节双账；判定参数改动必须在此登记）
+revisions:
+  - date: "2026-09-25"
+    reason: "初版生效（协议 v1.0），判定口径锁定"
+    counts_as_attempt: false
+  - date: "2026-09-25"
+    reason: "有效尝试 #1 执行：AI学术→光模块，双指标 ❌ 无传导"
+    counts_as_attempt: true
 output:
   prefix: chain01

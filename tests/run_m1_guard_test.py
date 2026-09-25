@@ -26,7 +26,10 @@ BASE_CFG = {
     "judgement": {"lag_range": [0, 8], "pass_window": [1, 4], "pass_corr": 0.3, "noise_band": 0.15},
     "lead": {"params": {"keywords": ["a", "b"], "weeks_back": 260}},
     "lag": {"params": {"sector": "光模块", "weeks_back": 260}},
-    "budget": {"max_attempts": 3, "used": 1},
+    # used=0：P0-3 加固后，"首次运行"仅指链尚未用过额度的情况；
+    # 若 YAML 声明已用过而台账缺失，会被纪律锁判为「删档洗白」直接拒绝
+    # （见 tests/run_p0_guard_adversarial.py A1）。
+    "budget": {"max_attempts": 3, "used": 0},
 }
 VERDICTS = [{"metric": "周收益率", "status": "NO_TRANSMISSION", "k_best": 7, "corr": -0.108}]
 
@@ -55,7 +58,7 @@ with tempfile.TemporaryDirectory() as tmp:
     check("拒绝", not g.ok)
 
     print("== 场景5：修订 + used+1 -> 放行 ==")
-    tampered["budget"] = {**BASE_CFG["budget"], "used": 2}
+    tampered["budget"] = {**BASE_CFG["budget"], "used": 1}
     g = check_discipline(tampered, record)
     check("放行", g.ok)
 
