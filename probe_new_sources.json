@@ -1,0 +1,158 @@
+{
+  "at": "2026-09-25T18:27:09+00:00",
+  "probes": {
+    "us_tencent_usIXIC": {
+      "source": "tencent:usIXIC",
+      "url": "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get",
+      "status": 200,
+      "seconds": 1.36,
+      "bytes": 1574,
+      "ok": false,
+      "rows": 1,
+      "first": "2026-09-25",
+      "last": "2026-09-25"
+    },
+    "us_tencent_usSOX": {
+      "source": "tencent:usSOX",
+      "url": "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get",
+      "status": 200,
+      "seconds": 1.04,
+      "bytes": 1067,
+      "ok": false,
+      "rows": 0,
+      "first": null,
+      "last": null
+    },
+    "us_tencent_usSOXX": {
+      "source": "tencent:usSOXX",
+      "url": "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get",
+      "status": 200,
+      "seconds": 0.95,
+      "bytes": 1653,
+      "ok": false,
+      "rows": 2,
+      "first": "2011-06-02",
+      "last": "2026-09-25"
+    },
+    "us_tencent_usSMH": {
+      "source": "tencent:usSMH",
+      "url": "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get",
+      "status": 200,
+      "seconds": 0.88,
+      "bytes": 1579,
+      "ok": false,
+      "rows": 1,
+      "first": "2026-09-25",
+      "last": "2026-09-25"
+    },
+    "us_sina_.IXIC": {
+      "source": "sina_us:.IXIC",
+      "status": 200,
+      "seconds": 2.46,
+      "bytes": 632134,
+      "ok": true,
+      "rows": 5718,
+      "first": "2004-01-02",
+      "last": "2026-09-24",
+      "head": "/*<script>location.href='//sina.com';</script>*/ var d=([{\"d\":\"2004-01-02\",\"o\":\"2011.08\",\"h\":\"2022.37\",\"l\":\"1999.77\",\"c\""
+    },
+    "us_sina_.SOX": {
+      "source": "sina_us:.SOX",
+      "status": 200,
+      "seconds": 1.15,
+      "bytes": 287532,
+      "ok": true,
+      "rows": 3190,
+      "first": "2014-01-16",
+      "last": "2026-09-24",
+      "head": "/*<script>location.href='//sina.com';</script>*/ var d=([{\"d\":\"2014-01-16\",\"o\":\"543.19\",\"h\":\"544.15\",\"l\":\"540.10\",\"c\":\"5"
+    },
+    "us_sina_.SOXX": {
+      "source": "sina_us:.SOXX",
+      "status": 200,
+      "seconds": 0.79,
+      "bytes": 62,
+      "ok": false,
+      "rows": 0,
+      "first": null,
+      "last": null,
+      "head": "/*<script>location.href='//sina.com';</script>*/ var d=(null);"
+    },
+    "cn_tencent_sh000905": {
+      "source": "tencent:sh000905",
+      "url": "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get",
+      "status": 200,
+      "seconds": 1.31,
+      "bytes": 121439,
+      "ok": true,
+      "rows": 1600,
+      "first": "2020-02-26",
+      "last": "2026-09-24"
+    },
+    "cn_tencent_sh512480": {
+      "source": "tencent:sh512480",
+      "url": "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get",
+      "status": 200,
+      "seconds": 1.09,
+      "bytes": 41211,
+      "ok": true,
+      "rows": 640,
+      "first": "2024-02-02",
+      "last": "2026-09-24"
+    },
+    "cn_tencent_sz159995": {
+      "source": "tencent:sz159995",
+      "url": "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get",
+      "status": 200,
+      "seconds": 0.89,
+      "bytes": 40842,
+      "ok": true,
+      "rows": 640,
+      "first": "2024-02-02",
+      "last": "2026-09-24"
+    },
+    "cn_tencent_sh562500": {
+      "source": "tencent:sh562500",
+      "url": "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get",
+      "status": 200,
+      "seconds": 1.1,
+      "bytes": 71291,
+      "ok": true,
+      "rows": 1150,
+      "first": "2021-12-29",
+      "last": "2026-09-24"
+    },
+    "akshare_stock_zh_index_daily_sh000905": {
+      "ok": true,
+      "rows": 5279,
+      "seconds": 1.41,
+      "first": "2005-01-04",
+      "last": "2026-09-24"
+    },
+    "akshare_stock_zh_index_daily_sh512480": {
+      "ok": true,
+      "rows": 1771,
+      "seconds": 0.81,
+      "first": "2019-06-12",
+      "last": "2026-09-24"
+    }
+  },
+  "egress_ip": "20.104.167.75",
+  "verdict": {
+    "us_lead_candidates_ok": [
+      "us_sina_.IXIC",
+      "us_sina_.SOX"
+    ],
+    "cn_lag_candidates_ok": [
+      "cn_tencent_sh000905",
+      "cn_tencent_sh512480",
+      "cn_tencent_sz159995",
+      "cn_tencent_sh562500",
+      "akshare_stock_zh_index_daily_sh000905",
+      "akshare_stock_zh_index_daily_sh512480"
+    ],
+    "us_lead_usable": true,
+    "cn_lag_usable": true,
+    "semiconductor_lead_usable": true
+  }
+}
