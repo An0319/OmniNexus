@@ -29,6 +29,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 RESULT = {"at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
           "probes": {}}
 
+# 机器人板块（2026-09-26 复验中由生产代码在云 IP 搜索得到）：固定后跳过列表搜索。
+# 本探针刻意只发极少量东财请求——2026-09-26 复验发现东财的限流**随请求数累积**，
+# 探针自己发得太猛会把后面的测量一起毒化（上一版约 80 次请求，后半段连 K 线都拒连）。
+PINNED_BK = "BK1408"
+
 
 def timed(fn, *a, **kw):
     t0 = time.time()
@@ -68,8 +73,7 @@ def main():
     print(f"\n[0] 出口 IP：{env.get('head', env.get('error'))}")
 
     from omninexus.sources import (UA, fetch_sector_daily, fetch_via_akshare,
-                                   fetch_via_em_direct, fetch_via_sina_proxy,
-                                   resolve_sector_code)
+                                   fetch_via_em_direct, fetch_via_sina_proxy)
 
     # ---------- 1) 裸 HTTP 诊断：东财板块列表（三级里第2级的前置） ----------
     print("\n[1] 东财板块列表（行业板块 t:2 / 概念板块 t:3）")
@@ -81,76 +85,52 @@ def main():
         print(f"    {fs}: status={p.get('status')} {p.get('seconds')}s "
               f"ctype={p.get('ctype', '')[:30]} head={str(p.get('head', p.get('error')))[:80]}")
 
-    # ---------- 1.5) 对照实验：K线接口失败是"缺请求头"还是"IP 被拦" ----------
-    # 现象：板块列表(clist)在云 IP 上 200 且返回 JSON，但路径2 报
-    #       JSONDecodeError（拿到的是非 JSON 内容）——失败点在 push2his 的 K线接口。
-    # 若加上 Referer/ut 就能通，那这是**能修的工程问题**，不是 IP 风控；
-    # 结论直接决定 M3 能否供"板块级"数据，而不是含个股特质噪声的个股代理。
-    print("\n[1.5] 东财 K线接口对照实验（同一板块，只改请求头/参数）")
-    import requests
-    bk_code, bk_name = None, None
-    # 上一次运行该接口返回过 502 Bad Gateway（瞬时故障），故重试；全失败则用稳定板块代码兜底
-    for attempt in range(3):
-        try:
-            r = requests.get("https://push2.eastmoney.com/api/qt/clist/get",
-                             params={"fs": "m:90+t:3", "pn": 1, "pz": 10,
-                                     "fields": "f12,f14", "po": 1},
-                             headers=UA, timeout=20)
-            d = r.json()["data"]["diff"]
-            items = list(d.values()) if isinstance(d, dict) else d
-            bk_code, bk_name = items[0]["f12"], items[0].get("f14")
-            break
-        except Exception as e:
-            print(f"    取靶子板块第 {attempt + 1} 次失败：{type(e).__name__}")
-            time.sleep(2)
-    if not bk_code:
-        bk_code, bk_name = "BK0425", "工程建设（兜底固定代码）"
-        print("    靶子板块三次获取均失败，改用固定板块代码兜底")
-    print(f"    靶子板块：{bk_name} {bk_code}")
-    if bk_code:
-        end = dt.date.today().strftime("%Y-%m-%d")
-        # 隔离"请求头"与"时间跨度"两个变量：
-        # 生产代码用 312 周（6年），探针此前只测了 8 周——长跨度是否才是触发条件？
-        variants = [
-            ("(a) 仅UA/近8周（与生产代码请求头一致）", 8, dict(UA), {}),
-            ("(b) +Referer/近8周", 8, {**UA, "Referer": "https://quote.eastmoney.com/"}, {}),
-            ("(c) +Referer+ut/近8周", 8, {**UA, "Referer": "https://quote.eastmoney.com/"},
-             {"ut": "fa5fd1943c7b386f172d6893dbfba10b"}),
-            ("(d) 仅UA/近312周（生产代码的实际跨度）", 312, dict(UA), {}),
-            ("(e) +Referer/近312周", 312, {**UA, "Referer": "https://quote.eastmoney.com/"}, {}),
-        ]
-        for label, weeks, hdrs, extra in variants:
-            beg = (dt.date.today() - dt.timedelta(weeks=weeks)).strftime("%Y-%m-%d")
-            kparams = {"secid": f"90.{bk_code}", "klt": "101", "fqt": "0",
-                       "beg": beg, "end": end,
-                       "fields1": "f1,f2,f3", "fields2": "f51,f53,f57"}
-            p = raw_http_probe("https://push2his.eastmoney.com/api/qt/stock/kline/get",
-                               params={**kparams, **extra}, headers=hdrs)
-            RESULT["probes"][f"kline_{label}"] = p
-            print(f"    {label}: status={p.get('status')} {p.get('seconds')}s "
-                  f"head={str(p.get('head', p.get('error')))[:90]}")
+    # ---------- 1.5) 冷状态下的 K 线接口（用固定板块代码，只发 2 次） ----------
+    # 2026-09-26 更正：上一版这里靠 clist 现场搜靶子板块（3 次重试），且列了 5 个变体，
+    # 属于自己给自己制造限流。现在直接用已知代码，只比对"仅UA"与"+Referer"两种头。
+    print("\n[1.5] 东财 K线接口（冷状态，固定板块代码，仅 2 次请求）")
+    end = dt.date.today().strftime("%Y-%m-%d")
+    beg = (dt.date.today() - dt.timedelta(weeks=312)).strftime("%Y-%m-%d")
+    for label, hdrs in [("(a) 仅UA/近312周（与生产代码一致）", dict(UA)),
+                        ("(b) +Referer/近312周", {**UA, "Referer": "https://quote.eastmoney.com/"})]:
+        kparams = {"secid": f"90.{PINNED_BK}", "klt": "101", "fqt": "0",
+                   "beg": beg, "end": end,
+                   "fields1": "f1,f2,f3", "fields2": "f51,f53,f57"}
+        p = raw_http_probe("https://push2his.eastmoney.com/api/qt/stock/kline/get",
+                           params=kparams, headers=hdrs)
+        RESULT["probes"][f"kline_{label}"] = p
+        print(f"    {label}: status={p.get('status')} {p.get('seconds')}s "
+              f"head={str(p.get('head', p.get('error')))[:90]}")
 
-    # ---------- 1.6) 板块列表搜索重试实测：单次 502 是否会被重试救回 ----------
-    print("\n[1.6] 板块列表搜索（路径2 的第一道关，也是唯一没有重试的地方）")
-    ok_list, tries = 0, 5
+    # ---------- 1.6) 板块列表搜索：区分"第一次就成功"与"靠重试救回" ----------
+    # 2026-09-26 更正：上一版把 `tries_to_first_success=1` 记成"重试可救回"，是**误读**——
+    # 第一次就成功根本不能证明重试有效。现在两个指标分开记。
+    print("\n[1.6] 板块列表搜索（路径2 的第一道关）")
+    tries = 3
+    first_ok, ok_cnt = False, 0
     for i in range(tries):
         p = raw_http_probe("https://push2.eastmoney.com/api/qt/clist/get",
                            params={"fs": "m:90+t:3", "pn": 1, "pz": 100,
                                    "fields": "f12,f14", "po": 1}, headers=UA)
-        ok_list += 1 if p.get("ok") else 0
+        if i == 0:
+            first_ok = bool(p.get("ok"))
+        ok_cnt += 1 if p.get("ok") else 0
         print(f"    第{i + 1}次: status={p.get('status')} {p.get('seconds')}s")
         if p.get("ok"):
             break
-    RESULT["probes"]["clist_retry"] = {"tries_to_first_success": ok_list,
-                                       "attempts": tries,
-                                       "retry_saves_tier2": bool(ok_list)}
-    print(f"    → 重试{'可以' if ok_list else '无法'}救回路径2（前 {tries} 次内成功 {ok_list} 次）")
+    RESULT["probes"]["clist_retry"] = {
+        "first_try_ok": first_ok, "attempts_used": i + 1, "max_attempts": tries,
+        "success_within_attempts": ok_cnt,
+        "retry_needed_and_saved": bool(ok_cnt and not first_ok)}
+    print(f"    → 首次{'成功' if first_ok else '失败'}；"
+          f"重试{'把它救了回来' if ok_cnt and not first_ok else '未被验证'}")
 
     # ---------- 2) 三级降级逐级实测（调用生产代码） ----------
     print("\n[2] 三级降级逐级实测（生产代码 omninexus.sources）")
     tiers = [
         ("路径1 akshare 板块历史", fetch_via_akshare, ("机器人", 312)),
-        ("路径2 东财裸requests直连", fetch_via_em_direct, ("机器人", 312)),
+        ("路径2 东财裸requests直连(固定BK1408)", fetch_via_em_direct,
+         ("机器人", 312, PINNED_BK)),
         ("路径3 新浪个股代理(绿的谐波)", fetch_via_sina_proxy, (("sh688017", "绿的谐波"), 312)),
     ]
     for label, fn, args in tiers:
@@ -159,43 +139,9 @@ def main():
         print(f"    {label}: ok={r['ok']} {r['seconds']}s rows={r.get('rows')} "
               f"{r.get('error', '')}")
 
-    # ---------- 2.5) 修复复验：固定板块代码后，路径2 能否只发 1 次请求就供数 ----------
-    # 背景：P0-2 上一轮把失败点隔离到「板块列表搜索 502 且无重试」。
-    # 修复 = ①列表搜索加 3 次重试 ②链配置可固定板块代码（跳过搜索）。
-    # 本块同时验两件事：修复后的搜索版能否供数、固定代码版能否供数，并回传代码供写进链配置。
-    print("\n[2.5] 修复复验：搜索版（带重试）与固定代码版")
-    hit = None
-    t0 = time.time()
-    try:
-        hit = resolve_sector_code("机器人")
-    except Exception as e:
-        print(f"    resolve_sector_code 异常：{type(e).__name__}: {str(e)[:120]}")
-    RESULT["probes"]["resolved_bk_code"] = {
-        "code": hit[0] if hit else None, "name": hit[1] if hit else None,
-        "seconds": round(time.time() - t0, 2)}
-    print(f"    resolve_sector_code('机器人') -> {hit}（{round(time.time()-t0, 2)}s）")
-    if hit:
-        r = timed(fetch_via_em_direct, "机器人", 312, hit[0])
-        RESULT["probes"]["路径2b 固定板块代码"] = r
-        print(f"    固定代码版：ok={r['ok']} {r['seconds']}s rows={r.get('rows')} "
-              f"{r.get('error', '')}")
-        RESULT["verdict_fix"] = {
-            "search_with_retry_ok": bool(RESULT["probes"]["路径2 东财裸requests直连"]["ok"]),
-            "pinned_code_ok": bool(r["ok"]),
-            "pinned_code": hit[0],
-            "fix_restores_tier2": bool(r["ok"]),
-        }
-    else:
-        RESULT["verdict_fix"] = {"search_with_retry_ok":
-                                 RESULT["probes"]["路径2 东财裸requests直连"]["ok"],
-                                 "pinned_code_ok": False, "pinned_code": None,
-                                 "fix_restores_tier2": False,
-                                 "note": "搜索仍失败，无法取到可固定的板块代码"}
-        print("    搜索失败，无法复验固定代码版")
-
     # ---------- 3) 复合函数：最终哪一级救了场 ----------
     print("\n[3] fetch_sector_daily（复合三级降级）——看最终由哪一级供数")
-    r = timed(fetch_sector_daily, "机器人", ("sh688017", "绿的谐波"), 312)
+    r = timed(fetch_sector_daily, "机器人", ("sh688017", "绿的谐波"), 312, PINNED_BK)
     RESULT["probes"]["fetch_sector_daily"] = r
     print(f"    结果：ok={r['ok']} {r['seconds']}s rows={r.get('rows')} {r.get('error', '')}")
 
@@ -231,18 +177,21 @@ def main():
 
     # ---------- 判定 ----------
     t1 = RESULT["probes"]["路径1 akshare 板块历史"]["ok"]
-    t2 = RESULT["probes"]["路径2 东财裸requests直连"]["ok"]
+    t2 = RESULT["probes"]["路径2 东财裸requests直连(固定BK1408)"]["ok"]
     t3 = RESULT["probes"]["路径3 新浪个股代理(绿的谐波)"]["ok"]
     oa = RESULT["probes"]["openalex"]["ok"]
     used_tier = 1 if t1 else (2 if t2 else (3 if t3 else 0))
-    retry_ok = RESULT["probes"].get("clist_retry", {}).get("retry_saves_tier2", False)
+    retry = RESULT["probes"].get("clist_retry", {})
     RESULT["verdict"] = {
         "tier1_akshare": t1, "tier2_em_direct": t2, "tier3_sina_proxy": t3,
         "openalex_ok": oa, "winning_tier": used_tier or None,
-        "tier2_failure_isolated": ("路径2 挂在第一步「板块列表搜索」的 502（非 JSON），"
-                                   "K线接口本身在云 IP 可用；请求头无关"),
-        "tier2_retry_would_help": bool(retry_ok),
-        "tier2_fix_restores": RESULT.get("verdict_fix", {}).get("fix_restores_tier2", False),
+        "tier2_pinned_code": PINNED_BK,
+        "tier2_fix_restores": bool(t2),
+        "clist_first_try_ok": bool(retry.get("first_try_ok")),
+        "clist_retry_needed_and_saved": bool(retry.get("retry_needed_and_saved")),
+        "throttling_hypothesis": ("东财对同一出口 IP 的限流随请求数累积："
+                                  "2026-09-26 复验中同 run 前半段 clist 全 200、"
+                                  "后半段连 K 线也拒连；故本探针刻意压低请求数"),
         "can_sustain_30d": bool(used_tier and oa),
         "note": ("三级降级可用，但降级到第3级时结论含个股特质噪声"
                  if used_tier == 3 else
