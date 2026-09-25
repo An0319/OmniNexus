@@ -107,23 +107,43 @@ def main():
         print("    靶子板块三次获取均失败，改用固定板块代码兜底")
     print(f"    靶子板块：{bk_name} {bk_code}")
     if bk_code:
-        beg = (dt.date.today() - dt.timedelta(weeks=8)).strftime("%Y-%m-%d")
         end = dt.date.today().strftime("%Y-%m-%d")
-        kparams = {"secid": f"90.{bk_code}", "klt": "101", "fqt": "0",
-                   "beg": beg, "end": end,
-                   "fields1": "f1,f2,f3", "fields2": "f51,f53,f57"}
+        # 隔离"请求头"与"时间跨度"两个变量：
+        # 生产代码用 312 周（6年），探针此前只测了 8 周——长跨度是否才是触发条件？
         variants = [
-            ("(a) 现状：仅 UA（与生产代码一致）", dict(UA), {}),
-            ("(b) + Referer", {**UA, "Referer": "https://quote.eastmoney.com/"}, {}),
-            ("(c) + Referer + ut", {**UA, "Referer": "https://quote.eastmoney.com/"},
+            ("(a) 仅UA/近8周（与生产代码请求头一致）", 8, dict(UA), {}),
+            ("(b) +Referer/近8周", 8, {**UA, "Referer": "https://quote.eastmoney.com/"}, {}),
+            ("(c) +Referer+ut/近8周", 8, {**UA, "Referer": "https://quote.eastmoney.com/"},
              {"ut": "fa5fd1943c7b386f172d6893dbfba10b"}),
+            ("(d) 仅UA/近312周（生产代码的实际跨度）", 312, dict(UA), {}),
+            ("(e) +Referer/近312周", 312, {**UA, "Referer": "https://quote.eastmoney.com/"}, {}),
         ]
-        for label, hdrs, extra in variants:
+        for label, weeks, hdrs, extra in variants:
+            beg = (dt.date.today() - dt.timedelta(weeks=weeks)).strftime("%Y-%m-%d")
+            kparams = {"secid": f"90.{bk_code}", "klt": "101", "fqt": "0",
+                       "beg": beg, "end": end,
+                       "fields1": "f1,f2,f3", "fields2": "f51,f53,f57"}
             p = raw_http_probe("https://push2his.eastmoney.com/api/qt/stock/kline/get",
                                params={**kparams, **extra}, headers=hdrs)
             RESULT["probes"][f"kline_{label}"] = p
             print(f"    {label}: status={p.get('status')} {p.get('seconds')}s "
                   f"head={str(p.get('head', p.get('error')))[:90]}")
+
+    # ---------- 1.6) 板块列表搜索重试实测：单次 502 是否会被重试救回 ----------
+    print("\n[1.6] 板块列表搜索（路径2 的第一道关，也是唯一没有重试的地方）")
+    ok_list, tries = 0, 5
+    for i in range(tries):
+        p = raw_http_probe("https://push2.eastmoney.com/api/qt/clist/get",
+                           params={"fs": "m:90+t:3", "pn": 1, "pz": 100,
+                                   "fields": "f12,f14", "po": 1}, headers=UA)
+        ok_list += 1 if p.get("ok") else 0
+        print(f"    第{i + 1}次: status={p.get('status')} {p.get('seconds')}s")
+        if p.get("ok"):
+            break
+    RESULT["probes"]["clist_retry"] = {"tries_to_first_success": ok_list,
+                                       "attempts": tries,
+                                       "retry_saves_tier2": bool(ok_list)}
+    print(f"    → 重试{'可以' if ok_list else '无法'}救回路径2（前 {tries} 次内成功 {ok_list} 次）")
 
     # ---------- 2) 三级降级逐级实测（调用生产代码） ----------
     print("\n[2] 三级降级逐级实测（生产代码 omninexus.sources）")
@@ -180,9 +200,13 @@ def main():
     t3 = RESULT["probes"]["路径3 新浪个股代理(绿的谐波)"]["ok"]
     oa = RESULT["probes"]["openalex"]["ok"]
     used_tier = 1 if t1 else (2 if t2 else (3 if t3 else 0))
+    retry_ok = RESULT["probes"].get("clist_retry", {}).get("retry_saves_tier2", False)
     RESULT["verdict"] = {
         "tier1_akshare": t1, "tier2_em_direct": t2, "tier3_sina_proxy": t3,
         "openalex_ok": oa, "winning_tier": used_tier or None,
+        "tier2_failure_isolated": ("路径2 挂在第一步「板块列表搜索」的 502（非 JSON），"
+                                   "K线接口本身在云 IP 可用；请求头无关"),
+        "tier2_retry_would_help": bool(retry_ok),
         "can_sustain_30d": bool(used_tier and oa),
         "note": ("三级降级可用，但降级到第3级时结论含个股特质噪声"
                  if used_tier == 3 else
