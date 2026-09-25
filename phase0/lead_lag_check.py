@@ -35,13 +35,15 @@ UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.3
 # ---------------- 领先面：OpenAlex（带断点缓存） ----------------
 def fetch_openalex_weekly() -> pd.Series:
     cache = OUT_DIR / "openalex_weekly.csv"
+    counts = {}
     if cache.exists():
         s = pd.read_csv(cache, index_col=0, parse_dates=True).iloc[:, 0]
         if s.notna().sum() > 30:
-            print("  [cache] 命中有效本地缓存，跳过重抓")
-            return s.rename("paper_count")
-        print("  [cache] 缓存无效（全缺失/样本不足），删除后重抓")
-        cache.unlink()
+            print(f"  [cache] 命中本地缓存 {s.notna().sum()} 有效周，续抓缺失/后续周")
+            counts = {idx.date(): v for idx, v in s.items()}
+        else:
+            print("  [cache] 缓存无效（全缺失/样本不足），删除后重抓")
+            cache.unlink()
 
     import os
     # API key 优先级：环境变量 > 本地密钥文件（openalex_key.local，已被 .gitignore 排除）
@@ -49,14 +51,17 @@ def fetch_openalex_weekly() -> pd.Series:
     key_file = Path(__file__).parent / "openalex_key.local"
     if not api_key and key_file.exists():
         api_key = key_file.read_text(encoding="utf-8").strip()
+
     today = dt.date.today()
-    counts = {}
     session = requests.Session()
     query = " OR ".join(KEYWORDS)
     consecutive_fail = 0
     for w in range(WEEKS_BACK, -1, -1):
         end = today - dt.timedelta(weeks=w)
         start = end - dt.timedelta(weeks=1)
+        # 已有非缺失值的周跳过（断点续传），NaN 周重试
+        if start in counts and pd.notna(counts[start]):
+            continue
         params = {
             "filter": f"title_and_abstract.search:{query},"
                       f"from_publication_date:{start},to_publication_date:{end}",
@@ -214,6 +219,8 @@ def main():
 
     print("[1/4] OpenAlex 周度论文计数（窄口径：" + " | ".join(KEYWORDS) + "）", flush=True)
     papers = fetch_openalex_weekly()
+    # 统一周标签到周一（OpenAlex 按 start-of-week 抓取，标签落在周五）
+    papers.index = papers.index - pd.to_timedelta(papers.index.dayofweek, unit="D")
     print(f"  论文计数：{len(papers)} 周，缺失 {papers.isna().sum()} 周")
 
     print("[2/4] 板块数据（三级降级）", flush=True)
