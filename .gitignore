@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 阶段0数据产出（体积大且可再生，不进仓库）
+phase0/output/
+
+# 本地密钥（绝不入库）
+openalex_key.local
+*.local
+
+# IDE / 系统
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
