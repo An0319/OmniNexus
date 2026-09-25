@@ -7,6 +7,11 @@ venv/
 # 阶段0数据产出（体积大且可再生，不进仓库）
 phase0/output/
 
+# 探针本地产出（云端结果由 probe-results / probe-new-results 分支回传）
+probe_result.json
+probe_new_sources.json
+probe-output.txt
+
 # 本地密钥（绝不入库）
 openalex_key.local
 *.local

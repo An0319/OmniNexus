@@ -1,0 +1,51 @@
+name: P0-4 新源探针（云 IP · 美股领先面 + 指数代理层）
+
+# 目的：第三条链（换链#2 · 隔夜快传导）的领先面是美股指数，而现有 sources.py
+#      只有 OpenAlex；同时用户已拍板新增「指数代理」兜底层。两者的取数口径
+#      一旦写进协议 §9.3 就不可修改，所以先在云 IP 上验证可用性。
+on:
+  push:
+    paths:
+      - ".github/workflows/probe_new_sources.yml"
+      - "tools/probe_new_sources.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pandas numpy pyyaml
+          pip install akshare || echo "::warning::akshare 安装失败（这本身是一个发现）"
+
+      - name: 运行探针
+        run: python tools/probe_new_sources.py 2>&1 | tee probe-output.txt
+
+      - name: 回传结果到 probe-new-results 分支
+        if: always()
+        run: |
+          set -x
+          mkdir -p /tmp/out
+          cp probe-output.txt /tmp/out/ 2>/dev/null || true
+          cp probe_new_sources.json /tmp/out/ 2>/dev/null || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch --orphan probe-new-out
+          git rm -rf . --quiet || true
+          cp /tmp/out/* . 2>/dev/null || true
+          find . -name '__pycache__' -type d -prune -exec rm -rf {} + 2>/dev/null || true
+          git add -A
+          git commit -m "P0-4 新源探针结果（run ${{ github.run_id }}）" || echo "no changes"
+          git push -f origin probe-new-out:probe-new-results
