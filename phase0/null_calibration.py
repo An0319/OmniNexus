@@ -49,6 +49,7 @@ OUT = ROOT / "phase0" / "output"
 SEED = 20260926          # 固定种子：结果可复现
 N_DRAWS = 500            # 每种方法的抽样次数
 MIN_PAIRS = 30           # 与 core.xcorr 一致：有效配对少于 30 返回 NaN
+ARM_NAMES = ("rotation", "phase", "white", "random_walk")  # 每臂独立种子（互不干扰）
 
 # 两条已判定链的配置（口径必须与实际判定时完全一致，否则校准无意义）
 CHAINS = {
@@ -93,19 +94,31 @@ def rotation_null(lead: pd.Series, lag: pd.Series, lag_range, rng, n=N_DRAWS):
 
 
 def phase_null(lead: pd.Series, lag: pd.Series, lag_range, rng, n=N_DRAWS):
-    """方法2：FFT 相位随机化。保持功率谱（自相关），随机化相位。"""
+    """方法2：FFT 相位随机化。保持功率谱（自相关），随机化相位。
+
+    bug 修复（2026-09-26，方法性修订，不改任何判定参数）：
+    lead_z 因滚动窗口预热，前 25 周为 NaN；FFT 对含 NaN 的数组做 rfft 会把整条
+    序列污染为 NaN，导致本臂首次运行全为 NaN。修复：只在有效值上做相位随机化，
+    再把替代值放回原有效位置（NaN 位置保持 NaN）。
+    注意：本修复会让本臂每次迭代消费的随机数个数变化（len(rfft) 由 131 变为 119），
+    若各臂共用一条随机流，会把后续所有臂的数值整体平移——故本脚本已改为
+    **每个臂独立种子**（见 main() 的 ARM_NAMES 与 run_seed）。
+    """
     x = lead.to_numpy(dtype=float)
-    n_obs = len(x)
+    mask = np.isfinite(x)
+    xv = x[mask]
+    n_obs = len(xv)
     out = []
     for _ in range(n):
-        X = np.fft.rfft(x - x.mean())
+        X = np.fft.rfft(xv - xv.mean())
         ph = np.exp(1j * rng.uniform(0, 2 * np.pi, len(X)))
         ph[0] = 1.0
         if n_obs % 2 == 0:
             ph[-1] = 1.0
-        y = np.fft.irfft(X * ph, n=n_obs) + x.mean()
-        sur = pd.Series(y, index=lead.index)
-        out.append(max_abs_corr(sur, lag, lag_range))
+        y = np.fft.irfft(X * ph, n=n_obs) + xv.mean()
+        sur = np.full(len(x), np.nan)
+        sur[mask] = y
+        out.append(max_abs_corr(pd.Series(sur, index=lead.index), lag, lag_range))
     return np.array(out, dtype=float)
 
 
@@ -121,45 +134,60 @@ def synth_null(kind: str, index, lag: pd.Series, lag_range, rng, n=N_DRAWS):
 
 def describe(null: np.ndarray, pass_corr: float, noise_band: float) -> dict:
     """零分布摘要 + 我们自己的判定线在零分布里的位置（即真实假阳性率）。"""
-    d = {"n_draws": int(len(null)), "mean": round(float(null.mean()), 3),
-         "p50": round(float(np.percentile(null, 50)), 3),
-         "p90": round(float(np.percentile(null, 90)), 3),
-         "p95": round(float(np.percentile(null, 95)), 3),
-         "p99": round(float(np.percentile(null, 99)), 3),
-         "max": round(float(null.max()), 3)}
+    n_nan = int(np.isnan(null).sum())
+    d = {"n_draws": int(len(null)), "n_nan": n_nan,
+         "mean": round(float(np.nanmean(null)), 3),
+         "p50": round(float(np.nanpercentile(null, 50)), 3),
+         "p90": round(float(np.nanpercentile(null, 90)), 3),
+         "p95": round(float(np.nanpercentile(null, 95)), 3),
+         "p99": round(float(np.nanpercentile(null, 99)), 3),
+         "max": round(float(np.nanmax(null)), 3)}
     # 关键数字：毫无关系的数据里，有多大比例会越我们的线 → 单指标假阳性率
-    d["fp_rate_at_pass_corr"] = round(float((null > pass_corr).mean()), 4)
-    d["fp_rate_at_noise_band"] = round(float((null > noise_band).mean()), 4)
+    d["fp_rate_at_pass_corr"] = round(float(np.nanmean(null > pass_corr)), 4)
+    d["fp_rate_at_noise_band"] = round(float(np.nanmean(null > noise_band)), 4)
+    if n_nan:
+        print(f"  [警告] 本次抽样有 {n_nan}/{len(null)} 次返回 NaN（管线有效配对不足）")
     return d
 
 
 def main():
-    rng = np.random.default_rng(SEED)
     results = {"seed": SEED, "n_draws": N_DRAWS,
-               "discipline_note": "本校准不用于给已判定链翻案，只用于给下一条链的预注册判定线定价。",
+               "seeding": "每臂独立种子：rotation/phase/white/random_walk 互不干扰",
+               "discipline_note": "本校准不用于给已判定链翻案，只用于给下一条链的预注册判定线定价。"
+                                  "全程未改动任何判定参数（pass_corr/pass_window/noise_band）。",
+               "run_history": [
+                   "run1 2026-09-26：相位臂因 lead_z 含 25 个预热 NaN 被 FFT 污染，全部为 NaN（代码缺陷，不可用）",
+                   "run2 2026-09-26：修复相位臂 NaN 处理；但各臂共用一条随机流，相位臂消费随机数个数变化，"
+                   "平移了其后各臂数值（非判定参数，属实现副作用）",
+                   "run3 2026-09-26：改为每臂独立种子（本文件当前口径）——最终结论以本次为准",
+               ],
                "chains": {}}
     raw_rows = []
 
-    for chain, cfg in CHAINS.items():
+    for ci, (chain, cfg) in enumerate(CHAINS.items()):
         print(f"\n{'='*72}\n零假设校准：{chain}（滞后扫描 0..{max(cfg['lag_range'])}，"
               f"共 {len(cfg['lag_range'])} 个滞后位）\n{'='*72}")
         lead_z, lags = load_series(chain)
         n_lag = len(cfg["lag_range"])
         results["chains"][chain] = {"n_lags": n_lag, "metrics": {}}
 
-        for name, lag_z in lags.items():
-            rot = rotation_null(lead_z, lag_z, cfg["lag_range"], rng)
-            pha = phase_null(lead_z, lag_z, cfg["lag_range"], rng)
-            wht = synth_null("white", lead_z.index, lag_z, cfg["lag_range"], rng)
-            rwk = synth_null("rw", lead_z.index, lag_z, cfg["lag_range"], rng)
+        for mi, (name, lag_z) in enumerate(lags.items()):
+            # 每个臂独立种子：任一只臂的实现改动，都不会平移其他臂的结果（可复现性）
+            seeds = {a: SEED + 1000 * ci + 10 * mi + ai
+                     for ai, a in enumerate(ARM_NAMES)}
+            rngs = {a: np.random.default_rng(s) for a, s in seeds.items()}
+            rot = rotation_null(lead_z, lag_z, cfg["lag_range"], rngs["rotation"])
+            pha = phase_null(lead_z, lag_z, cfg["lag_range"], rngs["phase"])
+            wht = synth_null("white", lead_z.index, lag_z, cfg["lag_range"], rngs["white"])
+            rwk = synth_null("rw", lead_z.index, lag_z, cfg["lag_range"], rngs["random_walk"])
 
             d_rot = describe(rot, 0.3, 0.15)
             d_pha = describe(pha, 0.3, 0.15)
             obs_c, obs_k = OBSERVED[chain][name]
             obs = abs(obs_c)
-            pct_rank = float((rot < obs).mean())     # 我们的发现落在噪声分布的第几百分位
+            pct_rank = float(np.nanmean(rot < obs))   # 我们的发现落在噪声分布的第几百分位
 
-            print(f"\n-- 指标：{name} --")
+            print(f"\n-- 指标：{name}（独立种子 {seeds}）--")
             print(f"  旋转法零分布  : 中位 {d_rot['p50']:.3f} | p95 {d_rot['p95']:.3f} "
                   f"| p99 {d_rot['p99']:.3f} | 最大 {d_rot['max']:.3f}")
             print(f"  相位法零分布  : 中位 {d_pha['p50']:.3f} | p95 {d_pha['p95']:.3f} "
