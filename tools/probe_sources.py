@@ -87,18 +87,25 @@ def main():
     # 结论直接决定 M3 能否供"板块级"数据，而不是含个股特质噪声的个股代理。
     print("\n[1.5] 东财 K线接口对照实验（同一板块，只改请求头/参数）")
     import requests
-    bk_code = None
-    try:
-        r = requests.get("https://push2.eastmoney.com/api/qt/clist/get",
-                         params={"fs": "m:90+t:3", "pn": 1, "pz": 10,
-                                 "fields": "f12,f14", "po": 1},
-                         headers=UA, timeout=20)
-        d = r.json()["data"]["diff"]
-        items = list(d.values()) if isinstance(d, dict) else d
-        bk_code = items[0]["f12"]
-        print(f"    取一个概念板块做靶子：{items[0].get('f14')} {bk_code}")
-    except Exception as e:
-        print(f"    靶子板块获取失败：{type(e).__name__}，跳过对照实验")
+    bk_code, bk_name = None, None
+    # 上一次运行该接口返回过 502 Bad Gateway（瞬时故障），故重试；全失败则用稳定板块代码兜底
+    for attempt in range(3):
+        try:
+            r = requests.get("https://push2.eastmoney.com/api/qt/clist/get",
+                             params={"fs": "m:90+t:3", "pn": 1, "pz": 10,
+                                     "fields": "f12,f14", "po": 1},
+                             headers=UA, timeout=20)
+            d = r.json()["data"]["diff"]
+            items = list(d.values()) if isinstance(d, dict) else d
+            bk_code, bk_name = items[0]["f12"], items[0].get("f14")
+            break
+        except Exception as e:
+            print(f"    取靶子板块第 {attempt + 1} 次失败：{type(e).__name__}")
+            time.sleep(2)
+    if not bk_code:
+        bk_code, bk_name = "BK0425", "工程建设（兜底固定代码）"
+        print("    靶子板块三次获取均失败，改用固定板块代码兜底")
+    print(f"    靶子板块：{bk_name} {bk_code}")
     if bk_code:
         beg = (dt.date.today() - dt.timedelta(weeks=8)).strftime("%Y-%m-%d")
         end = dt.date.today().strftime("%Y-%m-%d")

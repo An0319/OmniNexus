@@ -45,6 +45,7 @@ jobs:
           git switch --orphan probe-out
           git rm -rf . --quiet || true
           cp /tmp/out/* . 2>/dev/null || true
-          git add -A -- ':(exclude)**/__pycache__' ':(exclude)__pycache__'
+          find . -name '__pycache__' -type d -prune -exec rm -rf {} + 2>/dev/null || true
+          git add -A
           git commit -m "P0-2 探针结果（run ${{ github.run_id }}）" || echo "no changes"
           git push -f origin probe-out:probe-results
