@@ -17,6 +17,19 @@ P0-3 加固（2026-09-26，对抗测试发现 4 类作弊路径后补上）
   H3 台账不许删：record 缺失而 YAML 声明已用过 / 日志仍在 → 拒绝运行
   H4 运行历史只追加不覆写：每次运行追加一行到 *.runs.jsonl，覆写留痕
 
+项目级尝试账本（2026-09-26 新增，堵跨链洗白）
+--------------------------------------------
+原设计里"尝试预算"写在**每条链自己的 YAML** 里，于是"新建一条链 YAML 把 used 写 0"
+就能凭空把计数清零——链级字段挡不住跨链作弊。现在改为：
+  P1 **项目级账本 `chains/project_budget.json` 是唯一真相**（attempts 列表进 git）；
+  P2 预算用尽后**不得再开新链**（换链=新 chain_id，一条链只消耗一次判定额度）；
+  P3 链 YAML 的 `budget.used` **降级为展示字段**，必须等于该链在项目账本中的尝试
+     序号（未记账的新链必须写 0），不一致即拒绝运行；
+  P4 项目账本不可删、不可回退：账本与只追加日志 `project_budget.runs.jsonl` 交叉校验。
+
+注意：项目账本只约束**按约定放在 `chains/` 目录下**的链；测试用的临时目录不受约束
+（否则预算用尽后测试自身就再也跑不起来了）。
+
 边界（诚实声明）
 ----------------
 本锁防的是"无意间的自欺"和"顺手改参"，**不是防恶意伪造**——能改文件的人
@@ -79,6 +92,121 @@ def runs_log_path(record_path: Path) -> Path:
     return record_path.with_suffix(".runs.jsonl")
 
 
+# ---------------- 项目级尝试账本（P1~P4） ----------------
+PROJECT_LEDGER_NAME = "project_budget.json"
+PROJECT_LOG_NAME = "project_budget.runs.jsonl"
+
+
+def project_ledger_path(record_path: Path) -> Path:
+    """项目级账本与链台账同目录（约定：chains/project_budget.json）。"""
+    return record_path.parent / PROJECT_LEDGER_NAME
+
+
+def _project_log_path(record_path: Path) -> Path:
+    return record_path.parent / PROJECT_LOG_NAME
+
+
+def _project_applies(record_path: Path) -> bool:
+    """只有按约定放在 chains/ 目录下的链才受项目级账本约束。
+
+    测试与临时链写在临时目录里，若也被预算约束，则预算用尽后连测试都跑不起来。
+    """
+    return record_path.parent.name == "chains"
+
+
+def _load_project_ledger(record_path: Path) -> dict | None:
+    p = project_ledger_path(record_path)
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
+
+
+def _log_max_attempts_len(record_path: Path) -> int:
+    """项目日志里出现过的最大账本长度——用于检测"账本被删条"（P4）。"""
+    log = _project_log_path(record_path)
+    if not log.exists():
+        return 0
+    best = 0
+    for ln in log.read_text(encoding="utf-8").splitlines():
+        if ln.strip():
+            best = max(best, int(json.loads(ln).get("attempts_len", 0)))
+    return best
+
+
+def check_project_budget(record_path: Path, cfg: dict) -> GuardResult | None:
+    """项目级预算检查。返回 None 表示本链不受项目账本约束（非 chains/ 目录）。"""
+    if not _project_applies(record_path):
+        return None
+
+    chain_id = cfg.get("chain_id")
+    used = (cfg.get("budget") or {}).get("used", 0)
+    ledger = _load_project_ledger(record_path)
+
+    if ledger is None:
+        if record_path.exists() or _project_log_path(record_path).exists():
+            return GuardResult(False, (
+                "[纪律锁/项目账本] 项目级尝试账本缺失，但本链已有运行台账或项目日志——"
+                "拒绝运行。\n"
+                "  删掉项目账本等于抹掉全局尝试次数，链级字段挡不住这件事。\n"
+                f"  请恢复 {PROJECT_LEDGER_NAME}（内容须与协议第7节修订记录表一致）后重跑。"))
+        return GuardResult(True, f"[纪律锁/项目账本] 尚无 {PROJECT_LEDGER_NAME}，"
+                                 "本次判定后创建。")
+
+    attempts = ledger.get("attempts") or []
+    max_n = ledger.get("max_attempts", 3)
+
+    n_log = _log_max_attempts_len(record_path)
+    if len(attempts) < n_log:
+        return GuardResult(False, (
+            f"[纪律锁/项目账本] 项目账本从 {n_log} 条回退到 {len(attempts)} 条，拒绝运行。\n"
+            "  已消耗的尝试额度不可退还——删条等于改历史（跨链记账舞弊）。"))
+
+    mine = [a for a in attempts if a.get("chain_id") == chain_id]
+    if mine:
+        n_mine = mine[-1].get("n")
+        if used != n_mine:
+            return GuardResult(False, (
+                f"[纪律锁/项目账本] 链 YAML 的 budget.used={used} 与项目账本中本链的"
+                f"尝试序号 {n_mine} 不一致，拒绝运行。\n"
+                "  项目账本为唯一真相，链级 used 只是展示字段——请改齐后重跑。"))
+        return GuardResult(True, f"[纪律锁/项目账本] 本链已记账为第 {n_mine} 次尝试"
+                                 f"（{len(attempts)}/{max_n} 已用）。")
+
+    if used != 0:
+        return GuardResult(False, (
+            f"[纪律锁/项目账本] 本链尚未在项目账本中记账，但 YAML 声明 budget.used={used}——"
+            "拒绝运行。\n  新链首次判定前 used 必须写 0，记账由工具在判定完成后写入。"))
+    if len(attempts) >= max_n:
+        return GuardResult(False, (
+            f"[纪律锁/项目账本] 项目尝试预算已用尽（{len(attempts)}/{max_n}），"
+            "不得再开新链。\n"
+            "  预算写在项目账本里而不是各链 YAML 里——新建一条链把 used 写 0 不再有用。\n"
+            "  若确需追加额度，须在协议修订记录表登记新预算并说明理由。"))
+    return GuardResult(True, f"[纪律锁/项目账本] 新链首次判定将记为第 "
+                             f"{len(attempts) + 1} 次尝试（{len(attempts)}/{max_n} 已用）。")
+
+
+def record_project_attempt(record_path: Path, cfg: dict) -> None:
+    """判定完成后把本次尝试写进项目账本（同链只记一次，技术性重跑不重复计数）。"""
+    if not _project_applies(record_path):
+        return
+    ledger = _load_project_ledger(record_path) or {
+        "max_attempts": (cfg.get("budget") or {}).get("max_attempts", 3),
+        "attempts": []}
+    chain_id = cfg.get("chain_id")
+    if any(a.get("chain_id") == chain_id for a in ledger.get("attempts") or []):
+        return
+    entry = {"n": len(ledger["attempts"]) + 1, "chain_id": chain_id,
+             "date": dt.date.today().isoformat(), "title": cfg.get("title", "")}
+    ledger["attempts"].append(entry)
+    ledger["updated"] = dt.datetime.now().isoformat(timespec="seconds")
+    project_ledger_path(record_path).write_text(
+        json.dumps(ledger, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    with _project_log_path(record_path).open("a", encoding="utf-8") as f:
+        f.write(json.dumps({"event": "record_attempt",
+                            "at": dt.datetime.now().isoformat(timespec="seconds"),
+                            "attempts_len": entry["n"], "entry": entry},
+                           ensure_ascii=False) + "\n")
+
+
 def _last_log_entry(record_path: Path) -> dict | None:
     log = runs_log_path(record_path)
     if not log.exists():
@@ -114,6 +242,17 @@ def init_ledger(record_path: Path, cfg: dict, note: str) -> None:
 
 
 def check_discipline(cfg: dict, record_path: Path) -> GuardResult:
+    """跑前检查：项目级预算 + 链级参数变更，两者都过才放行。"""
+    proj = check_project_budget(record_path, cfg)
+    if proj is not None and not proj.ok:
+        return proj
+    res = _check_chain_discipline(cfg, record_path)
+    if proj is not None and res.ok:
+        res.message = f"{proj.message}\n{res.message}"
+    return res
+
+
+def _check_chain_discipline(cfg: dict, record_path: Path) -> GuardResult:
     """跑前检查：参数变更必须配修订登记与尝试记账，否则拒绝运行。"""
     fp = fingerprint(cfg)
     sfp = substantive_fingerprint(cfg)
@@ -205,3 +344,4 @@ def write_record(record_path: Path, cfg: dict, verdicts: list[dict]) -> None:
     record_path.write_text(json.dumps(entry, ensure_ascii=False, indent=2),
                            encoding="utf-8")
     _append_run_log(record_path, entry)
+    record_project_attempt(record_path, cfg)

@@ -130,8 +130,54 @@ with tempfile.TemporaryDirectory() as tmpd:
     check("新链首跑（used=0，无记录）-> 放行",
           check_discipline(newc, tmp / "atk2.record.json").ok)
 
+    # ---------------- A6 跨链洗白：新建链 YAML 把计数清零 ----------------
+    # 项目级账本只约束按约定放在 chains/ 目录下的链，故这里搭一个 tmp/chains/ 布局。
+    print("== A6 跨链洗白：靠新建链 YAML 把尝试计数清零 ==")
+    chains = tmp / "chains"
+    chains.mkdir()
+
+    def proj_setup(attempts, log_len=None):
+        """写项目账本；log_len 用于模拟「账本被删条但日志还在」。"""
+        (chains / "project_budget.json").write_text(
+            json.dumps({"max_attempts": 3, "attempts": attempts},
+                       ensure_ascii=False, indent=2), encoding="utf-8")
+        with (chains / "project_budget.runs.jsonl").open("w", encoding="utf-8") as f:
+            for i in range(1, (log_len or len(attempts)) + 1):
+                f.write(json.dumps({"event": "backfill", "attempts_len": i}) + "\n")
+
+    FULL = [{"n": i, "chain_id": f"c{i}", "date": "2026-09-25"} for i in (1, 2, 3)]
+    newchain = {**BASE, "chain_id": "atk", "budget": {"max_attempts": 3, "used": 0}}
+
+    proj_setup(FULL)
+    g = check_discipline(newchain, chains / "atk.record.json")
+    check("A6a 预算已用尽（3/3）后开新链 -> 拒绝", not g.ok, f"ok={g.ok}")
+    print(f"       guard 说：{g.message.splitlines()[0][:70]}")
+
+    proj_setup([{"n": 1, "chain_id": "atk", "date": "2026-09-25"}])
+    g = check_discipline(BASE, chains / "atk.record.json")   # 账本说第1次，YAML 说用了2次
+    check("A6b 链级 used 与项目账本序号不一致 -> 拒绝", not g.ok, f"ok={g.ok}")
+    print(f"       guard 说：{g.message.splitlines()[0][:70]}")
+
+    proj_setup(FULL[:2], log_len=3)
+    g = check_discipline(newchain, chains / "atk.record.json")
+    check("A6c 项目账本被删条（日志 3 条、账本 2 条）-> 拒绝", not g.ok, f"ok={g.ok}")
+    print(f"       guard 说：{g.message.splitlines()[0][:70]}")
+
+    proj_setup(FULL[:2])
+    init_ledger(chains / "atk.record.json", newchain, note="A6d 用")
+    (chains / "project_budget.json").unlink()
+    g = check_discipline(newchain, chains / "atk.record.json")
+    check("A6d 项目账本整体被删（链台账仍在）-> 拒绝", not g.ok, f"ok={g.ok}")
+    print(f"       guard 说：{g.message.splitlines()[0][:70]}")
+
+    proj_setup(FULL[:2])
+    (chains / "atk.record.json").unlink()
+    (chains / "atk.record.runs.jsonl").unlink()
+    check("A6e 预算未用尽 + 新链 used=0 -> 放行",
+          check_discipline(newchain, chains / "atk.record.json").ok)
+
 print("\n== 结果 ==")
 if FAILURES:
     print(f"对抗测试失败（防线被击穿）：{FAILURES}")
     sys.exit(1)
-print("全部通过：4 类作弊路径均被拒绝，5 条正常路径不受影响。")
+print("全部通过：5 类作弊路径均被拒绝，6 条正常路径不受影响。")
