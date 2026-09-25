@@ -80,6 +80,44 @@ def main():
         print(f"    {fs}: status={p.get('status')} {p.get('seconds')}s "
               f"ctype={p.get('ctype', '')[:30]} head={str(p.get('head', p.get('error')))[:80]}")
 
+    # ---------- 1.5) 对照实验：K线接口失败是"缺请求头"还是"IP 被拦" ----------
+    # 现象：板块列表(clist)在云 IP 上 200 且返回 JSON，但路径2 报
+    #       JSONDecodeError（拿到的是非 JSON 内容）——失败点在 push2his 的 K线接口。
+    # 若加上 Referer/ut 就能通，那这是**能修的工程问题**，不是 IP 风控；
+    # 结论直接决定 M3 能否供"板块级"数据，而不是含个股特质噪声的个股代理。
+    print("\n[1.5] 东财 K线接口对照实验（同一板块，只改请求头/参数）")
+    import requests
+    bk_code = None
+    try:
+        r = requests.get("https://push2.eastmoney.com/api/qt/clist/get",
+                         params={"fs": "m:90+t:3", "pn": 1, "pz": 10,
+                                 "fields": "f12,f14", "po": 1},
+                         headers=UA, timeout=20)
+        d = r.json()["data"]["diff"]
+        items = list(d.values()) if isinstance(d, dict) else d
+        bk_code = items[0]["f12"]
+        print(f"    取一个概念板块做靶子：{items[0].get('f14')} {bk_code}")
+    except Exception as e:
+        print(f"    靶子板块获取失败：{type(e).__name__}，跳过对照实验")
+    if bk_code:
+        beg = (dt.date.today() - dt.timedelta(weeks=8)).strftime("%Y-%m-%d")
+        end = dt.date.today().strftime("%Y-%m-%d")
+        kparams = {"secid": f"90.{bk_code}", "klt": "101", "fqt": "0",
+                   "beg": beg, "end": end,
+                   "fields1": "f1,f2,f3", "fields2": "f51,f53,f57"}
+        variants = [
+            ("(a) 现状：仅 UA（与生产代码一致）", dict(UA), {}),
+            ("(b) + Referer", {**UA, "Referer": "https://quote.eastmoney.com/"}, {}),
+            ("(c) + Referer + ut", {**UA, "Referer": "https://quote.eastmoney.com/"},
+             {"ut": "fa5fd1943c7b386f172d6893dbfba10b"}),
+        ]
+        for label, hdrs, extra in variants:
+            p = raw_http_probe("https://push2his.eastmoney.com/api/qt/stock/kline/get",
+                               params={**kparams, **extra}, headers=hdrs)
+            RESULT["probes"][f"kline_{label}"] = p
+            print(f"    {label}: status={p.get('status')} {p.get('seconds')}s "
+                  f"head={str(p.get('head', p.get('error')))[:90]}")
+
     # ---------- 2) 三级降级逐级实测（调用生产代码） ----------
     print("\n[2] 三级降级逐级实测（生产代码 omninexus.sources）")
     tiers = [
