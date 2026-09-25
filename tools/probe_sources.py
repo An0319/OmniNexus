@@ -68,7 +68,8 @@ def main():
     print(f"\n[0] 出口 IP：{env.get('head', env.get('error'))}")
 
     from omninexus.sources import (UA, fetch_sector_daily, fetch_via_akshare,
-                                   fetch_via_em_direct, fetch_via_sina_proxy)
+                                   fetch_via_em_direct, fetch_via_sina_proxy,
+                                   resolve_sector_code)
 
     # ---------- 1) 裸 HTTP 诊断：东财板块列表（三级里第2级的前置） ----------
     print("\n[1] 东财板块列表（行业板块 t:2 / 概念板块 t:3）")
@@ -158,6 +159,40 @@ def main():
         print(f"    {label}: ok={r['ok']} {r['seconds']}s rows={r.get('rows')} "
               f"{r.get('error', '')}")
 
+    # ---------- 2.5) 修复复验：固定板块代码后，路径2 能否只发 1 次请求就供数 ----------
+    # 背景：P0-2 上一轮把失败点隔离到「板块列表搜索 502 且无重试」。
+    # 修复 = ①列表搜索加 3 次重试 ②链配置可固定板块代码（跳过搜索）。
+    # 本块同时验两件事：修复后的搜索版能否供数、固定代码版能否供数，并回传代码供写进链配置。
+    print("\n[2.5] 修复复验：搜索版（带重试）与固定代码版")
+    hit = None
+    t0 = time.time()
+    try:
+        hit = resolve_sector_code("机器人")
+    except Exception as e:
+        print(f"    resolve_sector_code 异常：{type(e).__name__}: {str(e)[:120]}")
+    RESULT["probes"]["resolved_bk_code"] = {
+        "code": hit[0] if hit else None, "name": hit[1] if hit else None,
+        "seconds": round(time.time() - t0, 2)}
+    print(f"    resolve_sector_code('机器人') -> {hit}（{round(time.time()-t0, 2)}s）")
+    if hit:
+        r = timed(fetch_via_em_direct, "机器人", 312, hit[0])
+        RESULT["probes"]["路径2b 固定板块代码"] = r
+        print(f"    固定代码版：ok={r['ok']} {r['seconds']}s rows={r.get('rows')} "
+              f"{r.get('error', '')}")
+        RESULT["verdict_fix"] = {
+            "search_with_retry_ok": bool(RESULT["probes"]["路径2 东财裸requests直连"]["ok"]),
+            "pinned_code_ok": bool(r["ok"]),
+            "pinned_code": hit[0],
+            "fix_restores_tier2": bool(r["ok"]),
+        }
+    else:
+        RESULT["verdict_fix"] = {"search_with_retry_ok":
+                                 RESULT["probes"]["路径2 东财裸requests直连"]["ok"],
+                                 "pinned_code_ok": False, "pinned_code": None,
+                                 "fix_restores_tier2": False,
+                                 "note": "搜索仍失败，无法取到可固定的板块代码"}
+        print("    搜索失败，无法复验固定代码版")
+
     # ---------- 3) 复合函数：最终哪一级救了场 ----------
     print("\n[3] fetch_sector_daily（复合三级降级）——看最终由哪一级供数")
     r = timed(fetch_sector_daily, "机器人", ("sh688017", "绿的谐波"), 312)
@@ -207,6 +242,7 @@ def main():
         "tier2_failure_isolated": ("路径2 挂在第一步「板块列表搜索」的 502（非 JSON），"
                                    "K线接口本身在云 IP 可用；请求头无关"),
         "tier2_retry_would_help": bool(retry_ok),
+        "tier2_fix_restores": RESULT.get("verdict_fix", {}).get("fix_restores_tier2", False),
         "can_sustain_30d": bool(used_tier and oa),
         "note": ("三级降级可用，但降级到第3级时结论含个股特质噪声"
                  if used_tier == 3 else

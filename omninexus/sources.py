@@ -114,10 +114,15 @@ def fetch_openalex_weekly(keywords: list[str], weeks_back: int,
 
 # ---------------- 滞后面：东财板块三级降级 ----------------
 def fetch_sector_daily(sector_name: str, proxy_stock: tuple[str, str],
-                       weeks_back: int) -> pd.DataFrame | None:
-    """akshare → 裸requests东财直连 → 新浪个股代理。返回日线 [close, amount]。"""
+                       weeks_back: int,
+                       sector_code: str | None = None) -> pd.DataFrame | None:
+    """akshare → 裸requests东财直连 → 新浪个股代理。返回日线 [close, amount]。
+
+    sector_code：链配置里固定的东财板块代码（如 "BK0448"）。给了就跳过板块列表搜索，
+    路径2 只发 1 次 K 线请求——云 IP 上列表搜索会突发 502（见 resolve_sector_code）。
+    """
     return (fetch_via_akshare(sector_name, weeks_back)
-            or fetch_via_em_direct(sector_name, weeks_back)
+            or fetch_via_em_direct(sector_name, weeks_back, sector_code=sector_code)
             or fetch_via_sina_proxy(proxy_stock, weeks_back))
 
 
@@ -137,30 +142,58 @@ def fetch_via_akshare(sector_name: str, weeks_back: int) -> pd.DataFrame | None:
         return None
 
 
-def fetch_via_em_direct(sector_name: str, weeks_back: int) -> pd.DataFrame | None:
-    """裸requests：依次搜行业板块(t:2)与概念板块(t:3)，再拉历史K线。"""
-    try:
-        bk_code, bk_name = None, None
-        for fs in ("m:90+t:2", "m:90+t:3"):
-            for page in range(1, 6):
-                r = requests.get(
-                    "https://push2.eastmoney.com/api/qt/clist/get",
-                    params={"fs": fs, "pn": page, "pz": 100,
-                            "fields": "f12,f14", "po": 1},
-                    headers=UA, timeout=20)
-                data = r.json().get("data", {}).get("diff", {})
-                items = data.values() if isinstance(data, dict) else data
-                for it in items:
-                    if sector_name in str(it.get("f14", "")):
-                        bk_code, bk_name = it["f12"], it["f14"]
-                        break
-                if bk_code:
+def resolve_sector_code(sector_name: str, attempts: int = 3) -> tuple[str, str] | None:
+    """搜索东财板块代码：行业板块(t:2) → 概念板块(t:3)，返回 (代码, 名称)。
+
+    P0-2 云 IP 实测（2026-09-26）：本接口是路径2 唯一会挂的地方——突发请求会返
+    502（HTML 非 JSON），而原先该步**无重试**，一挂即放弃整条路径。实测重试可救回。
+    因此这里加 3 次重试（退避 2s/4s），并把返回码打印出来，供写进链配置固定使用。
+    """
+    for fs in ("m:90+t:2", "m:90+t:3"):
+        for page in range(1, 6):
+            data = None
+            for i in range(attempts):
+                try:
+                    r = requests.get(
+                        "https://push2.eastmoney.com/api/qt/clist/get",
+                        params={"fs": fs, "pn": page, "pz": 100,
+                                "fields": "f12,f14", "po": 1},
+                        headers=UA, timeout=20)
+                    r.raise_for_status()
+                    data = r.json().get("data", {}).get("diff", {})
                     break
-            if bk_code:
-                break
-        if not bk_code:
-            print(f"  [路径2] 东财板块列表中未找到「{sector_name}」")
-            return None
+                except Exception as e:
+                    print(f"  [路径2] 板块列表搜索失败（{fs} p{page}，"
+                          f"第{i + 1}/{attempts} 次）：{e.__class__.__name__}")
+                    if i < attempts - 1:
+                        time.sleep(2 * (i + 1))
+            if data is None:
+                continue
+            items = data.values() if isinstance(data, dict) else data
+            for it in items:
+                if sector_name in str(it.get("f14", "")):
+                    return str(it["f12"]), str(it["f14"])
+    return None
+
+
+def fetch_via_em_direct(sector_name: str, weeks_back: int,
+                        sector_code: str | None = None) -> pd.DataFrame | None:
+    """裸requests：拿板块代码（优先用配置固定值），再拉历史K线。
+
+    sector_code 固定后每链只发 1 次 K 线请求，绕开云 IP 上会突发 502 的列表搜索。
+    """
+    try:
+        if sector_code:
+            bk_code, bk_name = sector_code, sector_name
+            print(f"  [路径2] 使用链配置固定的板块代码 {bk_code}，跳过列表搜索")
+        else:
+            hit = resolve_sector_code(sector_name)
+            if hit is None:
+                print(f"  [路径2] 东财板块列表中未找到「{sector_name}」")
+                return None
+            bk_code, bk_name = hit
+            print(f"  [路径2] 搜索到板块 {bk_name} {bk_code}（建议写进链配置固定，"
+                  f"避免云 IP 上的列表搜索 502）")
         beg = (dt.date.today() - dt.timedelta(weeks=weeks_back)).strftime("%Y-%m-%d")
         end = dt.date.today().strftime("%Y-%m-%d")
         r = requests.get(

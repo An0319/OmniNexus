@@ -62,7 +62,7 @@ def run_chain(config_path: str, init: bool = False) -> int:
     lp2 = cfg["lag"]["params"]
     daily = fetch_sector_daily(
         sector_name=lp2["sector"], proxy_stock=(lp2["proxy_stock"], lp2["proxy_name"]),
-        weeks_back=lp2["weeks_back"])
+        weeks_back=lp2["weeks_back"], sector_code=lp2.get("sector_code"))
     if daily is None:
         print("三条路径全部失败，终止。")
         return 1
