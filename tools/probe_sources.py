@@ -17,8 +17,14 @@ M3 就是空头承诺。
 """
 import datetime as dt
 import json
+import sys
 import time
 import traceback
+from pathlib import Path
+
+# 本脚本在 tools/ 下，Python 只会把 tools/ 放进 sys.path；
+# 显式补上仓库根目录，保证 `from omninexus.sources import ...` 在本地与 CI 都能跑。
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 RESULT = {"at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
           "probes": {}}
