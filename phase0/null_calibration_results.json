@@ -1,0 +1,199 @@
+{
+  "seed": 20260926,
+  "n_draws": 500,
+  "seeding": "每臂独立种子：rotation/phase/white/random_walk 互不干扰",
+  "discipline_note": "本校准不用于给已判定链翻案，只用于给下一条链的预注册判定线定价。全程未改动任何判定参数（pass_corr/pass_window/noise_band）。",
+  "run_history": [
+    "run1 2026-09-26：相位臂因 lead_z 含 25 个预热 NaN 被 FFT 污染，全部为 NaN（代码缺陷，不可用）",
+    "run2 2026-09-26：修复相位臂 NaN 处理；但各臂共用一条随机流，相位臂消费随机数个数变化，平移了其后各臂数值（非判定参数，属实现副作用）",
+    "run3 2026-09-26：改为每臂独立种子（本文件当前口径）——最终结论以本次为准"
+  ],
+  "chains": {
+    "chain01": {
+      "n_lags": 9,
+      "metrics": {
+        "周收益率": {
+          "rotation": {
+            "n_draws": 500,
+            "n_nan": 0,
+            "mean": 0.122,
+            "p50": 0.109,
+            "p90": 0.184,
+            "p95": 0.218,
+            "p99": 0.248,
+            "max": 0.248,
+            "fp_rate_at_pass_corr": 0.0,
+            "fp_rate_at_noise_band": 0.222
+          },
+          "phase": {
+            "n_draws": 500,
+            "n_nan": 0,
+            "mean": 0.128,
+            "p50": 0.123,
+            "p90": 0.181,
+            "p95": 0.197,
+            "p99": 0.227,
+            "max": 0.252,
+            "fp_rate_at_pass_corr": 0.0,
+            "fp_rate_at_noise_band": 0.264
+          },
+          "white_noise": {
+            "p50": 0.122,
+            "p95": 0.186
+          },
+          "random_walk": {
+            "p50": 0.082,
+            "p95": 0.19
+          },
+          "observed": {
+            "corr": -0.108,
+            "k": 7,
+            "abs": 0.108,
+            "percentile_in_null": 0.456
+          }
+        },
+        "周成交额": {
+          "rotation": {
+            "n_draws": 500,
+            "n_nan": 0,
+            "mean": 0.125,
+            "p50": 0.118,
+            "p90": 0.168,
+            "p95": 0.19,
+            "p99": 0.205,
+            "max": 0.205,
+            "fp_rate_at_pass_corr": 0.0,
+            "fp_rate_at_noise_band": 0.27
+          },
+          "phase": {
+            "n_draws": 500,
+            "n_nan": 0,
+            "mean": 0.124,
+            "p50": 0.117,
+            "p90": 0.183,
+            "p95": 0.199,
+            "p99": 0.226,
+            "max": 0.275,
+            "fp_rate_at_pass_corr": 0.0,
+            "fp_rate_at_noise_band": 0.246
+          },
+          "white_noise": {
+            "p50": 0.104,
+            "p95": 0.179
+          },
+          "random_walk": {
+            "p50": 0.154,
+            "p95": 0.341
+          },
+          "observed": {
+            "corr": -0.123,
+            "k": 1,
+            "abs": 0.123,
+            "percentile_in_null": 0.544
+          }
+        }
+      }
+    },
+    "chain10": {
+      "n_lags": 27,
+      "metrics": {
+        "周收益率": {
+          "rotation": {
+            "n_draws": 500,
+            "n_nan": 0,
+            "mean": 0.149,
+            "p50": 0.159,
+            "p90": 0.183,
+            "p95": 0.183,
+            "p99": 0.183,
+            "max": 0.183,
+            "fp_rate_at_pass_corr": 0.0,
+            "fp_rate_at_noise_band": 0.584
+          },
+          "phase": {
+            "n_draws": 500,
+            "n_nan": 0,
+            "mean": 0.139,
+            "p50": 0.137,
+            "p90": 0.173,
+            "p95": 0.186,
+            "p99": 0.204,
+            "max": 0.256,
+            "fp_rate_at_pass_corr": 0.0,
+            "fp_rate_at_noise_band": 0.286
+          },
+          "white_noise": {
+            "p50": 0.134,
+            "p95": 0.189
+          },
+          "random_walk": {
+            "p50": 0.06,
+            "p95": 0.111
+          },
+          "observed": {
+            "corr": 0.149,
+            "k": 20,
+            "abs": 0.149,
+            "percentile_in_null": 0.416
+          }
+        },
+        "周成交额": {
+          "rotation": {
+            "n_draws": 500,
+            "n_nan": 0,
+            "mean": 0.135,
+            "p50": 0.136,
+            "p90": 0.167,
+            "p95": 0.188,
+            "p99": 0.188,
+            "max": 0.188,
+            "fp_rate_at_pass_corr": 0.0,
+            "fp_rate_at_noise_band": 0.224
+          },
+          "phase": {
+            "n_draws": 500,
+            "n_nan": 0,
+            "mean": 0.145,
+            "p50": 0.143,
+            "p90": 0.19,
+            "p95": 0.208,
+            "p99": 0.235,
+            "max": 0.257,
+            "fp_rate_at_pass_corr": 0.0,
+            "fp_rate_at_noise_band": 0.418
+          },
+          "white_noise": {
+            "p50": 0.121,
+            "p95": 0.18
+          },
+          "random_walk": {
+            "p50": 0.194,
+            "p95": 0.335
+          },
+          "observed": {
+            "corr": 0.167,
+            "k": 26,
+            "abs": 0.167,
+            "percentile_in_null": 0.92
+          }
+        }
+      }
+    }
+  },
+  "merged": {
+    "n_draws": 2000,
+    "n_nan": 0,
+    "mean": 0.133,
+    "p50": 0.131,
+    "p90": 0.183,
+    "p95": 0.188,
+    "p99": 0.218,
+    "max": 0.248,
+    "fp_rate_at_pass_corr": 0.0,
+    "fp_rate_at_noise_band": 0.325
+  },
+  "family_wise": {
+    "per_metric_chain_fp": 0.0,
+    "over_3_chains_2_metrics_note": 0.0
+  }
+}
