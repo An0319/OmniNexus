@@ -15,14 +15,23 @@ import pandas as pd
 import yaml
 
 from .core import STATUS_CN, align_weekday, judge, roll_z, to_weekly, xcorr
+from .guard import check_discipline, write_record
 from .sources import fetch_openalex_weekly, fetch_sector_daily
 
 
 def run_chain(config_path: str) -> int:
+    config_path = str(config_path)
     cfg = yaml.safe_load(Path(config_path).read_text(encoding="utf-8"))
     chain_id = cfg["chain_id"]
     j = cfg["judgement"]
     out_dir = Path(cfg.get("output", {}).get("out_dir", "")) or None
+
+    # 预注册纪律锁：判定参数被修改而未登记修订 -> 拒绝运行
+    record_path = Path(config_path).parent / f"{chain_id}.record.json"
+    guard = check_discipline(cfg, record_path)
+    print(guard.message, flush=True)
+    if not guard.ok:
+        return 2
 
     print(f"== {chain_id}：{cfg.get('title', '')} ==", flush=True)
 
@@ -58,7 +67,8 @@ def run_chain(config_path: str) -> int:
     print("\n== 预注册判定（及格线：corr>"
           f"{j['pass_corr']} 且 k∈[{j['pass_window'][0]},{j['pass_window'][1]}]，"
           f"噪声带 |corr|<{j['noise_band']}）==")
-    for v in judge(corr_tbl, tuple(j["pass_window"]), j["pass_corr"], j["noise_band"]):
+    verdicts = judge(corr_tbl, tuple(j["pass_window"]), j["pass_corr"], j["noise_band"])
+    for v in verdicts:
         if v["status"] == "NO_DATA":
             print(f"· {v['metric']}：{STATUS_CN[v['status']]}")
         else:
@@ -71,7 +81,8 @@ def run_chain(config_path: str) -> int:
     out = out_dir or default_out_dir()
     wk.to_csv(out / f"sector_weekly_{prefix}.csv")
     corr_tbl.to_csv(out / f"xcorr_{prefix}.csv")
-    print(f"完成。输出在 {out}（前缀 {prefix}）。")
+    write_record(record_path, cfg, verdicts)
+    print(f"完成。输出在 {out}（前缀 {prefix}）；纪律记录 {record_path.name} 已更新。")
     return 0
 
 
