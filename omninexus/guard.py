@@ -50,9 +50,9 @@ SENSITIVE_FIELDS = ("judgement", "lead", "lag")
 
 # 实质性字段：改动 = 换了实验的"数字口径"，禁止用"技术性修订"豁免
 SUBSTANTIVE = {
-    "judgement": ("lag_range", "pass_window", "pass_corr", "noise_band"),
-    "lead": ("keywords", "weeks_back"),
-    "lag": ("sector", "proxy_stock", "weeks_back"),
+    "judgement": ("lag_range", "pass_window", "pass_corr", "noise_band", "null_median"),
+    "lead": ("keywords", "symbol", "weeks_back"),
+    "lag": ("sector", "proxy_stock", "sector_code", "index_proxy", "try_em", "weeks_back"),
 }
 
 

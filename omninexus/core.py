@@ -19,10 +19,16 @@ def align_weekday(index: pd.DatetimeIndex) -> pd.DatetimeIndex:
 
 
 def to_weekly(daily: pd.DataFrame) -> pd.DataFrame:
-    """日线 -> 周线：close 取周末最后值，amount 求和，ret 为周收益率；索引对齐周一。"""
+    """日线 -> 周线：close 取周末最后值，amount 求和，ret 为周收益率；索引对齐周一。
+
+    amount 为可选列：新浪美股/新浪指数接口只返回 OHLC+volume，**没有成交额**
+    （接口限制，非主动取舍——见协议第9.3节）。缺列时只产出 close/ret，
+    判定指标随之只剩周收益率，而非把无成交额当成缺失值处理。
+    """
     wk = pd.DataFrame()
     wk["close"] = daily["close"].resample("W").last()
-    wk["amount"] = daily["amount"].resample("W").sum()
+    if "amount" in daily.columns:
+        wk["amount"] = daily["amount"].resample("W").sum()
     wk["ret"] = wk["close"].pct_change()
     wk.index = align_weekday(wk.index)
     return wk
@@ -46,15 +52,21 @@ def xcorr(lead: pd.Series, lag: pd.Series, lag_range) -> pd.Series:
 
 
 def judge(corr_tbl: pd.DataFrame, pass_window: tuple[int, int],
-          pass_corr: float, noise_band: float) -> list[dict]:
+          pass_corr: float, noise_band: float,
+          null_median: float | None = None) -> list[dict]:
     """预注册判定（协议口径，判定线在跑数据前写死）。
 
     - PASS：峰值 corr > pass_corr 且峰值位置位于 pass_window 内
-    - NO_TRANSMISSION：全滞后位 |corr| < noise_band
+    - NO_TRANSMISSION：|corr| 峰值 < 判据线（默认 noise_band）
     - GREY：其余（登记评估，不调参）
+
+    null_median（协议第9.1节表述修订）：给了就用"零分布中位数"作「无传导」判据，
+    此时 noise_band 降级为描述"弱信号"的带，不再决定判定。不传则行为与 M0 逐位一致
+    （回归校验依赖这一点）。
     """
     verdicts = []
     lo, hi = pass_window
+    no_trans_line = noise_band if null_median is None else null_median
     for name in corr_tbl.columns:
         c = corr_tbl[name].dropna()
         if c.empty:
@@ -64,7 +76,7 @@ def judge(corr_tbl: pd.DataFrame, pass_window: tuple[int, int],
         c_best = float(c.loc[k_best])
         if lo <= k_best <= hi and c_best > pass_corr:
             status = "PASS"
-        elif abs(c_best) < noise_band:
+        elif abs(c_best) < no_trans_line:
             status = "NO_TRANSMISSION"
         else:
             status = "GREY"

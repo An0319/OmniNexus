@@ -1,0 +1,16 @@
+{
+  "chain_id": "chain20",
+  "last_run": "2026-09-26T03:57:01",
+  "fingerprint": "2f9a8713346e9436f4cfc88fa266f59c74cf9c4b15f838853ce8d767d42fadf3",
+  "substantive_fingerprint": "8c399bdfde240595214abd123186dee830a36a5ae46df4707191dd36bb5209d0",
+  "budget_used": 0,
+  "revisions_seen": 1,
+  "last_verdicts": [
+    {
+      "metric": "周收益率",
+      "status": "GREY",
+      "k_best": 0,
+      "corr": 0.263
+    }
+  ]
+}

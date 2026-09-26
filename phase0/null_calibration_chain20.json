@@ -1,0 +1,69 @@
+{
+  "seed": 20260926,
+  "n_draws": 500,
+  "seeding": "每臂独立种子：rotation/phase/white/random_walk 互不干扰",
+  "discipline_note": "本校准不用于给已判定链翻案，只用于给下一条链的预注册判定线定价。全程未改动任何判定参数（pass_corr/pass_window/noise_band）。也不计算真实配对的相关，只把序列作为零分布生成的输入。",
+  "run_history": [
+    "run1 2026-09-26：相位臂因 lead_z 含 25 个预热 NaN 被 FFT 污染，全部为 NaN（代码缺陷，不可用）",
+    "run2 2026-09-26：修复相位臂 NaN 处理；但各臂共用一条随机流，相位臂消费随机数个数变化，平移了其后各臂数值（非判定参数，属实现副作用）",
+    "run3 2026-09-26：改为每臂独立种子（本文件当前口径）——最终结论以本次为准",
+    "run4 2026-09-26：新增 chain20（3 个滞后位）专属校准，单独输出，未改动前三次结论"
+  ],
+  "chains": {
+    "chain20": {
+      "n_lags": 3,
+      "metrics": {
+        "周收益率": {
+          "rotation": {
+            "n_draws": 500,
+            "n_nan": 0,
+            "mean": 0.089,
+            "p50": 0.084,
+            "p90": 0.136,
+            "p95": 0.139,
+            "p99": 0.189,
+            "max": 0.227,
+            "fp_rate_at_pass_corr": 0.0,
+            "fp_rate_at_noise_band": 0.034
+          },
+          "phase": {
+            "n_draws": 500,
+            "n_nan": 0,
+            "mean": 0.087,
+            "p50": 0.086,
+            "p90": 0.133,
+            "p95": 0.147,
+            "p99": 0.175,
+            "max": 0.206,
+            "fp_rate_at_pass_corr": 0.0,
+            "fp_rate_at_noise_band": 0.046
+          },
+          "white_noise": {
+            "p50": 0.074,
+            "p95": 0.144
+          },
+          "random_walk": {
+            "p50": 0.034,
+            "p95": 0.087
+          }
+        }
+      }
+    }
+  },
+  "merged": {
+    "n_draws": 500,
+    "n_nan": 0,
+    "mean": 0.089,
+    "p50": 0.084,
+    "p90": 0.136,
+    "p95": 0.139,
+    "p99": 0.189,
+    "max": 0.227,
+    "fp_rate_at_pass_corr": 0.0,
+    "fp_rate_at_noise_band": 0.034
+  },
+  "family_wise": {
+    "per_metric_chain_fp": 0.0,
+    "over_3_chains_2_metrics_note": 0.0
+  }
+}
