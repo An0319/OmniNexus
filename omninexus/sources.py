@@ -60,10 +60,19 @@ def fetch_openalex_weekly(keywords: list[str], weeks_back: int,
             cache.unlink()
 
     # API key 优先级：环境变量 > 本地密钥文件（openalex_key.local，已被 .gitignore 排除）
-    api_key = os.environ.get("OPENALEX_API_KEY", "")
-    key_file = Path(__file__).resolve().parent.parent / "phase0" / "openalex_key.local"
-    if not api_key and key_file.exists():
-        api_key = key_file.read_text(encoding="utf-8").strip()
+    api_key = os.environ.get("OPENALEX_API_KEY", "").strip()
+    key_src = "环境变量 OPENALEX_API_KEY（云端 Secret）" if api_key else ""
+    if not api_key:
+        key_file = Path(__file__).resolve().parent.parent / "phase0" / "openalex_key.local"
+        if key_file.exists():
+            api_key = key_file.read_text(encoding="utf-8").strip()
+            key_src = "本地文件 phase0/openalex_key.local"
+    # 只报"有没有读到、从哪读到"，不打印密钥内容——供点火后核对 Secret 是否生效
+    if api_key:
+        print(f"  [key] 已启用 OpenAlex API key（来源：{key_src}）")
+    else:
+        print("  [key] 未找到 API key：走匿名共享池，配额低、429 风险高"
+              "（云端请在仓库配置 Secret OPENALEX_API_KEY）")
 
     today = dt.date.today()
     session = requests.Session()

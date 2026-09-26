@@ -1,0 +1,65 @@
+name: T1 无人值守日更（监控，不判定）
+
+# 依据 docs/T1-工具化设计.md 第13节（点火前锁定）。
+# UTC 00:30 / 12:30 两个时段各跑一次；任一完整成功即当日达标。
+# 整个作业不判定、不改预算/修订/账本——只做数据新鲜度 + 降级披露。
+on:
+  schedule:
+    - cron: "30 0 * * *"
+    - cron: "30 12 * * *"
+  push:
+    paths:
+      - ".github/workflows/daily-update.yml"
+      - "tools/daily_update.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: daily-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pandas numpy pyyaml
+          pip install akshare || echo "::warning::akshare 安装失败（滞后面将走降级路径）"
+
+      - name: 运行日更
+        id: daily
+        env:
+          OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
+        run: python tools/daily_update.py
+
+      - name: 提交快照（失败当日也提交，留痕可审计）
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data || true
+          git commit -m "日更快照 $(date -u +%Y-%m-%dT%H:%MZ)" || echo "no changes"
+          git push || echo "::warning::push 未完成"
+
+      - name: 失败时开 issue（响亮失败）
+        if: failure()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "T1 日更失败：$(date -u +%Y-%m-%d)" \
+            --body "本次运行失败（run ${{ github.run_id }}）。按 docs/T1-工具化设计.md §13.3，当日若再无一次完整成功运行，连续计时归零、从头开始。请把本 issue 转告助手，不要自己抢修（抢修＝人工干预）。" \
+            || true
