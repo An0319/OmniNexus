@@ -257,14 +257,19 @@ def _update_streak(doc: dict, today: str, stamp: str,
     days.sort(key=lambda d: d["utc_date"])
 
     doc["last_run_utc"] = stamp
-    streak = _streak_before(days, today)
-    if any(d["utc_date"] == today and d["status"] == "success" for d in days):
-        streak += 1
+    before = _streak_before(days, today)
+    today_success = any(d["utc_date"] == today and d["status"] == "success"
+                        for d in days)
+    streak = before + (1 if today_success else 0)
     doc["current_streak"] = streak
     if streak > 0:
-        doc["started_utc_date"] = (dt.date.fromisoformat(today)
-                                   - dt.timedelta(days=streak - 1)).isoformat()
-        doc["last_success_utc_date"] = today
+        # 起点口径修正（2026-09-30 修订）：当日未成功时连续段止于上一成功日，
+        # 起点 = 今日 − streak 天；旧公式 today−(streak−1) 会把起点后移一天，
+        # 且当日未成功时把 last_success 误记为今天。
+        doc["started_utc_date"] = (dt.date.fromisoformat(today) - dt.timedelta(
+            days=streak - 1 if today_success else streak)).isoformat()
+        succ = [d["utc_date"] for d in days if d["status"] == "success"]
+        doc["last_success_utc_date"] = today if today_success else succ[-1]
     else:
         doc["started_utc_date"] = None
     STREAK_PATH.write_text(json.dumps(doc, ensure_ascii=False, indent=2) + "\n",

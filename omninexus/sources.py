@@ -179,6 +179,19 @@ def fetch_us_index_daily(symbol: str, weeks_back: int) -> pd.DataFrame | None:
 
 
 # ---------------- 滞后面：东财板块四级降级 ----------------
+def _demote_if_empty(df: pd.DataFrame | None, where: str) -> pd.DataFrame | None:
+    """空响应（不报错但 0 行）视同失败，继续降级。
+
+    2026-09-30 chain10 事故：东财直连返回空 klines 列表不抛异常，被当成
+    "成功"收下，降级链提前停车、路径3/4 未被尝试（快照 path=路径2、points=0）。
+    空响应与请求失败同样不可信——修在共享取数层，四条路径全覆盖，任何链受益。
+    """
+    if df is not None and df.empty:
+        print(f"  [降级] {where} 返回 0 行（不报错的空响应），视同失败继续降级")
+        return None
+    return df
+
+
 def fetch_sector_daily(sector_name: str, proxy_stock: tuple[str, str],
                        weeks_back: int,
                        sector_code: str | None = None,
@@ -204,15 +217,20 @@ def fetch_sector_daily(sector_name: str, proxy_stock: tuple[str, str],
     """
     daily = None
     if try_em:
-        daily = fetch_via_akshare(sector_name, weeks_back)
+        daily = _demote_if_empty(fetch_via_akshare(sector_name, weeks_back),
+                                 "路径1 akshare")
         if daily is None:
-            daily = fetch_via_em_direct(sector_name, weeks_back, sector_code=sector_code)
+            daily = _demote_if_empty(
+                fetch_via_em_direct(sector_name, weeks_back, sector_code=sector_code),
+                "路径2 东财直连")
     else:
         print("  [路径1/2] 按链配置跳过东财板块（登记口径为固定指数，东财板块属不同标的）")
     if daily is None and index_proxy:
-        daily = fetch_via_index_proxy(index_proxy, weeks_back)
+        daily = _demote_if_empty(fetch_via_index_proxy(index_proxy, weeks_back),
+                                 "路径3 指数代理")
     if daily is None:
-        daily = fetch_via_sina_proxy(proxy_stock, weeks_back)
+        daily = _demote_if_empty(fetch_via_sina_proxy(proxy_stock, weeks_back),
+                                 "路径4 个股代理")
     return daily
 
 
