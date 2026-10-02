@@ -1,0 +1,148 @@
+{
+  "schema_version": "1.0",
+  "chain_id": "chain01",
+  "title": "AI学术热度(LLM/推理优化) → 光模块板块",
+  "generated_at": "2026-10-02T14:37:55Z",
+  "source_files": [
+    "chains/chain01.yaml",
+    "phase0/output/xcorr.csv",
+    "phase0/output/sector_weekly.csv"
+  ],
+  "judgement": {
+    "lag_range": [
+      0,
+      8
+    ],
+    "pass_window": [
+      1,
+      4
+    ],
+    "pass_corr": 0.3,
+    "noise_band": 0.15,
+    "null_median": null
+  },
+  "verdict": {
+    "status": "falsified",
+    "decided_utc_date": "2026-09-25",
+    "note": "AI学术热度(LLM/推理优化) → 光模块板块"
+  },
+  "forward_look": null,
+  "samples": {
+    "total_weeks": 260,
+    "effective_weeks": 252,
+    "basis": "周频（周一），重叠窗口按最大滞后位扣减"
+  },
+  "pipeline": {
+    "lead": "openalex",
+    "lag": "em_sector",
+    "steps": [
+      "align",
+      "normalize",
+      "judge"
+    ]
+  },
+  "metrics": [
+    {
+      "name": "周收益率",
+      "status": "not_passed",
+      "best_in_window": {
+        "k": 2,
+        "corr": -0.104
+      },
+      "peak": {
+        "k": 7,
+        "corr": -0.108
+      },
+      "peak_outside_window": true,
+      "lags": [
+        {
+          "k": 0,
+          "corr": 0.032
+        },
+        {
+          "k": 1,
+          "corr": -0.083
+        },
+        {
+          "k": 2,
+          "corr": -0.104
+        },
+        {
+          "k": 3,
+          "corr": 0.065
+        },
+        {
+          "k": 4,
+          "corr": -0.035
+        },
+        {
+          "k": 5,
+          "corr": -0.099
+        },
+        {
+          "k": 6,
+          "corr": -0.022
+        },
+        {
+          "k": 7,
+          "corr": -0.108
+        },
+        {
+          "k": 8,
+          "corr": 0.043
+        }
+      ]
+    },
+    {
+      "name": "周成交额",
+      "status": "not_passed",
+      "best_in_window": {
+        "k": 1,
+        "corr": -0.123
+      },
+      "peak": {
+        "k": 1,
+        "corr": -0.123
+      },
+      "peak_outside_window": false,
+      "lags": [
+        {
+          "k": 0,
+          "corr": -0.073
+        },
+        {
+          "k": 1,
+          "corr": -0.123
+        },
+        {
+          "k": 2,
+          "corr": -0.069
+        },
+        {
+          "k": 3,
+          "corr": -0.051
+        },
+        {
+          "k": 4,
+          "corr": -0.05
+        },
+        {
+          "k": 5,
+          "corr": -0.081
+        },
+        {
+          "k": 6,
+          "corr": 0.035
+        },
+        {
+          "k": 7,
+          "corr": -0.063
+        },
+        {
+          "k": 8,
+          "corr": -0.049
+        }
+      ]
+    }
+  ]
+}

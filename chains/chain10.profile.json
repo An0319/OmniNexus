@@ -1,0 +1,292 @@
+{
+  "schema_version": "1.0",
+  "chain_id": "chain10",
+  "title": "人形机器人学术热度(humanoid robot/embodied intelligence) → 机器人板块",
+  "generated_at": "2026-10-02T14:37:55Z",
+  "source_files": [
+    "chains/chain10.yaml",
+    "phase0/output/xcorr_chain10.csv",
+    "phase0/output/sector_weekly_chain10.csv"
+  ],
+  "judgement": {
+    "lag_range": [
+      0,
+      26
+    ],
+    "pass_window": [
+      4,
+      13
+    ],
+    "pass_corr": 0.3,
+    "noise_band": 0.15,
+    "null_median": null
+  },
+  "verdict": {
+    "status": "not_passed",
+    "decided_utc_date": "2026-09-25",
+    "note": "人形机器人学术热度(humanoid robot/embodied intelligence) → 机器人板块"
+  },
+  "forward_look": null,
+  "samples": {
+    "total_weeks": 312,
+    "effective_weeks": 286,
+    "basis": "周频（周一），重叠窗口按最大滞后位扣减"
+  },
+  "pipeline": {
+    "lead": "openalex",
+    "lag": "em_sector",
+    "steps": [
+      "align",
+      "normalize",
+      "judge"
+    ]
+  },
+  "metrics": [
+    {
+      "name": "周收益率",
+      "status": "not_passed",
+      "best_in_window": {
+        "k": 6,
+        "corr": 0.097
+      },
+      "peak": {
+        "k": 20,
+        "corr": 0.149
+      },
+      "peak_outside_window": true,
+      "lags": [
+        {
+          "k": 0,
+          "corr": 0.016
+        },
+        {
+          "k": 1,
+          "corr": 0.025
+        },
+        {
+          "k": 2,
+          "corr": -0.029
+        },
+        {
+          "k": 3,
+          "corr": 0.119
+        },
+        {
+          "k": 4,
+          "corr": 0.027
+        },
+        {
+          "k": 5,
+          "corr": 0.011
+        },
+        {
+          "k": 6,
+          "corr": 0.097
+        },
+        {
+          "k": 7,
+          "corr": -0.019
+        },
+        {
+          "k": 8,
+          "corr": 0.068
+        },
+        {
+          "k": 9,
+          "corr": -0.043
+        },
+        {
+          "k": 10,
+          "corr": -0.02
+        },
+        {
+          "k": 11,
+          "corr": -0.053
+        },
+        {
+          "k": 12,
+          "corr": -0.056
+        },
+        {
+          "k": 13,
+          "corr": -0.028
+        },
+        {
+          "k": 14,
+          "corr": 0.002
+        },
+        {
+          "k": 15,
+          "corr": -0.06
+        },
+        {
+          "k": 16,
+          "corr": -0.029
+        },
+        {
+          "k": 17,
+          "corr": -0.036
+        },
+        {
+          "k": 18,
+          "corr": 0.062
+        },
+        {
+          "k": 19,
+          "corr": 0.027
+        },
+        {
+          "k": 20,
+          "corr": 0.149
+        },
+        {
+          "k": 21,
+          "corr": -0.053
+        },
+        {
+          "k": 22,
+          "corr": 0.041
+        },
+        {
+          "k": 23,
+          "corr": 0.088
+        },
+        {
+          "k": 24,
+          "corr": -0.059
+        },
+        {
+          "k": 25,
+          "corr": 0.038
+        },
+        {
+          "k": 26,
+          "corr": -0.064
+        }
+      ]
+    },
+    {
+      "name": "周成交额",
+      "status": "not_passed",
+      "best_in_window": {
+        "k": 9,
+        "corr": 0.104
+      },
+      "peak": {
+        "k": 26,
+        "corr": 0.167
+      },
+      "peak_outside_window": true,
+      "lags": [
+        {
+          "k": 0,
+          "corr": -0.007
+        },
+        {
+          "k": 1,
+          "corr": -0.044
+        },
+        {
+          "k": 2,
+          "corr": 0.021
+        },
+        {
+          "k": 3,
+          "corr": 0.097
+        },
+        {
+          "k": 4,
+          "corr": 0.065
+        },
+        {
+          "k": 5,
+          "corr": -0.01
+        },
+        {
+          "k": 6,
+          "corr": 0.081
+        },
+        {
+          "k": 7,
+          "corr": 0.028
+        },
+        {
+          "k": 8,
+          "corr": 0.014
+        },
+        {
+          "k": 9,
+          "corr": 0.104
+        },
+        {
+          "k": 10,
+          "corr": 0.035
+        },
+        {
+          "k": 11,
+          "corr": 0.055
+        },
+        {
+          "k": 12,
+          "corr": 0.025
+        },
+        {
+          "k": 13,
+          "corr": 0.008
+        },
+        {
+          "k": 14,
+          "corr": -0.05
+        },
+        {
+          "k": 15,
+          "corr": -0.026
+        },
+        {
+          "k": 16,
+          "corr": -0.029
+        },
+        {
+          "k": 17,
+          "corr": -0.014
+        },
+        {
+          "k": 18,
+          "corr": -0.087
+        },
+        {
+          "k": 19,
+          "corr": -0.044
+        },
+        {
+          "k": 20,
+          "corr": 0.021
+        },
+        {
+          "k": 21,
+          "corr": -0.003
+        },
+        {
+          "k": 22,
+          "corr": 0.01
+        },
+        {
+          "k": 23,
+          "corr": 0.004
+        },
+        {
+          "k": 24,
+          "corr": 0.085
+        },
+        {
+          "k": 25,
+          "corr": 0.097
+        },
+        {
+          "k": 26,
+          "corr": 0.167
+        }
+      ]
+    }
+  ]
+}
