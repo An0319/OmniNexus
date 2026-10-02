@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "chain_id": "chain10",
   "title": "人形机器人学术热度(humanoid robot/embodied intelligence) → 机器人板块",
-  "generated_at": "2026-10-02T14:37:55Z",
+  "generated_at": "2026-10-02T14:54:13Z",
   "source_files": [
     "chains/chain10.yaml",
     "phase0/output/xcorr_chain10.csv",

@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
-"""物化「判定剖线快照」chains/<id>.profile.json（M2 看板数据契约，清单 §5★）。
+"""物化看板所需的仓库侧快照（M2 数据契约，清单 §5/§5★）。
 
-只读既有产出（phase0/output/xcorr*.csv、chains/*.yaml、weekly csv），
-不触发回测、不改判定参数、不写 data/。判定结论的唯一真相是
-chains/project_budget.json 的 attempts[].note，本脚本只做结构化。
+产出三份，全部入库、全部只读外部输入：
+- chains/<id>.profile.json  「判定剖线快照」：滞后位相关系数 + 判定参数（清单 §5★）
+- chains/<id>.zseries.json  「z 曲线快照」：领先面/滞后面周频归一序列（链详情页 C5）
+- chains/revisions.json     「修订登记」：各链 YAML revisions 块的结构化（时间线页 C8）
+
+只读既有产出（phase0/output/*.csv、chains/*.yaml），不触发回测、不改判定参数、
+不写 data/。判定结论的唯一真相是 chains/project_budget.json 的 attempts[].note，
+本脚本只做结构化，判定状态由作者裁定（VERDICT 写死），不从阈值机械推导。
 
 用法：python scripts/materialize_profiles.py
 """
@@ -37,6 +42,12 @@ FILES = {
 
 # 前视位登记（chain20.yaml：pass_window 之外的 k=0 只作诊断，不可交易化）
 FORWARD_LOOK = {"chain20": 0}
+
+# z 曲线快照：chain20 无 zseries 产出（隔夜快传导链未做周频归一），前端走「无数据」灰态。
+ZSERIES_FILES = {
+    "chain01": "zseries.csv",
+    "chain10": "zseries_chain10.csv",
+}
 
 
 def load_yaml(path: Path) -> dict:
@@ -156,14 +167,75 @@ def build(chain_id: str) -> dict:
     }
 
 
+def _num(value: str | None) -> float | None:
+    if value is None or value == "":
+        return None
+    return round(float(value), 6)
+
+
+def build_zseries(chain_id: str) -> dict:
+    """zseries CSV → 周频归一序列。
+
+    裁掉开头「两序列皆缺」的预热段（回归窗口尚未重叠），但保留中间的真缺口，
+    前端据此画显式断口——绝不跨缺段连线、绝不把缺失补成零。
+    """
+    source = ZSERIES_FILES[chain_id]
+    with (OUTPUT_DIR / source).open(encoding="utf-8-sig", newline="") as fh:
+        rows = list(csv.DictReader(fh))
+    points = [
+        {
+            "date": row.get("") or row.get("date") or "",
+            "lead": _num(row.get("lead_z")),
+            "lag_ret": _num(row.get("lag_z_周收益率")),
+            "lag_amount": _num(row.get("lag_z_周成交额")),
+        }
+        for row in rows
+    ]
+    start = next(
+        (i for i, p in enumerate(points) if p["lead"] is not None or p["lag_ret"] is not None),
+        0,
+    )
+    return {
+        "chain_id": chain_id,
+        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "source_file": f"phase0/output/{source}",
+        "points": points[start:],
+    }
+
+
+def build_revisions() -> dict:
+    """各链 YAML revisions 块 → 统一登记（时间线页 C8 的「修订」事件源）。"""
+    revisions: dict[str, list[dict]] = {}
+    for chain_id in FILES:
+        spec = load_yaml(CHAINS_DIR / f"{chain_id}.yaml")
+        revisions[chain_id] = [
+            {
+                "date": str(item.get("date", "")),
+                "reason": item.get("reason", ""),
+                "counts_as_attempt": bool(item.get("counts_as_attempt", False)),
+            }
+            for item in spec.get("revisions", [])
+        ]
+    return {
+        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "source_files": [f"chains/{chain_id}.yaml" for chain_id in FILES],
+        "revisions": revisions,
+    }
+
+
+def _write(target: Path, payload: dict) -> None:
+    target.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    print(f"wrote {target.relative_to(ROOT)}")
+
+
 def main() -> int:
     for chain_id in FILES:
-        profile = build(chain_id)
-        target = CHAINS_DIR / f"{chain_id}.profile.json"
-        target.write_text(
-            json.dumps(profile, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-        )
-        print(f"wrote {target.relative_to(ROOT)}")
+        _write(CHAINS_DIR / f"{chain_id}.profile.json", build(chain_id))
+    for chain_id in ZSERIES_FILES:
+        _write(CHAINS_DIR / f"{chain_id}.zseries.json", build_zseries(chain_id))
+    _write(CHAINS_DIR / "revisions.json", build_revisions())
     return 0
 
 

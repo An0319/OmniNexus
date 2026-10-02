@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "chain_id": "chain01",
   "title": "AI学术热度(LLM/推理优化) → 光模块板块",
-  "generated_at": "2026-10-02T14:37:55Z",
+  "generated_at": "2026-10-02T14:54:13Z",
   "source_files": [
     "chains/chain01.yaml",
     "phase0/output/xcorr.csv",

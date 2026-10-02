@@ -37,3 +37,22 @@ export function fmtLag(k: number | null | undefined): string {
   if (k === null || k === undefined) return '—'
   return `k=${k}`
 }
+
+/** z-score：两位小数 + 显式符号，例如 +1.24 / −0.80（归一序列不是相关系数，故不用 ρ 前缀）。 */
+export function fmtZ(value: number | null | undefined): string {
+  if (value === null || value === undefined || Number.isNaN(value)) return '—'
+  const sign = value < 0 ? MINUS : '+'
+  return `${sign}${Math.abs(value).toFixed(2)}`
+}
+
+/** 千分位整数（样本周数、点数）。 */
+export function fmtCount(value: number | null | undefined): string {
+  if (value === null || value === undefined || Number.isNaN(value)) return '—'
+  return value.toLocaleString('en-US')
+}
+
+/** 图表横轴短日期：2026-09-21 → 09-21。 */
+export function fmtShortDate(date: string | null | undefined): string {
+  if (!date) return '—'
+  return date.slice(5)
+}

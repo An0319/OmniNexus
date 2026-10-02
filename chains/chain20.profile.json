@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "chain_id": "chain20",
   "title": "美股费城半导体指数(.SOX) → A股半导体ETF(sh512480) · 隔夜快传导",
-  "generated_at": "2026-10-02T14:37:55Z",
+  "generated_at": "2026-10-02T14:54:13Z",
   "source_files": [
     "chains/chain20.yaml",
     "phase0/output/xcorr_chain20.csv",

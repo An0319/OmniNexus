@@ -77,28 +77,104 @@ export interface Budget {
   updated: string
 }
 
+export interface SnapshotLead {
+  source?: string
+  symbol?: string
+  keywords?: string[]
+  latest?: string
+  points?: number
+  missing_weeks?: number
+  degraded?: boolean
+}
+
+export interface SnapshotLag {
+  source?: string
+  sector?: string
+  latest?: string
+  weekly_points?: number
+  has_amount?: boolean
+  path?: string
+  degraded?: boolean
+}
+
 export interface Snapshot {
   chain_id: string
   status: string
   failure_reasons: string[]
-  lead?: { source?: string; symbol?: string; latest?: string; points?: number; degraded?: boolean }
-  lag?: {
-    source?: string
-    sector?: string
-    latest?: string
-    weekly_points?: number
-    has_amount?: boolean
-    path?: string
-    degraded?: boolean
-  }
+  lead?: SnapshotLead
+  lag?: SnapshotLag
   run_utc: string
 }
 
-/** 总览页的链视图：profile + snapshot + 项目预算账本合成。 */
+/** chains/<id>.zseries.json：链详情页 z 曲线（C5）的周频归一序列。 */
+export interface ZPoint {
+  date: string
+  lead: number | null
+  lag_ret: number | null
+  lag_amount: number | null
+}
+
+export interface ZSeries {
+  chain_id: string
+  generated_at: string
+  source_file: string
+  points: ZPoint[]
+}
+
+/** chains/revisions.json：各链 YAML revisions 块的结构化。 */
+export interface RevisionEntry {
+  date: string
+  reason: string
+  counts_as_attempt: boolean
+}
+
+export interface RevisionsFile {
+  generated_at: string
+  source_files: string[]
+  revisions: Record<string, RevisionEntry[]>
+}
+
+/** chains/<id>.record.runs.jsonl / project_budget.runs.jsonl：append-only 运行账本。 */
+export interface RunLedgerEvent {
+  event?: string
+  at?: string
+  note?: string
+  reason?: string
+  last_run?: string
+  chain_id?: string
+  fingerprint?: string
+  substantive_fingerprint?: string
+  budget_used?: number
+  revisions_seen?: number
+  attempts_len?: number
+  entry?: { n: number; chain_id: string; date: string; title?: string; note?: string }
+  last_verdicts?: { metric: string; status: string; k_best: number; corr: number }[]
+}
+
+/** 时间线页（C8）：尝试 / 修订 / 运维事件三类之一。 */
+export type TimelineKind = 'attempt' | 'revision' | 'reset'
+
+export interface TimelineEvent {
+  id: string
+  kind: TimelineKind
+  /** UTC 日期，YYYY-MM-DD。 */
+  date: string
+  /** 可选精确时间戳。 */
+  at?: string
+  /** 链标题 / 事件标题。 */
+  title: string
+  /** 一句话原因/结论。 */
+  body: string
+  chainId?: string
+  countsAsAttempt?: boolean
+}
+
+/** 链视图：profile + snapshot + z 曲线 + 项目预算账本合成。总览卡片与链详情页共用。 */
 export interface ChainView {
   chainId: string
   title: string
   verdict: VerdictStatus
+  decidedDate: string
   note: string
   runUtc: string | null
   runStatus: string | null
@@ -111,4 +187,9 @@ export interface ChainView {
   samples: Profile['samples']
   metrics: Metric[]
   forwardLook: Profile['forward_look']
+  judgement: Judgement
+  pipeline: Profile['pipeline']
+  sourceFiles: Profile['source_files']
+  snapshot: Snapshot | null
+  zSeries: ZSeries | null
 }

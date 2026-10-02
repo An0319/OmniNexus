@@ -1,0 +1,46 @@
+{
+  "generated_at": "2026-10-02T14:54:13Z",
+  "source_files": [
+    "chains/chain01.yaml",
+    "chains/chain10.yaml",
+    "chains/chain20.yaml"
+  ],
+  "revisions": {
+    "chain01": [
+      {
+        "date": "2026-09-25",
+        "reason": "初版生效（协议 v1.0），判定口径锁定",
+        "counts_as_attempt": false
+      },
+      {
+        "date": "2026-09-25",
+        "reason": "有效尝试 #1 执行：AI学术→光模块，双指标 ❌ 无传导",
+        "counts_as_attempt": true
+      }
+    ],
+    "chain10": [
+      {
+        "date": "2026-09-25",
+        "reason": "换链#1 修订案生效（协议 v1.1 第6节：H2·链10端到端口径）",
+        "counts_as_attempt": true
+      },
+      {
+        "date": "2026-09-25",
+        "reason": "有效尝试 #2 执行：机器人学术→A股机器人板块，未通过（收益 ❌ / 成交额 ⚠️灰区）",
+        "counts_as_attempt": false
+      }
+    ],
+    "chain20": [
+      {
+        "date": "2026-09-26",
+        "reason": "换链#2 修订案生效（协议第9节：H3·链20 隔夜快传导；领先面换为美股指数、滞后面换为固定指数口径）",
+        "counts_as_attempt": true
+      },
+      {
+        "date": "2026-09-26",
+        "reason": "有效尝试 #3（3/3）执行完毕并登记结果：⚠️ 未通过——窗口内最优 k=1 corr=+0.215（越过弱信号带 0.19、未达及格线 0.3）；峰值落在 k=0（+0.263）属前视诊断，不计入判定。判定参数未做任何事后修改。",
+        "counts_as_attempt": false
+      }
+    ]
+  }
+}
