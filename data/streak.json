@@ -2,10 +2,10 @@
   "project": "omninexus",
   "target_days": 30,
   "rule": "UTC 日界；当日至少一次完整成功运行即达标；断更计时归零，不补、不豁免（docs/T1-工具化设计.md §13）",
-  "current_streak": 4,
+  "current_streak": 5,
   "started_utc_date": "2026-09-30",
-  "last_success_utc_date": "2026-10-03",
-  "last_run_utc": "2026-10-03T16:37:22Z",
+  "last_success_utc_date": "2026-10-04",
+  "last_run_utc": "2026-10-04T06:05:06Z",
   "days": [
     {
       "utc_date": "2026-09-30",
@@ -47,6 +47,18 @@
       "utc_date": "2026-10-03",
       "status": "success",
       "runs": 2,
+      "chains": {
+        "chain01": "ok",
+        "chain10": "ok",
+        "chain20": "ok"
+      },
+      "failure_reasons": [],
+      "closed": true
+    },
+    {
+      "utc_date": "2026-10-04",
+      "status": "success",
+      "runs": 1,
       "chains": {
         "chain01": "ok",
         "chain10": "ok",
