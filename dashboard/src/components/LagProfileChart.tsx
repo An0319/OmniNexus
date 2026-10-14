@@ -62,6 +62,7 @@ export function LagProfileChart({ metrics, judgement, forwardLook, empty = false
   // ρ 标签统一在顶层绘制（所有组之后），不被相邻组柱子/前视高亮列遮挡；
   // 组内锚点统一取「组顶」（与柱子朝向解耦），层距恒定 16px；
   // 同层水平间距 < 46px 自动抬升一层——任何链（含 27 滞后位）都不会叠字。
+  // 可读性由几何保证；禁用描边/晕圈/底色块补丁（需求清单 §6.6 图表标注红线）。
   const labelPoints = !empty
     ? visibleKs.flatMap((k, index) => {
         const groupX = PLOT.left + index * step + (step - groupWidth) / 2

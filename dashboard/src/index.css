@@ -2384,10 +2384,6 @@ body {
 .lag-value-label {
   fill: var(--text-1);
   font-weight: 600;
-  paint-order: stroke;
-  stroke: var(--bg);
-  stroke-width: 3px;
-  stroke-linejoin: round;
 }
 .chart-empty-symbol { fill: var(--text-4); font: 400 32px/1 var(--font-mono); }
 
