@@ -59,6 +59,43 @@ export function LagProfileChart({ metrics, judgement, forwardLook, empty = false
   const labelStride = Math.max(1, Math.ceil(visibleKs.length / 14))
   const bestKs = new Set(metrics.map((metric) => metric.best_in_window?.k).filter((k): k is number => k !== undefined))
 
+  // ρ 标签统一在顶层绘制（所有组之后），不被相邻组柱子/前视高亮列遮挡；
+  // 组内锚点统一取「组顶」（与柱子朝向解耦），层距恒定 16px；
+  // 同层水平间距 < 46px 自动抬升一层——任何链（含 27 滞后位）都不会叠字。
+  const labelPoints = !empty
+    ? visibleKs.flatMap((k, index) => {
+        const groupX = PLOT.left + index * step + (step - groupWidth) / 2
+        const isForward = forwardK !== null && k === forwardK
+        if (!(active === k || isForward || bestKs.has(k))) return []
+        const entries = metrics.flatMap((metric, metricIndex) => {
+          const point = metric.lags.find((lag) => lag.k === k)
+          if (!point) return []
+          const x = groupX + metricIndex * barWidth
+          return [{ key: `${metric.name}-${k}`, cx: x + Math.max(barWidth - 1, 1) / 2, corr: point.corr, level: metricIndex }]
+        })
+        if (entries.length === 0) return []
+        const groupTop = Math.min(
+          ...metrics.flatMap((metric) => {
+            const point = metric.lags.find((lag) => lag.k === k)
+            if (!point) return []
+            return [point.corr >= 0 ? y(point.corr) : zeroY]
+          }),
+        )
+        return entries.map((entry) => ({ ...entry, groupTop }))
+      })
+    : []
+  // 同层防撞：层内按 x 排序，与同层前一枚中心距 < 46px 则抬升一层
+  if (!empty) {
+    labelPoints.sort((a, b) => a.level - b.level || a.cx - b.cx)
+    const layerRight: number[] = []
+    for (const p of labelPoints) {
+      let level = p.level
+      while (layerRight[level] !== undefined && p.cx - layerRight[level] < 46) level += 1
+      layerRight[level] = p.cx
+      p.level = level
+    }
+  }
+
   const tickSet = new Set<number>(
     [yMax, -yMax, 0, passCorr, -passCorr].map((value) => Math.round(value * 1000) / 1000),
   )
@@ -155,7 +192,6 @@ export function LagProfileChart({ metrics, judgement, forwardLook, empty = false
                   const x = groupX + metricIndex * barWidth
                   const top = point.corr >= 0 ? y(point.corr) : zeroY
                   const height = Math.max(Math.abs(y(point.corr) - zeroY), 1)
-                  const showLabel = highlighted || isForward || bestKs.has(k)
                   return (
                     <g key={metric.name}>
                       <rect
@@ -174,16 +210,6 @@ export function LagProfileChart({ metrics, judgement, forwardLook, empty = false
                           fill={`url(#${patternId})`}
                         />
                       )}
-                      {showLabel && (
-                        <text
-                          x={x + Math.max(barWidth - 1, 1) / 2}
-                          y={Math.max(top - 8, 13)}
-                          textAnchor="middle"
-                          className="lag-value-label"
-                        >
-                          {`ρ${fmtCorr(point.corr)}`}
-                        </text>
-                      )}
                     </g>
                   )
                 })}
@@ -195,6 +221,20 @@ export function LagProfileChart({ metrics, judgement, forwardLook, empty = false
               </g>
             )
           })}
+
+        {/* ρ 值标签顶层：最后绘制 + 组顶统一锚点 + 同层防撞 */}
+        {!empty &&
+          labelPoints.map((p) => (
+            <text
+              key={p.key}
+              x={p.cx}
+              y={Math.max(p.groupTop - 10 - p.level * 16, 13)}
+              textAnchor="middle"
+              className="lag-value-label"
+            >
+              {`ρ${fmtCorr(p.corr)}`}
+            </text>
+          ))}
 
         {empty && (
           <g>
