@@ -5,6 +5,7 @@
 
 import { LagProfileChart } from '../components/LagProfileChart'
 import { SignalBadge, VERDICT_STATE } from '../components/SignalBadge'
+import { VerdictNav } from '../components/VerdictNav'
 import { ZSeriesChart } from '../components/ZSeriesChart'
 import { fmtCorr, fmtCount, fmtDate, fmtFixed3, fmtLag, fmtUtc } from '../format'
 import { revisions, runLedgers } from '../data'
@@ -161,6 +162,9 @@ export function ChainDetail({
             </span>
           </div>
         </div>
+
+        {/* C14 证伪导航（断点②处置）：判定后不停摆，给出结构化解读与下一步选项 */}
+        <VerdictNav view={view} />
       </section>
 
       <section className="detail-card" aria-labelledby="c4-title">

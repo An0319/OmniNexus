@@ -575,6 +575,43 @@
   color: var(--text-3);
 }
 
+/* ── C14 证伪导航：把终点变成岔路口（证伪 ≠ 事故，视觉无报错观感） ── */
+.verdict-nav {
+  margin-top: 12px;
+  padding: 12px 16px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-xs);
+}
+
+.verdict-nav-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--text-3);
+}
+
+.verdict-nav-reading {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.verdict-nav-options {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.verdict-nav-ledger {
+  margin-top: 8px;
+  font-size: 10px;
+  color: var(--text-3);
+}
+
 /* ── 双指标判定表 ─────────────────────────────────────────────── */
 .metric-table {
   margin-top: 20px;
