@@ -63,3 +63,26 @@ jobs:
             --title "T1 日更失败：$(date -u +%Y-%m-%d)" \
             --body "本次运行失败（run ${{ github.run_id }}）。按 docs/T1-工具化设计.md §13.3，当日若再无一次完整成功运行，连续计时归零、从头开始。请把本 issue 转告助手，不要自己抢修（抢修＝人工干预）。" \
             || true
+
+      - name: 达成 30 天里程碑时开 issue（提醒人工收尾，防静默错过）
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          STREAK=$(python -c "import json;print(json.load(open('data/streak.json'))['current_streak'])" || echo 0)
+          TARGET=$(python -c "import json;print(json.load(open('data/streak.json'))['target_days'])" || echo 30)
+          echo "streak=$STREAK target=$TARGET"
+          if [ "$STREAK" -ge "$TARGET" ]; then
+            COUNT=$(gh issue list --search "streak-milestone in:title" --state all --json number --jq length || echo 0)
+            if [ "$COUNT" -eq 0 ]; then
+              gh issue create \
+                --title "T1 里程碑达成 streak-milestone：$STREAK/$TARGET 天连续无人值守运行" \
+                --body "streak.json 计数达到 $STREAK/$TARGET（截至 $(date -u +%Y-%m-%dT%H:%MZ)）。达成触发两件人工事（按 docs/T1-工具化设计.md §13 约定，属人工拍板动作，非抢修）：① 回填 GitHub 主页 Current Core；② 发布「30 天无人值守运行」短复盘。本 issue 为唯一张，重复运行不会重复开（按标题标记去重）。" \
+                || true
+            else
+              echo "里程碑 issue 已存在，跳过"
+            fi
+          else
+            echo "未达 $TARGET 天，不触发"
+          fi
