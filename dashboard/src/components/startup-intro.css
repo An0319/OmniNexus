@@ -1,0 +1,753 @@
+/*
+ * 启动动画样式（§13.1 组件迁移，源：Figma - Loading Animation - First Version/src/index.css）。
+ *
+ * 迁移防撞处理（与看板 index.css / app.css 共存的前提）：
+ * 1. 所有类名收进 .startup-intro 作用域（原文件为全局选择器）；
+ * 2. 18 个 @keyframes 全部加 intro- 前缀——原 breathe / pulse-ring / float-up / data-flow
+ *    与看板同名且实现不同，重名会按文档顺序互相覆盖；
+ * 3. 原文件 :root 变量与看板 :root 同名不同值，改为 .startup-intro 作用域内定义，
+ *    亮色变体跟随看板的 html.light 切换机制；
+ * 4. --font-mono / --font-display 复用看板 @theme 变量（中文回退栈一致）。
+ */
+
+.startup-intro {
+  /* 动画专用变量（暗色默认）——仅在 .startup-intro 内生效，不污染看板 */
+  --intro-bg: #07090e;
+  --intro-border: rgba(193, 199, 218, 0.12);
+  --intro-border-strong: rgba(207, 212, 231, 0.22);
+  --intro-border-accent: rgba(192, 132, 252, 0.48);
+  --intro-text-1: #eef0f7;
+  --intro-text-2: #b9bfce;
+  --intro-text-3: #7f8799;
+  --intro-text-4: #4e5668;
+  --intro-accent: #c084fc;
+  --intro-accent-mid: #a855f7;
+  --intro-accent-dim: rgba(192, 132, 252, 0.12);
+  --intro-accent-glow: rgba(168, 85, 247, 0.24);
+  --intro-surface-2: #10141e;
+  --intro-shadow-glow: 0 0 32px var(--intro-accent-glow);
+  --intro-grid-dot: rgba(185, 192, 212, 0.11);
+  --intro-overlay: rgba(7, 9, 14, 0.86);
+  --intro-aurora-a: rgba(126, 34, 206, 0.16);
+  --intro-aurora-b: rgba(76, 29, 149, 0.11);
+  --intro-aurora-c: rgba(30, 64, 175, 0.07);
+  --intro-radius-xs: 3px;
+  --intro-space-1: 4px;
+  --intro-space-2: 8px;
+  --intro-space-3: 12px;
+  --intro-space-4: 16px;
+  --intro-space-6: 24px;
+
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  overflow: hidden;
+  background-color: var(--intro-bg);
+  background-image: radial-gradient(circle, var(--intro-grid-dot) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity 360ms ease,
+    transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 亮色跟随看板主题切换（documentElement.light） */
+html.light .startup-intro {
+  --intro-bg: #f4f4fa;
+  --intro-border: rgba(52, 48, 69, 0.12);
+  --intro-border-strong: rgba(52, 48, 69, 0.22);
+  --intro-border-accent: rgba(124, 58, 237, 0.42);
+  --intro-text-1: #181621;
+  --intro-text-2: #4d4859;
+  --intro-text-3: #777184;
+  --intro-text-4: #aaa4b4;
+  --intro-accent: #7c3aed;
+  --intro-accent-mid: #8b5cf6;
+  --intro-accent-dim: rgba(124, 58, 237, 0.1);
+  --intro-accent-glow: rgba(124, 58, 237, 0.18);
+  --intro-surface-2: #f1f0f8;
+  --intro-shadow-glow: 0 0 32px var(--intro-accent-glow);
+  --intro-grid-dot: rgba(62, 54, 81, 0.11);
+  --intro-overlay: rgba(244, 244, 250, 0.88);
+  --intro-aurora-a: rgba(124, 58, 237, 0.12);
+  --intro-aurora-b: rgba(139, 92, 246, 0.08);
+  --intro-aurora-c: rgba(37, 99, 235, 0.06);
+}
+
+.startup-intro::after {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  background: radial-gradient(circle at center, transparent 22%, var(--intro-overlay) 92%);
+}
+
+.startup-intro--exiting {
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(1.008);
+}
+
+.startup-intro .intro-aurora {
+  position: absolute;
+  z-index: 0;
+  inset: -20%;
+  background:
+    radial-gradient(circle at 28% 38%, var(--intro-aurora-a), transparent 28%),
+    radial-gradient(circle at 72% 62%, var(--intro-aurora-b), transparent 29%),
+    radial-gradient(circle at 50% 14%, var(--intro-aurora-c), transparent 24%);
+  animation: intro-breathe 7s ease-in-out infinite alternate;
+}
+
+.startup-intro .constellation {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-mono);
+}
+
+.startup-intro .coordinate-field {
+  opacity: 0;
+  animation: intro-field-enter 1350ms ease 2.75s forwards;
+}
+
+.startup-intro .time-axis {
+  fill: none;
+  stroke: var(--intro-border-strong);
+  stroke-dasharray: 420;
+  stroke-dashoffset: 420;
+  animation: intro-draw-line 1650ms cubic-bezier(0.65, 0, 0.35, 1) 2.85s forwards;
+}
+
+.startup-intro .axis-tick {
+  opacity: 0;
+  stroke: var(--intro-text-3);
+  fill: var(--intro-accent);
+}
+
+.startup-intro .axis-tick circle {
+  filter: drop-shadow(0 0 5px var(--intro-accent-glow));
+}
+
+.startup-intro .axis-tick--1 {
+  animation: intro-tick-align 450ms ease 3.35s forwards;
+}
+
+.startup-intro .axis-tick--2 {
+  animation: intro-tick-align 450ms ease 3.63s forwards;
+}
+
+.startup-intro .axis-tick--3 {
+  animation: intro-tick-align 450ms ease 3.91s forwards;
+}
+
+.startup-intro .axis-tick--4 {
+  animation: intro-tick-align 450ms ease 4.19s forwards;
+}
+
+.startup-intro .axis-tick--5 {
+  animation: intro-tick-align 450ms ease 4.47s forwards;
+}
+
+.startup-intro .axis-meta,
+.startup-intro .domain-code,
+.startup-intro .domain-label,
+.startup-intro .score-meta {
+  letter-spacing: 0.12em;
+}
+
+.startup-intro .axis-meta {
+  fill: var(--intro-text-4);
+  font-size: 9px;
+}
+
+.startup-intro .domain-path {
+  fill: none;
+  stroke: var(--intro-text-4);
+  stroke-width: 1;
+  stroke-dasharray: 3 9;
+  opacity: 0;
+  animation:
+    intro-path-reveal 1100ms ease 1.45s forwards,
+    intro-data-flow 2.2s linear 2.6s infinite;
+}
+
+.startup-intro .domain-path--primary {
+  stroke: var(--intro-accent-mid);
+  stroke-width: 1.35;
+}
+
+.startup-intro .flow-particle {
+  fill: var(--intro-text-3);
+  opacity: 0;
+  animation: intro-particle-enter 500ms ease 1.5s forwards;
+}
+
+.startup-intro .flow-particle--primary {
+  fill: var(--intro-accent);
+  filter: drop-shadow(0 0 6px var(--intro-accent));
+}
+
+.startup-intro .flow-particle--echo {
+  fill: var(--intro-accent-mid);
+  opacity: 0.62;
+}
+
+.startup-intro .domain-node {
+  opacity: 0;
+  color: var(--intro-text-3);
+  stroke: currentColor;
+  fill: none;
+}
+
+.startup-intro .domain-node--1 {
+  animation: intro-node-enter 1280ms ease 0.9s forwards;
+}
+
+.startup-intro .domain-node--2 {
+  animation: intro-node-enter 1280ms ease 1.2s forwards;
+}
+
+.startup-intro .domain-node--3 {
+  animation: intro-node-enter 1280ms ease 1.48s forwards;
+}
+
+.startup-intro .domain-node--4 {
+  animation: intro-node-enter 1280ms ease 1.04s forwards;
+}
+
+.startup-intro .domain-node--5 {
+  animation: intro-node-enter 1280ms ease 1.36s forwards;
+}
+
+.startup-intro .domain-node--6 {
+  animation: intro-node-enter 1280ms ease 1.62s forwards;
+}
+
+.startup-intro .domain-node-ring {
+  stroke-width: 1;
+  stroke-dasharray: 4 6;
+}
+
+.startup-intro .domain-node-core {
+  fill: var(--intro-accent-dim);
+  stroke: var(--intro-accent);
+  filter: drop-shadow(0 0 5px var(--intro-accent-glow));
+}
+
+.startup-intro .domain-node > path {
+  stroke-width: 1;
+}
+
+.startup-intro .domain-code {
+  fill: var(--intro-text-2);
+  stroke: none;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.startup-intro .domain-label {
+  fill: var(--intro-text-4);
+  stroke: none;
+  font-size: 8px;
+}
+
+.startup-intro .inference-field {
+  opacity: 0;
+  animation:
+    intro-field-enter 600ms ease 5.1s forwards,
+    intro-inference-resolve 900ms ease 8.7s forwards;
+}
+
+.startup-intro .inference-field path {
+  fill: none;
+  stroke: var(--intro-accent);
+  stroke-width: 2;
+  stroke-dasharray: 540;
+  stroke-dashoffset: 540;
+  filter: drop-shadow(0 0 6px var(--intro-accent-glow));
+  animation: intro-draw-line 2300ms cubic-bezier(0.65, 0, 0.35, 1) 5.35s forwards;
+}
+
+.startup-intro .inference-field circle {
+  fill: var(--intro-bg);
+  stroke: var(--intro-accent);
+  stroke-width: 1.5;
+}
+
+.startup-intro .zscore-field {
+  opacity: 0;
+  animation:
+    intro-zscore-enter 980ms ease 5.7s forwards,
+    intro-inference-resolve 850ms ease 8.82s forwards;
+}
+
+.startup-intro .score-reference {
+  fill: none;
+  stroke: var(--intro-text-4);
+  stroke-width: 1;
+  stroke-dasharray: 3 7;
+}
+
+.startup-intro .score-wave {
+  fill: none;
+  stroke: url("#score-gradient");
+  stroke-width: 2;
+  stroke-dasharray: 540;
+  stroke-dashoffset: 540;
+  filter: drop-shadow(0 0 6px var(--intro-accent-glow));
+  animation: intro-draw-line 2100ms ease 6s forwards;
+}
+
+.startup-intro .score-meta {
+  fill: var(--intro-text-4);
+  font-size: 8px;
+}
+
+.startup-intro .score-pulse {
+  fill: none;
+  stroke: var(--intro-accent);
+  opacity: 0;
+  animation: intro-score-pulse 1350ms ease-out 7.65s forwards;
+}
+
+.startup-intro .formula-lockup {
+  opacity: 0;
+  animation:
+    intro-float-up 980ms ease 5.9s forwards,
+    intro-formula-out 650ms ease 8.5s forwards;
+}
+
+.startup-intro .formula-lockup text {
+  fill: var(--intro-text-2);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+}
+
+.startup-intro .formula-lockup path {
+  stroke: var(--intro-border-strong);
+  stroke-width: 1;
+}
+
+.startup-intro .origin-mark {
+  opacity: 0;
+  stroke: var(--intro-text-4);
+  fill: none;
+  animation:
+    intro-field-enter 1000ms ease 0.18s forwards,
+    intro-origin-collapse 1200ms ease 8.6s forwards;
+}
+
+.startup-intro .origin-mark path {
+  stroke-width: 1;
+}
+
+.startup-intro .origin-mark circle {
+  stroke-width: 0.7;
+  stroke-dasharray: 2 10;
+}
+
+.startup-intro .origin-mark circle:last-child {
+  opacity: 0.35;
+}
+
+.startup-intro .sigma-lockup {
+  opacity: 0;
+  transform: scale(0.72);
+  transform-origin: 720px 450px;
+  animation: intro-sigma-enter 1200ms cubic-bezier(0.16, 1, 0.3, 1) 8.75s forwards;
+}
+
+.startup-intro .sigma-lockup text {
+  fill: var(--intro-accent);
+  font-family: var(--font-display);
+  font-size: 138px;
+  font-weight: 500;
+}
+
+.startup-intro .sigma-ring {
+  fill: none;
+  stroke: var(--intro-accent);
+  opacity: 0;
+}
+
+.startup-intro .sigma-ring--one {
+  animation: intro-pulse-ring 1650ms ease-out 9.8s forwards;
+}
+
+.startup-intro .sigma-ring--two {
+  animation: intro-pulse-ring 1900ms ease-out 10s forwards;
+}
+
+/* 延长态加载进度：Σ 下方的时间轴采样点轨道 */
+.startup-intro .progress-track {
+  opacity: 0;
+  animation: intro-field-enter 600ms ease 0.15s forwards;
+}
+
+.startup-intro .progress-dot {
+  fill: var(--intro-bg);
+  stroke: var(--intro-text-4);
+  stroke-width: 1;
+}
+
+.startup-intro .progress-dot--done {
+  fill: var(--intro-accent);
+  stroke: none;
+  filter: drop-shadow(0 0 5px var(--intro-accent-glow));
+  animation: intro-progress-align 450ms ease forwards;
+}
+
+.startup-intro .progress-meta {
+  fill: var(--intro-text-4);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+}
+
+.startup-intro .progress-pulse {
+  fill: none;
+  stroke: var(--intro-accent);
+  opacity: 0;
+  animation: intro-score-pulse 1200ms ease-out forwards;
+}
+
+.startup-intro .intro-system-note {
+  position: absolute;
+  z-index: 4;
+  top: var(--intro-space-6);
+  left: var(--intro-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--intro-space-1);
+  color: var(--intro-text-4);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  line-height: 1.5;
+  opacity: 0;
+  animation: intro-field-enter 420ms ease 0.16s forwards;
+}
+
+.startup-intro .intro-system-note span:first-child {
+  color: var(--intro-text-3);
+}
+
+.startup-intro .intro-skip {
+  position: absolute;
+  z-index: 5;
+  right: var(--intro-space-6);
+  bottom: var(--intro-space-6);
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 var(--intro-space-3);
+  border: 1px solid var(--intro-border);
+  border-radius: var(--intro-radius-xs);
+  color: var(--intro-text-3);
+  background: color-mix(in srgb, var(--intro-surface-2) 68%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--intro-text-1) 6%, transparent);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  opacity: 0;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  transform: translateY(6px);
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+  animation: intro-skip-enter 360ms ease 0.6s forwards;
+}
+
+.startup-intro .intro-skip:hover {
+  border-color: var(--intro-border-accent);
+  color: var(--intro-text-1);
+  background: var(--intro-accent-dim);
+  box-shadow: var(--intro-shadow-glow);
+  transform: translateY(-1px);
+}
+
+.startup-intro .intro-skip:active {
+  transform: scale(0.98);
+}
+
+.startup-intro .intro-skip:focus-visible {
+  outline: 2px solid var(--intro-accent);
+  outline-offset: 3px;
+}
+
+.startup-intro .intro-skip-divider {
+  width: 1px;
+  height: 12px;
+  margin: 0 var(--intro-space-2);
+  background: var(--intro-border-strong);
+}
+
+/* ── Keyframes（intro- 前缀，防撞看板全局 keyframes）────────── */
+
+@keyframes intro-breathe {
+  0% {
+    opacity: 0.62;
+    transform: scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes intro-field-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes intro-node-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes intro-path-reveal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.72;
+  }
+}
+
+@keyframes intro-particle-enter {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes intro-data-flow {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+@keyframes intro-draw-line {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes intro-tick-align {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.3);
+  }
+  65% {
+    opacity: 1;
+    stroke: var(--intro-accent);
+    transform: scaleY(1.35);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes intro-zscore-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes intro-score-pulse {
+  0% {
+    opacity: 0.8;
+    r: 5px;
+  }
+  100% {
+    opacity: 0;
+    r: 34px;
+  }
+}
+
+@keyframes intro-progress-align {
+  0% {
+    opacity: 0;
+    r: 1.5px;
+  }
+  55% {
+    opacity: 1;
+    r: 5px;
+  }
+  100% {
+    opacity: 1;
+    r: 3.5px;
+  }
+}
+
+@keyframes intro-float-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes intro-formula-out {
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes intro-inference-resolve {
+  to {
+    opacity: 0;
+    transform: scale(0.84);
+    transform-origin: center;
+  }
+}
+
+@keyframes intro-origin-collapse {
+  to {
+    opacity: 0.3;
+    transform: scale(0.58);
+    transform-origin: 720px 450px;
+  }
+}
+
+@keyframes intro-sigma-enter {
+  0% {
+    opacity: 0;
+    transform: scale(0.72);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes intro-pulse-ring {
+  0% {
+    opacity: 0.7;
+    r: 64px;
+    stroke-width: 1.5;
+  }
+  100% {
+    opacity: 0;
+    r: 126px;
+    stroke-width: 0.5;
+  }
+}
+
+@keyframes intro-skip-enter {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── 响应式 ──────────────────────────────────────────────────── */
+
+@media (max-width: 1080px) {
+  .startup-intro .domain-label {
+    display: none;
+  }
+
+  .startup-intro .domain-code {
+    font-size: 9px;
+  }
+
+  .startup-intro .intro-system-note {
+    top: var(--intro-space-4);
+    left: var(--intro-space-4);
+  }
+
+  .startup-intro .intro-skip {
+    right: var(--intro-space-4);
+    bottom: var(--intro-space-4);
+  }
+}
+
+@media (max-width: 720px) {
+  .startup-intro .constellation {
+    width: 132%;
+    max-width: none;
+    margin-left: -16%;
+  }
+
+  .startup-intro .domain-code,
+  .startup-intro .domain-label,
+  .startup-intro .axis-meta {
+    display: none;
+  }
+
+  .startup-intro .intro-system-note span:last-child {
+    display: none;
+  }
+}
+
+/* 减少动态：动画整体关闭（含 forwards 定格），静态版面用普通声明直接写死终态。
+   仅作用于 .startup-intro 内部，不影响看板其余部分。 */
+@media (prefers-reduced-motion: reduce) {
+  .startup-intro,
+  .startup-intro *,
+  .startup-intro *::before,
+  .startup-intro *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+
+  .startup-intro .intro-aurora,
+  .startup-intro .flow-particle,
+  .startup-intro .score-pulse,
+  .startup-intro .sigma-ring {
+    display: none;
+  }
+
+  .startup-intro .axis-tick,
+  .startup-intro .sigma-lockup,
+  .startup-intro .intro-system-note,
+  .startup-intro .intro-skip {
+    opacity: 1;
+    transform: none;
+  }
+
+  .startup-intro .domain-node,
+  .startup-intro .domain-path,
+  .startup-intro .coordinate-field,
+  .startup-intro .origin-mark,
+  .startup-intro .progress-track {
+    opacity: 0.34;
+  }
+
+  .startup-intro .time-axis {
+    stroke-dashoffset: 0;
+  }
+
+  .startup-intro .inference-field,
+  .startup-intro .formula-lockup,
+  .startup-intro .zscore-field {
+    opacity: 0;
+  }
+}
