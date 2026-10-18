@@ -21,3 +21,6 @@ openalex_key.local
 .idea/
 Thumbs.db
 .DS_Store
+
+# 临时脉络稿（本地思考用，永不入库）
+临时文件-*
