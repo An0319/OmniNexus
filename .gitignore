@@ -16,6 +16,14 @@ probe-output.txt
 openalex_key.local
 *.local
 
+# 环境变量文件（绝不入库）
+# 现状：本项目用 GitHub Secrets + *.local，尚未使用 .env；
+# 此三条为未来保险——任何工具生成的 .env 都不会被误提交。
+# .env.example（模板，无真实值）故意不拦，允许入库。
+.env
+.env.local
+.env.*.local
+
 # IDE / 系统
 .vscode/
 .idea/
