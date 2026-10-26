@@ -104,6 +104,54 @@ def _gate(snap: dict, face: str, label: str, series: pd.Series | None,
         snap["failure_reasons"].extend(reasons)
 
 
+# ---------------- 领先面源注册表（接源 SOP 第③步的落点） ----------------
+# 新源 = 写一个 builder（返回 (周度序列, 快照面)）+ 下方注册一行。
+# 同时必须在 omninexus/guard.py 的 SUBSTANTIVE["lead"] 登记新参数名，
+# 否则新参数不在实质性指纹保护内（改参数 = 换实验却不用付账）。
+def _lead_openalex(lp: dict) -> tuple[pd.Series | None, dict]:
+    """OpenAlex 学术热度周度计数。"""
+    s, log = _captured(fetch_openalex_weekly, keywords=lp.get("keywords") or [],
+                       weeks_back=MONITOR_WEEKS,
+                       mailto=lp.get("mailto", DEFAULT_MAILTO))
+    print(log, end="", flush=True)
+    s = s.copy()
+    s.index = align_weekday(s.index)
+    valid = s.dropna()
+    series = valid if len(valid) else None
+    face = {"source": "openalex", "keywords": lp.get("keywords") or [],
+            "latest": valid.index.max().date().isoformat() if len(valid) else None,
+            "points": int(len(valid)),
+            "missing_weeks": int(s.isna().sum()),
+            "degraded": False,
+            "series": {"count": _weekly_dict(valid)}}
+    return series, face
+
+
+def _lead_us_index(lp: dict) -> tuple[pd.Series | None, dict]:
+    """美股指数周收益（滞后面走降级链时的镜像领先面）。"""
+    daily, log = _captured(fetch_us_index_daily, lp.get("symbol"), MONITOR_WEEKS)
+    print(log, end="", flush=True)
+    if daily is not None and not daily.empty:
+        series = to_weekly(daily)["ret"].dropna()
+        face = {"source": "us_index", "symbol": lp.get("symbol"),
+                "latest": daily.index.max().date().isoformat(),
+                "points": int(len(series)),
+                "degraded": False,
+                "series": {"ret": _weekly_dict(series)}}
+    else:
+        series = None
+        face = {"source": "us_index", "symbol": lp.get("symbol"),
+                "points": 0, "degraded": False}
+    return series, face
+
+
+# 注册表：新源在此登记一行
+LEAD_SOURCES = {
+    "openalex": _lead_openalex,
+    "us_index": _lead_us_index,
+}
+
+
 def probe_chain(cfg: dict) -> dict:
     """单链监控：取两面数据 + 过门禁 + 组快照。不判定。"""
     chain_id = cfg["chain_id"]
@@ -111,39 +159,17 @@ def probe_chain(cfg: dict) -> dict:
     snap = {"chain_id": chain_id, "status": "ok", "failure_reasons": [],
             "lead": {}, "lag": {}}
 
-    # ---- 领先面 ----
+    # ---- 领先面（源注册表调度；未登记源响亮失败，不静默回落） ----
     lead = cfg.get("lead") or {}
     lp = lead.get("params") or {}
     lead_source = lead.get("source", "openalex")
-    lead_series = None
-    if lead_source == "us_index":
-        daily, log = _captured(fetch_us_index_daily, lp.get("symbol"), MONITOR_WEEKS)
-        print(log, end="", flush=True)
-        if daily is not None and not daily.empty:
-            lead_series = to_weekly(daily)["ret"].dropna()
-            snap["lead"] = {"source": "us_index", "symbol": lp.get("symbol"),
-                            "latest": daily.index.max().date().isoformat(),
-                            "points": int(len(lead_series)),
-                            "degraded": False,
-                            "series": {"ret": _weekly_dict(lead_series)}}
-        else:
-            snap["lead"] = {"source": "us_index", "symbol": lp.get("symbol"),
-                            "points": 0, "degraded": False}
-    else:
-        s, log = _captured(fetch_openalex_weekly, keywords=lp.get("keywords") or [],
-                           weeks_back=MONITOR_WEEKS,
-                           mailto=lp.get("mailto", DEFAULT_MAILTO))
-        print(log, end="", flush=True)
-        s = s.copy()
-        s.index = align_weekday(s.index)
-        valid = s.dropna()
-        lead_series = valid if len(valid) else None
-        snap["lead"] = {"source": "openalex", "keywords": lp.get("keywords") or [],
-                        "latest": valid.index.max().date().isoformat() if len(valid) else None,
-                        "points": int(len(valid)),
-                        "missing_weeks": int(s.isna().sum()),
-                        "degraded": False,
-                        "series": {"count": _weekly_dict(valid)}}
+    builder = LEAD_SOURCES.get(lead_source)
+    if builder is None:
+        raise ValueError(
+            f"未登记的领先面源：{lead_source!r}（已登记：{sorted(LEAD_SOURCES)}）"
+            "——按接源 SOP 三步（探针→口径卡→登记）后再用"
+        )
+    lead_series, snap["lead"] = builder(lp)
     _gate(snap, "lead", "领先面", lead_series, (prev.get("lead") or {}).get("latest"))
 
     # ---- 滞后面（四级降级；实际走到哪一级由日志辨认） ----
