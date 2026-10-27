@@ -1,0 +1,10 @@
+# Python 依赖（区间 pin：允许补丁与次版本，挡住破坏性大版本）
+# 与 .github/workflows/daily-update.yml 的安装步骤保持一致；切换前先由 test.yml 验证可解析。
+
+requests>=2.31,<3
+pandas>=2.1,<3
+numpy>=1.26,<3
+PyYAML>=6.0,<7
+
+# akshare 紧跟东财接口变化，只设下限、不设上限；升级时先跑一次日更验证降级链。
+akshare>=1.14

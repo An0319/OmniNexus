@@ -1,0 +1,81 @@
+name: 测试与构建守卫
+
+# F6：让 tests/ 的四个守卫在 push/PR 时自动执法。
+# 日更机器人用 GITHUB_TOKEN 推送的提交不会触发本 workflow（GitHub 防递归），
+# 因此本文件只覆盖人类改动，不给日更添负担。
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python-tests:
+    name: Python 守卫
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt || {
+            echo "::warning::requirements.txt 解析失败，回退核心四件（测试不依赖 akshare）"
+            pip install requests pandas numpy PyYAML
+          }
+
+      - name: 依赖方向守卫（F2）
+        run: python tests/run_dep_direction_test.py
+
+      - name: M0 回归
+        run: python tests/run_m0_regression.py
+
+      - name: M1 guard 纪律测试
+        run: python tests/run_m1_guard_test.py
+
+      - name: P0 guard 对抗测试
+        run: python tests/run_p0_guard_adversarial.py
+
+      - name: T1 双 cron 幂等测试（E6）
+        run: python tests/run_t1_streak_test.py
+
+  dashboard-build:
+    name: 看板构建
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      # 项目使用 pnpm（dashboard/pnpm-lock.yaml 入库）；setup-node 的 pnpm 缓存依赖它，故须先装 pnpm。
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: dashboard/pnpm-lock.yaml
+
+      - name: 安装依赖
+        working-directory: dashboard
+        run: pnpm install --frozen-lockfile
+
+      - name: 类型检查与构建
+        working-directory: dashboard
+        run: pnpm run build
