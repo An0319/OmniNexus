@@ -72,7 +72,7 @@ export function About() {
 
       <section aria-labelledby="states-title">
         <h2 className="section-title" id="states-title">
-          七态徽章 · 三通道冗余
+          六态徽章 · 三通道冗余
         </h2>
         <div className="detail-card">
           <p className="prose-lead">
@@ -86,7 +86,6 @@ export function About() {
             <SignalBadge state="nodata" />
             <SignalBadge state="notpassed" />
             <SignalBadge state="forward" />
-            <SignalBadge state="running" />
           </div>
           <p className="chart-caption">
             证伪使用冷色的「完成勾 + 印章边框」，与运行失败严格区分——判定是正常产出，故障才是红色警告。

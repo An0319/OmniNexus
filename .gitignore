@@ -5,7 +5,14 @@ __pycache__/
 venv/
 
 # 阶段0数据产出（体积大且可再生，不进仓库）
-phase0/output/
+phase0/output/*
+# M0 回归夹具：tests/run_m0_regression.py 依赖这 6 个文件逐位比对，合计不足 40KB
+!phase0/output/openalex_weekly.csv
+!phase0/output/sector_weekly.csv
+!phase0/output/xcorr.csv
+!phase0/output/openalex_weekly_chain10.csv
+!phase0/output/sector_weekly_chain10.csv
+!phase0/output/xcorr_chain10.csv
 
 # 探针本地产出（云端结果由 probe-results / probe-new-results 分支回传）
 probe_result.json

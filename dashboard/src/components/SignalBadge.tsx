@@ -1,5 +1,6 @@
 /**
- * C1 判定徽章 · 七态（design-system/AGENTS.md「Signal status badges」）。
+ * C1 判定徽章：契约六态（需求清单 §3 C1；K7 拍板去掉「运行中」）。
+ * `running` 仅作组件库预留（E9 行权后接线），当前无数据生产者。
  *
  * 三通道冗余：颜色 + 图标/形状/图案 + 文字。图标取 AGENTS.md 的严格口径，
  * 不沿用样品页旧 fixture 的图标（AGENTS.md：旧样品属已知 fixture 局限）。
