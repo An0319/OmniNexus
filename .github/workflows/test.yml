@@ -1,6 +1,6 @@
 name: 测试与构建守卫
 
-# F6：让 tests/ 的四个守卫在 push/PR 时自动执法。
+# F6：让 tests/ 的全部守卫在 push/PR 时自动执法。
 # 日更机器人用 GITHUB_TOKEN 推送的提交不会触发本 workflow（GitHub 防递归），
 # 因此本文件只覆盖人类改动，不给日更添负担。
 
@@ -53,6 +53,9 @@ jobs:
 
       - name: T1 双 cron 幂等测试（E6）
         run: python tests/run_t1_streak_test.py
+
+      - name: 文档一致性守卫
+        run: python tests/run_docs_consistency_test.py
 
   dashboard-build:
     name: 看板构建
