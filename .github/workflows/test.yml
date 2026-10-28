@@ -1,14 +1,19 @@
 name: 测试与构建守卫
 
 # F6：让 tests/ 的全部守卫在 push/PR 时自动执法。
-# 日更机器人用 GITHUB_TOKEN 推送的提交不会触发本 workflow（GitHub 防递归），
-# 因此本文件只覆盖人类改动，不给日更添负担。
+# 日更机器人用 GITHUB_TOKEN 推送的提交不会触发 push/PR（GitHub 防递归），
+# 因此人类改动即时执法；机器人提交的数据契约漂移由每周一的 schedule 补盲（见 on.schedule）。
 
 on:
   push:
     branches: [main]
   pull_request:
   workflow_dispatch:
+  schedule:
+    # N1：日更机器人用 GITHUB_TOKEN 推送不触发任何 workflow（GitHub 防递归），
+    # 而快照提交恰好改动看板静态导入的 data/*.json——契约漂移会静默入库。
+    # 每周一 UTC 04:00 全量守卫补盲；04:00 避开日更 00:30/12:30 两个班次及其调度延迟窗口。
+    - cron: "0 4 * * 1"
 
 permissions:
   contents: read
@@ -56,6 +61,9 @@ jobs:
 
       - name: 文档一致性守卫
         run: python tests/run_docs_consistency_test.py
+
+      - name: 快照契约守卫（N2）
+        run: python tests/run_snapshot_contract_test.py
 
   dashboard-build:
     name: 看板构建
