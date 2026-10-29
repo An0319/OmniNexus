@@ -1,0 +1,88 @@
+{
+  "at": "2026-10-29T13:29:58+00:00",
+  "probes": {
+    "egress_ip": {
+      "ok": true,
+      "status": 200,
+      "ctype": "text/plain",
+      "seconds": 0.1,
+      "head": "52.159.229.4"
+    },
+    "em_clist_m:90+t:2": {
+      "ok": true,
+      "status": 200,
+      "ctype": "application/json; charset=UTF-8",
+      "seconds": 1.77,
+      "head": "{\"rc\":0,\"rt\":6,\"svr\":177622155,\"lt\":2,\"full\":1,\"dlmkts\":\"8,10,128\",\"dsc\":\"0\",\"data\":{\"total\":496,\"diff\":{\"0\":{\"f12\":\"BK0420\",\"f14\":\"航空机场\"},\"1\":{\"f12\":\"BK0421\",\"f14\":\"铁路公路\"},\"2\":{\"f12\":\"BK0422\",\"f14\":\""
+    },
+    "em_clist_m:90+t:3": {
+      "ok": true,
+      "status": 200,
+      "ctype": "application/json; charset=UTF-8",
+      "seconds": 1.78,
+      "head": "{\"rc\":0,\"rt\":6,\"svr\":177542533,\"lt\":2,\"full\":1,\"dlmkts\":\"8,10,128\",\"dsc\":\"0\",\"data\":{\"total\":516,\"diff\":{\"0\":{\"f12\":\"BK0425\",\"f14\":\"工程建设\"},\"1\":{\"f12\":\"BK0429\",\"f14\":\"交运设备\"},\"2\":{\"f12\":\"BK0447\",\"f14\":\""
+    },
+    "kline_(a) 仅UA/近312周（与生产代码一致）": {
+      "ok": true,
+      "status": 200,
+      "ctype": "application/json; charset=UTF-8",
+      "seconds": 2.92,
+      "head": "{\"rc\":0,\"rt\":17,\"svr\":177617940,\"lt\":2,\"full\":0,\"dlmkts\":\"\",\"dsc\":\"0\",\"data\":{\"code\":\"BK1408\",\"market\":90,\"name\":\"机器人\",\"klines\":[]}}"
+    },
+    "kline_(b) +Referer/近312周": {
+      "ok": true,
+      "status": 200,
+      "ctype": "application/json; charset=UTF-8",
+      "seconds": 0.62,
+      "head": "{\"rc\":0,\"rt\":17,\"svr\":177617925,\"lt\":2,\"full\":0,\"dlmkts\":\"\",\"dsc\":\"0\",\"data\":{\"code\":\"BK1408\",\"market\":90,\"name\":\"机器人\",\"klines\":[]}}"
+    },
+    "clist_retry": {
+      "first_try_ok": true,
+      "attempts_used": 1,
+      "max_attempts": 3,
+      "success_within_attempts": 1,
+      "retry_needed_and_saved": false
+    },
+    "路径1 akshare 板块历史": {
+      "ok": false,
+      "seconds": 19.65,
+      "rows": 0
+    },
+    "路径2 东财裸requests直连(固定BK1408)": {
+      "ok": false,
+      "seconds": 0.62,
+      "rows": 0
+    },
+    "路径3 新浪个股代理(绿的谐波)": {
+      "ok": true,
+      "seconds": 1.61,
+      "rows": 1450
+    },
+    "fetch_sector_daily": {
+      "ok": true,
+      "seconds": 13.65,
+      "rows": 1450
+    },
+    "openalex_has_key": false,
+    "openalex": {
+      "ok": true,
+      "success": "3/3",
+      "seconds": 1.8,
+      "errors": []
+    }
+  },
+  "verdict": {
+    "tier1_akshare": false,
+    "tier2_em_direct": false,
+    "tier3_sina_proxy": true,
+    "openalex_ok": true,
+    "winning_tier": 3,
+    "tier2_pinned_code": "BK1408",
+    "tier2_fix_restores": false,
+    "clist_first_try_ok": true,
+    "clist_retry_needed_and_saved": false,
+    "throttling_hypothesis": "东财对同一出口 IP 的限流随请求数累积：2026-09-26 复验中同 run 前半段 clist 全 200、后半段连 K 线也拒连；故本探针刻意压低请求数",
+    "can_sustain_30d": true,
+    "note": "三级降级可用，但降级到第3级时结论含个股特质噪声"
+  }
+}

@@ -1,0 +1,43 @@
+========================================================================
+P0-2 云 IP 数据源连通性探针
+========================================================================
+
+[0] 出口 IP：52.159.229.4
+
+[1] 东财板块列表（行业板块 t:2 / 概念板块 t:3）
+    m:90+t:2: status=200 1.77s ctype=application/json; charset=UTF- head={"rc":0,"rt":6,"svr":177622155,"lt":2,"full":1,"dlmkts":"8,10,128","dsc":"0","da
+    m:90+t:3: status=200 1.78s ctype=application/json; charset=UTF- head={"rc":0,"rt":6,"svr":177542533,"lt":2,"full":1,"dlmkts":"8,10,128","dsc":"0","da
+
+[1.5] 东财 K线接口（冷状态，固定板块代码，仅 2 次请求）
+    (a) 仅UA/近312周（与生产代码一致）: status=200 2.92s head={"rc":0,"rt":17,"svr":177617940,"lt":2,"full":0,"dlmkts":"","dsc":"0","data":{"code":"BK14
+    (b) +Referer/近312周: status=200 0.62s head={"rc":0,"rt":17,"svr":177617925,"lt":2,"full":0,"dlmkts":"","dsc":"0","data":{"code":"BK14
+
+[1.6] 板块列表搜索（路径2 的第一道关）
+    第1次: status=200 1.84s
+    → 首次成功；重试未被验证
+
+[2] 三级降级逐级实测（生产代码 omninexus.sources）
+  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:02<00:08,  2.86s/it]                                               [路径1] akshare 失败：ConnectionError
+    路径1 akshare 板块历史: ok=False 19.65s rows=0 
+  [路径2] 使用链配置固定的板块代码 BK1408，跳过列表搜索
+  [路径2] 东财直连失败：ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without
+    路径2 东财裸requests直连(固定BK1408): ok=False 0.62s rows=0 
+  [路径4] 新浪个股代理：OK（绿的谐波，注意：个股代理含个股特质噪声）
+    路径3 新浪个股代理(绿的谐波): ok=True 1.61s rows=1450 
+
+[3] fetch_sector_daily（复合三级降级）——看最终由哪一级供数
+  [路径1] akshare 失败：ConnectionError
+  [路径2] 使用链配置固定的板块代码 BK1408，跳过列表搜索
+  [路径2] 东财直连失败：ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without
+  [路径4] 新浪个股代理：OK（绿的谐波，注意：个股代理含个股特质噪声）
+    结果：ok=True 13.65s rows=1450 
+
+[4] OpenAlex 连通性（不带 API key，仅 3 周）
+    环境变量 OPENALEX_API_KEY：未配置（走免费额度）
+    成功 3/3，耗时 1.8s，错误 []
+
+========================================================================
+判定：第1级=False 第2级=False 第3级=True；最终供数级别=3；OpenAlex=True
+结论：三级降级可用，但降级到第3级时结论含个股特质噪声
+========================================================================
+结果已写入 probe_result.json
