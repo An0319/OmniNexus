@@ -47,6 +47,8 @@ jobs:
         id: daily
         env:
           OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
+          # N3：仓库 Variables 优先，其次 Secrets（两者都支持，避免填错标签页时静默失效）
+          OPENALEX_MAILTO: ${{ vars.OPENALEX_MAILTO || secrets.OPENALEX_MAILTO }}
         run: python tools/daily_update.py
 
       - name: 提交快照（失败当日也提交，留痕可审计）
