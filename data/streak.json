@@ -5,7 +5,7 @@
   "current_streak": 30,
   "started_utc_date": "2026-09-30",
   "last_success_utc_date": "2026-10-29",
-  "last_run_utc": "2026-10-29T13:13:27Z",
+  "last_run_utc": "2026-10-29T13:45:36Z",
   "days": [
     {
       "utc_date": "2026-09-30",
@@ -358,7 +358,7 @@
     {
       "utc_date": "2026-10-29",
       "status": "success",
-      "runs": 2,
+      "runs": 4,
       "chains": {
         "chain01": "ok",
         "chain10": "ok",
@@ -376,12 +376,11 @@
     }
   ],
   "hash_chain": {
-    "checked_utc": "2026-10-29T13:13:27Z",
-    "head": "bb4616370805fd2444ab3dfb76cf31b2ba93c3c8",
-    "head_parent": "2149b9395058a83a330cb25efbeb2798a1d996aa",
-    "expected": null,
-    "status": "bootstrap",
-    "note": "首次启用哈希链，无历史记录"
+    "checked_utc": "2026-10-29T13:45:36Z",
+    "head": "57a32ee46570ddce5fa32c03366fd472d4b042ba",
+    "head_parent": "d3e2386fe79b4c34ea22621d5b3a6a71051a864f",
+    "expected": "d3e2386fe79b4c34ea22621d5b3a6a71051a864f",
+    "status": "ok"
   },
-  "last_commit_sha": "bb4616370805fd2444ab3dfb76cf31b2ba93c3c8"
+  "last_commit_sha": "57a32ee46570ddce5fa32c03366fd472d4b042ba"
 }
