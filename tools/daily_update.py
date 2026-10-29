@@ -28,7 +28,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from omninexus.core import align_weekday, to_weekly  # noqa: E402
-from omninexus.sources import (fetch_openalex_weekly,  # noqa: E402
+from omninexus.sources import (DEFAULT_MAILTO, fetch_openalex_weekly,  # noqa: E402
                                fetch_sector_daily, fetch_us_index_daily)
 
 DATA_DIR = ROOT / "data"
@@ -46,9 +46,6 @@ DEGRADE_PATHS = {
     "[路径3]": "指数代理",
     "[路径4]": "个股代理",
 }
-
-DEFAULT_MAILTO = "omninexus.phase0@example.com"
-
 
 # ---------------- 取数：捕获日志（降级层级要从日志里辨认） ----------------
 def _captured(fn, *args, **kwargs):

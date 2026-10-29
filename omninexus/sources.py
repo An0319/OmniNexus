@@ -28,7 +28,9 @@ import requests
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 # 新浪系接口对 Referer 有要求：缺了会被拒（P0-4 实测）
 SINA_HEADERS = {**UA, "Referer": "https://finance.sina.com.cn"}
-DEFAULT_MAILTO = "omninexus.phase0@example.com"
+# N3：OpenAlex 礼貌池邮箱的唯一权威落点。换真实邮箱时优先设环境变量
+# OPENALEX_MAILTO（GitHub Actions 走仓库 Secrets/Variables），不改代码。
+DEFAULT_MAILTO = os.environ.get("OPENALEX_MAILTO", "omninexus.phase0@example.com")
 
 
 def default_out_dir() -> Path:

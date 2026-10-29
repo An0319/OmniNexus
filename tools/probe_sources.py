@@ -72,8 +72,9 @@ def main():
     RESULT["probes"]["egress_ip"] = env
     print(f"\n[0] 出口 IP：{env.get('head', env.get('error'))}")
 
-    from omninexus.sources import (UA, fetch_sector_daily, fetch_via_akshare,
-                                   fetch_via_em_direct, fetch_via_sina_proxy)
+    from omninexus.sources import (DEFAULT_MAILTO, UA, fetch_sector_daily,
+                                   fetch_via_akshare, fetch_via_em_direct,
+                                   fetch_via_sina_proxy)
 
     # ---------- 1) 裸 HTTP 诊断：东财板块列表（三级里第2级的前置） ----------
     print("\n[1] 东财板块列表（行业板块 t:2 / 概念板块 t:3）")
@@ -159,7 +160,7 @@ def main():
         start = end - dt.timedelta(weeks=1)
         params = {"filter": f"title_and_abstract.search:humanoid robot,"
                             f"from_publication_date:{start},to_publication_date:{end}",
-                  "mailto": "omninexus.phase0@example.com"}
+                  "mailto": DEFAULT_MAILTO}
         if has_key:
             params["api_key"] = os.environ["OPENALEX_API_KEY"]
         try:

@@ -16,7 +16,7 @@ import yaml
 
 from .core import STATUS_CN, align_weekday, judge, roll_z, to_weekly, xcorr
 from .guard import check_discipline, init_ledger, write_record
-from .sources import (default_out_dir, fetch_openalex_weekly,
+from .sources import (DEFAULT_MAILTO, default_out_dir, fetch_openalex_weekly,
                       fetch_sector_daily, fetch_us_index_daily)
 
 
@@ -70,7 +70,7 @@ def run_chain(config_path: str, init: bool = False, fetch_only: bool = False) ->
         papers = fetch_openalex_weekly(
             keywords=lp["keywords"], weeks_back=lp["weeks_back"],
             cache_file=lp.get("cache_file"), out_dir=out_dir,
-            mailto=lp.get("mailto", "omninexus.phase0@example.com"))
+            mailto=lp.get("mailto", DEFAULT_MAILTO))
         papers.index = align_weekday(papers.index)
         lead_raw = papers
         print(f"  论文计数：{len(papers)} 周，缺失 {papers.isna().sum()} 周")
