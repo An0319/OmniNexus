@@ -374,14 +374,5 @@
       "reason": "T1 点火第5日主动重置：修复监控层缺陷（东财空响应致降级链提前停车 → chain10 当日首跑失败）与 streak 起点显示缺陷。旧账存档 streak_archive_20260930.json。详见 docs/T1-工具化设计.md §13.5；非判定参数改动，不消耗尝试预算。",
       "archive": "data/streak_archive_20260930.json"
     }
-  ],
-  "hash_chain": {
-    "checked_utc": "2026-10-29T14:30:14Z",
-    "head": "63388547ceab82ac9a304273570cec905a238896",
-    "head_parent": "5f3cab085f7a24779e167cf8125d286ffdc66460",
-    "expected": "57a32ee46570ddce5fa32c03366fd472d4b042ba",
-    "status": "gap",
-    "note": "记录 SHA 不是 HEAD 直接父提交，但仍在历史中（人工提交夹层）"
-  },
-  "last_commit_sha": "63388547ceab82ac9a304273570cec905a238896"
+  ]
 }
