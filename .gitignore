@@ -42,3 +42,14 @@ Thumbs.db
 
 # 接手者行为约束（本地文件，永不入库）
 AGENTS.md
+.trae/
+
+# 设计文档 / 思考逻辑 / 设计源文件——公开仓库不含，仅保留本地
+docs/
+design-system/
+Figma - Loading Animation - First Version/
+产品详细概念.md
+
+# Node 构建产物
+node_modules/
+dashboard/dist/

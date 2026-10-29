@@ -2,6 +2,8 @@
 """文档一致性守卫（最小版）：把"同一事实多副本漂移"变成 CI 红灯。
 
 范围：docs/*.md + 产品详细概念.md（历史存档也扫，防止旧口径被当成现状）。
+边界：这些私有设计文档只保留在作者本地，不随公开仓库分发；目标缺失时本守卫显式跳过并打印原因，
+      不静默通过（本机存在 docs/ 时照常全量扫描，纪律不变）。
 不扫：临时文件-*（工作底稿）、AGENTS.md（正文本身列出被禁措辞）、design-system/（Figma 生成物）。
 
 规则（每条都对应一次真实踩坑）：
@@ -18,7 +20,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-TARGETS = sorted((ROOT / "docs").glob("*.md")) + [ROOT / "产品详细概念.md"]
+TARGETS = [p for p in sorted((ROOT / "docs").glob("*.md")) + [ROOT / "产品详细概念.md"]
+           if p.exists()]
 
 FAILS = []
 COUNTS = {"LINK": 0, "M3": 0, "REPORT": 0, "ARCH": 0, "T2": 0}
@@ -62,6 +65,10 @@ def check_rules(path, lines):
             if not any(k in line for k in ("假设", "未执行", "§J", "不得", "从未执行", "不构成失败")):
                 fail("T2", path, lineno, line, "T2 口径未标注为历史假设或禁止重算")
 
+
+if not TARGETS:
+    print("跳过：私有设计文档未随本仓库分发（docs/ 与 产品详细概念.md 均不存在）。")
+    sys.exit(0)
 
 total_lines = 0
 
