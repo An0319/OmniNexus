@@ -5,7 +5,7 @@
   "current_streak": 30,
   "started_utc_date": "2026-09-30",
   "last_success_utc_date": "2026-10-29",
-  "last_run_utc": "2026-10-29T06:04:58Z",
+  "last_run_utc": "2026-10-29T13:13:27Z",
   "days": [
     {
       "utc_date": "2026-09-30",
@@ -358,7 +358,7 @@
     {
       "utc_date": "2026-10-29",
       "status": "success",
-      "runs": 1,
+      "runs": 2,
       "chains": {
         "chain01": "ok",
         "chain10": "ok",
@@ -374,5 +374,14 @@
       "reason": "T1 点火第5日主动重置：修复监控层缺陷（东财空响应致降级链提前停车 → chain10 当日首跑失败）与 streak 起点显示缺陷。旧账存档 streak_archive_20260930.json。详见 docs/T1-工具化设计.md §13.5；非判定参数改动，不消耗尝试预算。",
       "archive": "data/streak_archive_20260930.json"
     }
-  ]
+  ],
+  "hash_chain": {
+    "checked_utc": "2026-10-29T13:13:27Z",
+    "head": "bb4616370805fd2444ab3dfb76cf31b2ba93c3c8",
+    "head_parent": "2149b9395058a83a330cb25efbeb2798a1d996aa",
+    "expected": null,
+    "status": "bootstrap",
+    "note": "首次启用哈希链，无历史记录"
+  },
+  "last_commit_sha": "bb4616370805fd2444ab3dfb76cf31b2ba93c3c8"
 }
