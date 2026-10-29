@@ -16,6 +16,7 @@ import contextlib
 import datetime as dt
 import io
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -222,6 +223,53 @@ def _load_streak() -> dict:
     }
 
 
+def _git(*args: str) -> str | None:
+    """执行只读 git 命令；环境无 git 或命令失败返回 None（不拖累日更）。"""
+    try:
+        r = subprocess.run(["git", *args], cwd=ROOT, capture_output=True,
+                           text=True, timeout=15)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return r.stdout.strip() if r.returncode == 0 else None
+
+
+def _check_hash_chain(doc: dict, stamp: str) -> tuple[bool, list[str]]:
+    """E1 哈希链（架构审计 D12）：核对上次记录的 SHA 与当前 HEAD 的父提交。
+
+    三种判据：
+      ok        —— 记录 SHA == HEAD 的父提交（无夹层提交，链连续）；
+      gap       —— 不一致但记录 SHA 仍在历史中（人工提交夹层，披露不失败）；
+      rewritten —— 记录 SHA 不在当前历史中（账本历史被改写）→ 响亮失败。
+    """
+    head = _git("rev-parse", "HEAD")
+    parent = _git("rev-parse", "HEAD^")
+    last = doc.get("last_commit_sha")
+    status = {"checked_utc": stamp, "head": head,
+              "head_parent": parent, "expected": last}
+
+    if not head:
+        status.update(status="skipped", note="当前环境无 git 历史（本地/离线运行）")
+        doc["hash_chain"] = status
+        return True, []
+    if last is None:
+        status.update(status="bootstrap", note="首次启用哈希链，无历史记录")
+        doc["hash_chain"] = status
+        return True, []
+    if last == parent:
+        status["status"] = "ok"
+        doc["hash_chain"] = status
+        return True, []
+    if _git("merge-base", "--is-ancestor", last, head) is not None:
+        status.update(status="gap",
+                      note="记录 SHA 不是 HEAD 直接父提交，但仍在历史中（人工提交夹层）")
+        doc["hash_chain"] = status
+        return True, []
+    status.update(status="rewritten",
+                  note="记录 SHA 不在当前 git 历史中：账本历史疑似被改写")
+    doc["hash_chain"] = status
+    return False, ["哈希链断裂：streak.json 记录的 last_commit_sha 不在当前 git 历史中"]
+
+
 def _streak_before(days: list[dict], upto: str) -> int:
     """统计 upto 之前、连续无缺口且全部成功的天数。"""
     seq = sorted((d for d in days if d["utc_date"] < upto),
@@ -262,7 +310,7 @@ def _close_previous_days(doc: dict, today: str) -> None:
 
 
 def _update_streak(doc: dict, today: str, stamp: str,
-                   results: dict, ok: bool) -> None:
+                   results: dict, ok: bool, extra_reasons: list[str] | tuple = ()) -> None:
     days = doc.setdefault("days", [])
     rec = next((d for d in days if d["utc_date"] == today), None)
     if rec is None:
@@ -279,7 +327,8 @@ def _update_streak(doc: dict, today: str, stamp: str,
         rec["status"] = "failure"
         rec["failure_reasons"] = sorted({r for s in results.values()
                                          if s["status"] != "ok"
-                                         for r in s.get("failure_reasons") or ["未知"]})
+                                         for r in s.get("failure_reasons") or ["未知"]}
+                                        | set(extra_reasons))
     days.sort(key=lambda d: d["utc_date"])
 
     doc["last_run_utc"] = stamp
@@ -310,6 +359,11 @@ def main() -> int:
     stamp = now.strftime("%Y-%m-%dT%H:%M:%SZ")
 
     doc = _load_streak()
+    hash_ok, hash_reasons = _check_hash_chain(doc, stamp)
+    head_sha = _git("rev-parse", "HEAD")
+    if head_sha:
+        # E1 哈希链：记录运行起点 HEAD，供下一次运行核对（D12）
+        doc["last_commit_sha"] = head_sha
     _close_previous_days(doc, today)
 
     results = {}
@@ -329,8 +383,9 @@ def main() -> int:
         for r in snap.get("failure_reasons") or []:
             print(f"  [门禁] {r}", flush=True)
 
-    ok = bool(results) and all(s["status"] == "ok" for s in results.values())
-    _update_streak(doc, today, stamp, results, ok)
+    ok = (bool(results) and all(s["status"] == "ok" for s in results.values())
+          and hash_ok)
+    _update_streak(doc, today, stamp, results, ok, extra_reasons=hash_reasons)
 
     print(f"\n== 日更结果 {today}（UTC）==", flush=True)
     for cid, s in results.items():
@@ -341,6 +396,9 @@ def main() -> int:
           f"（当日仍需至少一次完整成功运行）", flush=True)
     print(f"  连续达标 {doc['current_streak']}/{doc['target_days']} 天"
           f"（起始 {doc['started_utc_date'] or '—'}）", flush=True)
+    hc = doc.get("hash_chain") or {}
+    print(f"  哈希链：{hc.get('status', 'unknown')}（{hc.get('note', '')}）",
+          flush=True)
     return 0 if ok else 1
 
 
