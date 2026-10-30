@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """tools/daily_update.py —— T1 无人值守日更作业（只监控，不判定）。
 
-依据：docs/T1-工具化设计.md 第13节（T1 点火前锁定）。
+T1 规则在点火前锁定；权威表述见 data/streak.json 的 rule 字段。
 对 chains/*.yaml 下每条已登记链执行：取数（带降级）→ 质量门禁 → 写快照。
 
-边界（§13.1 第4条）：
+边界：
   本作业**不计算交叉相关、不判定、不改预算/修订/账本**——
   已判定链只做「数据新鲜度 + 降级披露」监控。
 
@@ -210,7 +210,7 @@ def _load_streak() -> dict:
         "project": "omninexus",
         "target_days": 30,
         "rule": ("UTC 日界；当日至少一次完整成功运行即达标；"
-                 "断更计时归零，不补、不豁免（docs/T1-工具化设计.md §13）"),
+                 "断更计时归零，不补、不豁免"),
         "current_streak": 0,
         "started_utc_date": None,
         "last_success_utc_date": None,

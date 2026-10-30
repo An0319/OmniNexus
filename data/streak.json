@@ -1,7 +1,7 @@
 {
   "project": "omninexus",
   "target_days": 30,
-  "rule": "UTC 日界；当日至少一次完整成功运行即达标；断更计时归零，不补、不豁免（docs/T1-工具化设计.md §13）",
+  "rule": "UTC 日界；当日至少一次完整成功运行即达标；断更计时归零，不补、不豁免",
   "current_streak": 30,
   "started_utc_date": "2026-09-30",
   "last_success_utc_date": "2026-10-29",
@@ -371,7 +371,7 @@
   "resets": [
     {
       "utc_date": "2026-09-30",
-      "reason": "T1 点火第5日主动重置：修复监控层缺陷（东财空响应致降级链提前停车 → chain10 当日首跑失败）与 streak 起点显示缺陷。旧账存档 streak_archive_20260930.json。详见 docs/T1-工具化设计.md §13.5；非判定参数改动，不消耗尝试预算。",
+      "reason": "T1 点火第5日主动重置：修复监控层缺陷（东财空响应致降级链提前停车 → chain10 当日首跑失败）与 streak 起点显示缺陷。旧账存档 streak_archive_20260930.json。非判定参数改动，不消耗尝试预算。",
       "archive": "data/streak_archive_20260930.json"
     }
   ]

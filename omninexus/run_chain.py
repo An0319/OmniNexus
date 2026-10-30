@@ -3,7 +3,7 @@
 
 用法：python -m omninexus.run_chain chains/chain01.yaml
 
-链 YAML 结构见 docs/T1-工具化设计.md 第5节。
+链 YAML 结构以 chains/ 下现有配置为准。
 预注册纪律：judgement 与 budget 写入后不可静默修改（M1 起工具强制）。
 """
 from __future__ import annotations

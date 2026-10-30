@@ -1,5 +1,5 @@
 /*
- * 启动动画样式（§13.1 组件迁移，源：Figma - Loading Animation - First Version/src/index.css）。
+ * 启动动画样式（§13.1 组件迁移，源：设计稿导出，原件不随本仓库分发）。
  *
  * 迁移防撞处理（与看板 index.css / app.css 共存的前提）：
  * 1. 所有类名收进 .startup-intro 作用域（原文件为全局选择器）；

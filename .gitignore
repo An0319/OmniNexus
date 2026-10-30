@@ -50,6 +50,9 @@ design-system/
 Figma - Loading Animation - First Version/
 产品详细概念.md
 
+# 内容工作底稿（大纲/草稿只留本地，公开仓库只含成稿）
+content/*-大纲.md
+
 # Node 构建产物
 node_modules/
 dashboard/dist/

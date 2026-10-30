@@ -1,5 +1,5 @@
 /**
- * 启动动画（§13.1 组件迁移，源：Figma - Loading Animation - First Version）。
+ * 启动动画（§13.1 组件迁移，源：设计稿导出，原件不随本仓库分发）。
  * 三态状态机：loading（默认，完整叙事一遍 → 延长态等 ready）/ loop（?loop=1 调试循环）/
  * reduced-motion（静画 + 最短停留）。样式见同目录 startup-intro.css（作用域化迁移版）。
  */
