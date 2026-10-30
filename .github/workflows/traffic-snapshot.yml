@@ -1,0 +1,81 @@
+name: 流量快照（GitHub Traffic · 14 天窗口）
+
+# Traffic API 只保留 14 天且不可回溯：少拉一天，就永久少一天数据。
+# 每日 UTC 06:00 拉四端点落盘入库；避开日更 00:30 / 12:30 与周更 04:00。
+# 权限：traffic 端点需 Administration: read，默认 GITHUB_TOKEN 不具备，
+# 故优先读 Secret TRAFFIC_TOKEN（细粒度 PAT，仅本仓库 + Administration 只读）。
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: traffic-snapshot
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 拉取四端点
+        env:
+          TRAFFIC_TOKEN: ${{ secrets.TRAFFIC_TOKEN }}
+          DEFAULT_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          export GH_TOKEN="${TRAFFIC_TOKEN:-$DEFAULT_TOKEN}"
+          DAY="$(date -u +%F)"
+          DIR="data/traffic/$DAY"
+          mkdir -p "$DIR"
+
+          pull() {
+            local ep="$1" out="$2"
+            if gh api "repos/$REPO/traffic/$ep" > "$DIR/$out" 2> "$DIR/.error"; then
+              rm -f "$DIR/.error"
+              [ -s "$DIR/$out" ] || { echo "::error::$out 内容为空"; exit 1; }
+              echo "ok  traffic/$ep -> $out"
+            else
+              echo "::error::traffic/$ep 拉取失败"
+              echo "403/404 多半是默认 GITHUB_TOKEN 无 traffic 端点权限，请在仓库 Secrets 配置 TRAFFIC_TOKEN（细粒度 PAT：Administration 只读）。"
+              cat "$DIR/.error" || true
+              exit 1
+            fi
+          }
+
+          pull views              views.json
+          pull clones             clones.json
+          pull popular/referrers  popular_referrers.json
+          pull popular/paths      popular_paths.json
+
+          {
+            echo "### Traffic 快照 $DAY"
+            echo ""
+            echo "| 端点 | count | uniques |"
+            echo "|---|---|---|"
+            for f in views clones; do
+              echo "| $f | $(jq -r '.count' "$DIR/$f.json") | $(jq -r '.uniques' "$DIR/$f.json") |"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 提交快照（同日重跑不产生空提交）
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/traffic
+          if git diff --cached --quiet; then
+            echo "::notice::当日快照无变化，跳过提交"
+            exit 0
+          fi
+          git commit -m "chore: 流量快照 $(date -u +%F)"
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
