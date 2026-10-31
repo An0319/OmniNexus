@@ -11,6 +11,8 @@
   REPORT 「报告生成器」不得被称作导出物/导出器，除非同行明确否定
   ARCH  禁止修订考古句（已同步删除 / 此前为 / 修正 § / 本次修订）
   T2    同一行出现 T2 与 55%、1.2 时，必须标注为历史假设或禁止重算
+  POS   已退役的「套利引擎 / 实时预期差 / 信号引擎」不得在新文档以现在时出现
+        （产品详细概念.md＝历史存档、复盘-产品定位漂移.md＝事件记录，两文件豁免）
 
 运行：python tests/run_docs_consistency_test.py
 """
@@ -23,7 +25,7 @@ TARGETS = [p for p in sorted((ROOT / "docs").glob("*.md")) + [ROOT / "产品详�
            if p.exists()]
 
 FAILS = []
-COUNTS = {"LINK": 0, "M3": 0, "REPORT": 0, "ARCH": 0, "T2": 0}
+COUNTS = {"LINK": 0, "M3": 0, "REPORT": 0, "ARCH": 0, "T2": 0, "POS": 0}
 
 
 def fail(rule, path, lineno, line, why):
@@ -34,6 +36,9 @@ def fail(rule, path, lineno, line, why):
 
 LINK = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
 M3 = re.compile(r"M3\s*(?:后|之后|上线)")
+POS = re.compile(r"跨域信息套利引擎|套利引擎|实时预期差|信号引擎")
+POS_EXEMPT = {"产品详细概念.md", "复盘-产品定位漂移.md"}
+POS_OK = ("历史", "退役", "不采用", "假设", "早期", "未实现", "旧叙事")
 
 
 def check_links(path, lines):
@@ -64,6 +69,10 @@ def check_rules(path, lines):
             if not any(k in line for k in ("假设", "未执行", "§J", "不得", "从未执行", "不构成失败")):
                 fail("T2", path, lineno, line, "T2 口径未标注为历史假设或禁止重算")
 
+        if POS.search(line) and path.name not in POS_EXEMPT:
+            if not any(k in line for k in POS_OK):
+                fail("POS", path, lineno, line, "已退役的套利/实时预期差口径以现在时出现")
+
 
 if not TARGETS:
     print("跳过：私有设计文档未随本仓库分发（本地不存在）。")
@@ -88,4 +97,4 @@ if FAILS:
     print(f"\n共 {len(FAILS)} 处违规：文档漂移必须当场修复，不允许带病提交。")
     sys.exit(1)
 
-print("\n全部通过：链接完整、无 M3 残留、报告生成器口径一致、无修订考古句、T2 口径有标注。")
+print("\n全部通过：链接完整、无 M3 残留、报告生成器口径一致、无修订考古句、T2 口径有标注、无套利口径回流。")
