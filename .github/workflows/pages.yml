@@ -1,0 +1,74 @@
+name: 部署看板到 GitHub Pages
+
+# X3 拍板（2026-11-02，见 docs/架构审计.md）：T′0 前部署静态页，D15 其余条款不动。
+# 构建期把 data/ 与 chains/ 内联进产物，运行时零后端、零 fetch（M2 红线不变）。
+# 本文件不在 daily-update.yml 的 on.push.paths 内，不会触发日更。
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "dashboard/**"
+      - "data/**"
+      - "chains/**"
+      - ".github/workflows/pages.yml"
+  schedule:
+    # 日更机器人用 GITHUB_TOKEN 推送，按 GitHub 防递归规则不触发 push，
+    # 线上看板不会自动跟上数据快照；故在日更两个班次（00:30 / 12:30 UTC）之后各补一次重建。
+    - cron: "0 2 * * *"
+    - cron: "0 14 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: 构建看板
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: dashboard/pnpm-lock.yaml
+
+      - name: 安装依赖
+        working-directory: dashboard
+        run: pnpm install --frozen-lockfile
+
+      # 与 test.yml 的看板构建同一条命令：类型检查 + 构建，失败即响亮失败
+      - name: 类型检查与构建
+        working-directory: dashboard
+        run: pnpm run build
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dashboard/dist
+
+  deploy:
+    name: 发布
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

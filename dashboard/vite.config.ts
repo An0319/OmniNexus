@@ -7,6 +7,9 @@ const root = import.meta.dirname
 
 // 纯静态看板：数据以相对 JSON 导入（dev 热更新，build 内联），无后端、无 fetch。
 export default defineConfig({
+  // GitHub Pages 项目站点：仓库名决定路径前缀。相对基址让产物在
+  // /OmniNexus/ 子路径、本地 file:// 预览与 dev 下都能正确解析。
+  base: './',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
