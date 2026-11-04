@@ -19,6 +19,7 @@ This is an open-source experiment that turns "pre-registered verdicts" into an e
 
 | Item | Fact |
 |---|---|
+| Online dashboard | **https://an0319.github.io/OmniNexus/** (Chinese UI; English version pending) |
 | Engineering loop (T1) | **30 consecutive days** of unattended daily updates, 2026-09-30 → 2026-10-29, 30/30, no gaps |
 | Schedule | GitHub Actions, two cron slots (UTC 00:30 / 12:30); one fully successful run per day is enough |
 | Pre-registered verdicts | 3 chains, all failed (details below) |

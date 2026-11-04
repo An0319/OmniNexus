@@ -1,7 +1,8 @@
 name: 部署看板到 GitHub Pages
 
 # X3 拍板（2026-11-02，见 docs/架构审计.md）：T′0 前部署静态页，D15 其余条款不动。
-# 构建期把 data/ 与 chains/ 内联进产物，运行时零后端、零 fetch（M2 红线不变）。
+# 构建期把 data/ 与 chains/ 内联进产物，运行时零后端；唯一 fetch 例外是 E9
+# 运行态 run_state.json（已拍板，见 docs/架构审计.md D13）。
 # 本文件不在 daily-update.yml 的 on.push.paths 内，不会触发日更。
 
 on:
@@ -49,6 +50,14 @@ jobs:
       - name: 安装依赖
         working-directory: dashboard
         run: pnpm install --frozen-lockfile
+
+      # E9 运行态（架构审计 D13）：看板运行时 fetch 的唯一文件，摊平进产物根目录。
+      # 文件尚不存在（E9 合入后首跑前）只 warning 跳过，看板回落三态。
+      - name: 摊平运行态文件
+        run: |
+          mkdir -p dashboard/public
+          cp data/run_state.json dashboard/public/run_state.json \
+            || echo "::warning::data/run_state.json 不存在，看板运行态回落三态"
 
       # 与 test.yml 的看板构建同一条命令：类型检查 + 构建，失败即响亮失败
       - name: 类型检查与构建

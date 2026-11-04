@@ -16,6 +16,7 @@ import contextlib
 import datetime as dt
 import io
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -34,6 +35,7 @@ from omninexus.sources import (DEFAULT_MAILTO, fetch_openalex_weekly,  # noqa: E
 DATA_DIR = ROOT / "data"
 CHAINS_DIR = ROOT / "chains"
 STREAK_PATH = DATA_DIR / "streak.json"
+RUN_STATE_PATH = DATA_DIR / "run_state.json"
 
 # 监控窗口（周）：只用于回答"数据还取得回来吗、还新鲜吗"，
 # 与链 YAML 里的判定窗口无关——本作业不判定。
@@ -348,12 +350,25 @@ def _update_streak(doc: dict, today: str, stamp: str,
                            encoding="utf-8")
 
 
+def _write_run_state(state: dict) -> None:
+    RUN_STATE_PATH.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n",
+                              encoding="utf-8")
+
+
 # ---------------- 主流程 ----------------
 def main() -> int:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     now = dt.datetime.now(dt.timezone.utc)
     today = now.date().isoformat()
     stamp = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    # E9 运行态（架构审计 D13）：开工即写 run_state.json。有 started 无 finished
+    # 即「已开工未收尾」——中途崩溃时本文件保持此态，随快照提交（if: always()）
+    # 推送上线，暴露卡死/中断的运行。只有正常走到结尾才覆盖为 finished。
+    run_state = {"run_id": stamp, "started_utc": stamp,
+                 "slot": os.environ.get("RUN_SLOT"),
+                 "finished_utc": None, "status": "running"}
+    _write_run_state(run_state)
 
     doc = _load_streak()
     hash_ok, hash_reasons = _check_hash_chain(doc, stamp)
@@ -365,12 +380,16 @@ def main() -> int:
 
     results = {}
     for f in sorted(CHAINS_DIR.glob("*.yaml")):
-        cfg = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
-        chain_id = cfg.get("chain_id") or f.stem
-        print(f"== 日更监控：{chain_id} ==", flush=True)
+        cfg: dict = {}
+        # F7（架构审计）：配置解析与探测同进单链 try——一条链 YAML 损坏只判该链
+        # failed，其余链照跑，不再炸掉整个作业。
         try:
+            cfg = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
+            chain_id = cfg.get("chain_id") or f.stem
+            print(f"== 日更监控：{chain_id} ==", flush=True)
             snap = probe_chain(cfg)
         except (Exception, SystemExit) as e:  # SystemExit：如 OpenAlex 连续 429 的响亮失败
+            chain_id = (cfg.get("chain_id") if isinstance(cfg, dict) else None) or f.stem
             snap = {"chain_id": chain_id, "status": "failed", "lead": {}, "lag": {},
                     "failure_reasons": [f"未捕获中断 {e.__class__.__name__}: {str(e)[:120]}"]}
             print(f"  [失败] {snap['failure_reasons'][0]}", flush=True)
@@ -396,6 +415,12 @@ def main() -> int:
     hc = doc.get("hash_chain") or {}
     print(f"  哈希链：{hc.get('status', 'unknown')}（{hc.get('note', '')}）",
           flush=True)
+
+    # E9：正常收尾才覆盖为 finished（中途崩溃则保持 started 态随快照留痕）
+    run_state["finished_utc"] = dt.datetime.now(dt.timezone.utc).strftime(
+        "%Y-%m-%dT%H:%M:%SZ")
+    run_state["status"] = "ok" if ok else "failed"
+    _write_run_state(run_state)
     return 0 if ok else 1
 
 

@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import { VerdictBadge } from '../components/SignalBadge'
 import { budget, buildChainViews, streak } from '../data'
 import { fmtCorr, fmtDate, fmtFixed3, fmtLag, fmtUtc } from '../format'
+import { isRunUnfinished, useRunState } from '../useRunState'
 import type { ChainView } from '../types'
 
 const QUALITY_LABEL: Record<ChainView['quality'], string> = {
@@ -99,7 +100,17 @@ function T1Timer() {
   )
 }
 
-function ChainStatusCard({ view, onOpen }: { view: ChainView; onOpen: (chainId: string) => void }) {
+function ChainStatusCard({
+  view,
+  runUnfinished,
+  runStartedUtc,
+  onOpen,
+}: {
+  view: ChainView
+  runUnfinished: boolean
+  runStartedUtc: string | null
+  onOpen: (chainId: string) => void
+}) {
   return (
     <article
       className="chain-card hover-glow-card"
@@ -164,6 +175,15 @@ function ChainStatusCard({ view, onOpen }: { view: ChainView; onOpen: (chainId: 
         <span className={`quality-light is-${view.quality}`} aria-hidden="true" />
         <span className="quality-label">{QUALITY_LABEL[view.quality]}</span>
         {view.path && <span className="quality-label">· {view.path}</span>}
+        {runUnfinished && (
+          <span
+            className="badge-running"
+            title={`一次日更运行已开工未收尾（started_utc=${runStartedUtc ?? '—'}）：本卡快照可能不是本次运行的最终结果`}
+          >
+            <span className="badge-state-icon" aria-hidden="true">●</span>
+            RUNNING · 进行中·未收尾
+          </span>
+        )}
       </div>
 
       <div className="field">
@@ -215,6 +235,9 @@ function BudgetBar() {
 
 export function Overview({ onOpenChain }: { onOpenChain: (chainId: string) => void }) {
   const chains = useMemo(() => buildChainViews(), [])
+  // E9 运行态（架构审计 D13）：运行时 fetch 单文件，失败回落三态（C3 第 4 态数据源）
+  const runState = useRunState()
+  const runUnfinished = isRunUnfinished(runState)
 
   return (
     <>
@@ -235,7 +258,13 @@ export function Overview({ onOpenChain }: { onOpenChain: (chainId: string) => vo
         </h2>
         <div className="chain-grid">
           {chains.map((view) => (
-            <ChainStatusCard key={view.chainId} view={view} onOpen={onOpenChain} />
+            <ChainStatusCard
+              key={view.chainId}
+              view={view}
+              runUnfinished={runUnfinished}
+              runStartedUtc={runState?.started_utc ?? null}
+              onOpen={onOpenChain}
+            />
           ))}
         </div>
       </section>

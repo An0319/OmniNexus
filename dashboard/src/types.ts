@@ -154,6 +154,20 @@ export interface RunLedgerEvent {
 /** 时间线页（C8）：尝试 / 修订 / 运维事件三类之一。 */
 export type TimelineKind = 'attempt' | 'revision' | 'reset'
 
+/**
+ * data/run_state.json：E9 运行态（架构审计 D13）。日更开工即写、正常收尾才覆盖
+ * finished；中途崩溃保持 started 态随快照提交上线。看板运行时 fetch 此单文件
+ * （全站唯一 fetch 例外），语义是「已开工未收尾」，非实时"正在跑"。
+ */
+export interface RunState {
+  run_id: string
+  started_utc: string
+  /** cron 槽位（如 "30 0 * * *"）；非 cron 触发为 adhoc，本地未知为 null。 */
+  slot: string | null
+  finished_utc: string | null
+  status: 'running' | 'ok' | 'failed'
+}
+
 export interface TimelineEvent {
   id: string
   kind: TimelineKind

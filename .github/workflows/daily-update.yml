@@ -49,6 +49,8 @@ jobs:
           OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
           # N3：仓库 Variables 优先，其次 Secrets（两者都支持，避免填错标签页时静默失效）
           OPENALEX_MAILTO: ${{ vars.OPENALEX_MAILTO || secrets.OPENALEX_MAILTO }}
+          # E9 运行态（架构审计 D13）：cron 槽位随 run_state.json 落盘，非 cron 触发记 adhoc
+          RUN_SLOT: ${{ github.event.schedule || 'adhoc' }}
         run: python tools/daily_update.py
 
       - name: 提交快照（失败当日也提交，留痕可审计）

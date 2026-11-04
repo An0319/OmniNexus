@@ -2,7 +2,9 @@
  * 数据装载（只读）。
  *
  * 全部使用相对导入：JSON 走相对路径静态导入（dev 热更新，构建内联），
- * JSONL 运行账本走 `?raw` 后逐行解析。纯静态、无后端、无 fetch。
+ * JSONL 运行账本走 `?raw` 后逐行解析。纯静态、无后端、无 fetch——
+ * 唯一例外：E9 运行态 run_state.json 由 useRunState.ts 运行时 fetch
+ * （架构审计 D13 已拍板豁免，本模块不参与）。
  *
  * 红线：本模块及整个看板对 data/ 与 chains/ **只读**，绝不写回——
  * T1 计时连续性（runs.jsonl / streak.json 格式）在 30 天验收期内一字不动。
