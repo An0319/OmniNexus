@@ -77,6 +77,8 @@ def main() -> int:
     rows = []
     tp_strict = tp_lenient = emitted = 0
     labeled_events = 0
+    undecidable = 0
+    emitted_undecidable = 0
     action_ok = subject_cnt = subject_ok_cnt = 0
 
     for it in items:
@@ -92,6 +94,20 @@ def main() -> int:
             ev, reason = extract_item(raw_item, start, end, cache)
         else:
             ev, reason = build_event(raw_item, start, end)
+        # event 三态：true=算、false=不算、null=判不了（见 event_definition.md §5）
+        if lab["event"] is None:
+            undecidable += 1
+            if ev is not None:
+                emitted_undecidable += 1
+            rows.append({
+                "id": it["id"],
+                "label_event": None,
+                "emitted": ev is not None,
+                "reject_reason": reason,
+                "title": it["title"][:90],
+                "note": lab.get("note", ""),
+            })
+            continue
         is_event_label = bool(lab["event"])
         if is_event_label:
             labeled_events += 1
@@ -129,6 +145,7 @@ def main() -> int:
     summary = {
         "n_items": len(items),
         "n_labeled_events": labeled_events,
+        "n_undecidable": undecidable,
         "n_emitted": emitted,
         "lenient_recall": round(lenient_recall, 3),
         "strict_recall": round(strict_recall, 3),
@@ -136,6 +153,11 @@ def main() -> int:
         "strict_precision": round(strict_precision, 3),
         "action_accuracy": round(action_acc, 3),
         "subject_accuracy": round(subject_acc, 3),
+        # 备查口径：判不了按"不算"计（进召回分母、进精确分母），供对照，不作判定依据
+        "alt_lenient_recall": round(tp_lenient / (labeled_events + undecidable), 3) if (labeled_events + undecidable) else 0.0,
+        "alt_strict_recall": round(tp_strict / (labeled_events + undecidable), 3) if (labeled_events + undecidable) else 0.0,
+        "alt_lenient_precision": round(tp_lenient / (emitted + emitted_undecidable), 3) if (emitted + emitted_undecidable) else 0.0,
+        "alt_strict_precision": round(tp_strict / (emitted + emitted_undecidable), 3) if (emitted + emitted_undecidable) else 0.0,
         "floors": FLOORS,
         "pass": {
             "lenient_recall": lenient_recall >= FLOORS["lenient_recall"],
@@ -150,7 +172,10 @@ def main() -> int:
     print(json.dumps({k: v for k, v in summary.items() if k != "rows"}, ensure_ascii=False, indent=2))
     print("\n逐条：")
     for r in rows:
-        mark = "OK " if (r["emitted"] and r["label_event"]) else ("REJ" if not r["emitted"] else "FP ")
+        if r["label_event"] is None:
+            mark = "UND"
+        else:
+            mark = "OK " if (r["emitted"] and r["label_event"]) else ("REJ" if not r["emitted"] else "FP ")
         print(
             f"  {r['id']} {mark} emit={r['emitted']} label={r['label_event']} "
             f"action={r.get('action')} subject={str(r.get('subject'))[:40]} "

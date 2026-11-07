@@ -3,8 +3,20 @@
 > 创建日：2026-11-08 ｜ 依据代际：壳前置能力（phase0/timeline） ｜ 最后实质修订：2026-11-08
 > 本文件是字段的**唯一 owner**。`timeline.py` 与测试按此实现；改字段先改这里。
 
+## 0. 部署依赖（模型抽取器，接手前先看）
+
+| 依赖项 | 现象 | 处理 |
+|---|---|---|
+| Ollama 服务 | 未启动时 `URLError [WinError 10061]` | 先 `ollama serve`；端点 `http://127.0.0.1:11434` |
+| `OLLAMA_NOPRUNE` | 不设环境变量时，服务启动即报 `remove D:\Ollama\models\manifests-v2: Access is denied` | 启动前设 `OLLAMA_NOPRUNE=true` |
+| 沙箱只读模型目录 | 沙箱内起服务同样报 `Access is denied`（`D:\Ollama\models` 在只读区） | 服务需在沙箱外启动（`dangerouslyDisableSandbox` 或手工起） |
+| `format` 传 JSON Schema | 实测**不强制 `enum`**：给 `enum:["approval","halt"]` 仍返回枚举外字符串（Ollama 0.40.13） | 闭集由提示词全列 + `schema_error()` 校验 + 一次修复重试保证，不依赖解码器 |
+| 模型选型 |  | `svjack/Qwen3-4B-Instruct-2507-heretic:latest`（本机 8 个模型里唯一 JSON 3/3 合法且摘要逐字 3/3） |
+| 成本 | 单条 1.2–1.8s、0 元（本机推理，无 API 计费） | **可用于在线接口**（见 `benchmark.md` §6.5.3） |
+
 ## 1. 设计前提
 
+- 「什么算一个事件」由 [event_definition.md](event_definition.md) 唯一定义，本文件只定义字段。
 - 输出不是自由文本：每条事件落成固定字段，缺字段即拒绝入表。
 - 字段值可回溯到原始抓取：`source_url` + `fetched_at_utc` + `excerpt` 三件齐备才成立。
 - 抽取失败是显式状态（`reject` 记录原因），不是"猜一个填上去"。
