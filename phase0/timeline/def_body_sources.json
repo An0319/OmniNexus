@@ -1,0 +1,55 @@
+{
+  "captured_at_utc": "2026-11-07T22:59:31Z",
+  "rule": "取发布方页面正文首段（连续原文，整段不截断、上限 2000 字符，不改写、不拼接），仅对被判为「判不了」的 6 条补全",
+  "note": "正文段按预注册条款不入库，此处只登记来源与摘要指纹；复算需按 URL 重新取正文并与 excerpt_sha256_16 比对",
+  "items": [
+    {
+      "id": "B06",
+      "status": "supplemented",
+      "source_url": "https://www.nature.com/articles/s41591-025-04106-7",
+      "method": "requests 取正文段落（选择器）",
+      "chars": 1708,
+      "excerpt_sha256_16": "b0ae7148d1a3edd1"
+    },
+    {
+      "id": "B10",
+      "status": "supplemented",
+      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12680696/",
+      "method": "requests 取整页文本（关键词处连续切片）",
+      "chars": 2000,
+      "excerpt_sha256_16": "d1da6e33275ca4a7"
+    },
+    {
+      "id": "B12",
+      "status": "supplemented",
+      "source_url": "https://www.nature.com/articles/d41573-025-00208-6",
+      "method": "requests 取整页文本（关键词处连续切片）",
+      "chars": 2000,
+      "excerpt_sha256_16": "741b70a537fdf720"
+    },
+    {
+      "id": "B14",
+      "status": "supplemented",
+      "source_url": "https://www.ucl.ac.uk/population-health-sciences/clinical-trials-and-methodology/about/mrc-centre-research-excellence-clinical-trial-innovation-partnership-nihr",
+      "method": "WebFetch（站方对本机请求返回 403）",
+      "chars": 494,
+      "excerpt_sha256_16": "35063469c272fb28"
+    },
+    {
+      "id": "B20",
+      "status": "supplemented",
+      "source_url": "https://www.thebraintumourcharity.org/brain-tumour-diagnosis-treatment/treating-brain-tumours/clinical-trials/act-bt/",
+      "method": "requests 取 HTML 首个正文段落",
+      "chars": 165,
+      "excerpt_sha256_16": "367cf5c84b7cd1a0"
+    },
+    {
+      "id": "B22",
+      "status": "supplemented",
+      "source_url": "https://www.pennmedicine.org/news/four-penn-studies-named-among-nations-top-clinical-research-advances",
+      "method": "WebFetch（站方对本机请求返回 Incapsula 拦截页）",
+      "chars": 216,
+      "excerpt_sha256_16": "df457b3c4461ed9b"
+    }
+  ]
+}

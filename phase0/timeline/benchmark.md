@@ -274,6 +274,53 @@ python phase0/timeline/eval_benchmark.py --items phase0/timeline/benchmark_items
 
 按预注册，`def` 现在冻结：不重打分、不据此调口径、不出第三版。
 
+### 6.7 换输入重测（`def_body`）：预注册块
+
+§6.6 的结论把瓶颈指到输入：23/23 条 `excerpt == title`，6 条判不了全卡在 A（既看不出动作，也看不出发布载体）。本轮**只换输入**，其余全部冻结。
+
+#### 6.7.1 预注册（先于模型运行）
+
+**冻结项（本轮一个字没动）**
+
+- `event_definition.md`：SHA256 `caa8bf7f609aa1249caa2954cbfec14a13dafce1dfb0118409376524a321c8d9`（与 §6.6 登记值相同）。
+- `extract_model.py` 的 `model_v1` 提示词与闭集校验；模型 `svjack/Qwen3-4B-Instruct-2507-heretic:latest`，`temperature 0`。
+- §3 的五个下限（0.70 / 0.45 / 0.70 / 0.60 / 0.60）。
+
+**唯一改动：补 6 条判不了条目的 `excerpt`**
+
+- 补全规则：取发布方页面正文首段——连续原文，上限 2000 字符，不拼接、不改写、不翻译；抓不到正文的如实记「该源不可补」。
+- 抽样不变：仍是 §6.6 的同一套 23 条，`id` / 标题 / URL / 日期 / 来源字段一律不动，只替换这 6 条的 `excerpt`。
+- 正文段按预注册条款**不入库**。仓库内可核的是逐条来源与指纹（`def_body_sources.json`，SHA256 前 16 位 `0edfbeebd60087b4`）：
+
+| id | 来源 | 取用方式 | 字符数 | excerpt SHA256 前 16 位 |
+|---|---|---|---|---|
+| B06 | `https://www.nature.com/articles/s41591-025-04106-7` | requests 取正文段落（选择器） | 1708 | `b0ae7148d1a3edd1` |
+| B10 | `https://pmc.ncbi.nlm.nih.gov/articles/PMC12680696/` | requests 取整页文本（关键词处连续切片） | 2000 | `d1da6e33275ca4a7` |
+| B12 | `https://www.nature.com/articles/d41573-025-00208-6` | requests 取整页文本（关键词处连续切片） | 2000 | `741b70a537fdf720` |
+| B14 | `https://www.ucl.ac.uk/population-health-sciences/clinical-trials-and-methodology/about/mrc-centre-research-excellence-clinical-trial-innovation-partnership-nihr` | WebFetch（本机请求被 403） | 494 | `35063469c272fb28` |
+| B20 | `https://www.thebraintumourcharity.org/brain-tumour-diagnosis-treatment/treating-brain-tumours/clinical-trials/act-bt/` | requests 取正文首段 | 165 | `367cf5c84b7cd1a0` |
+| B22 | `https://www.pennmedicine.org/news/four-penn-studies-named-among-nations-top-clinical-research-advances` | WebFetch（本机请求被拦截页挡住） | 216 | `df457b3c4461ed9b` |
+
+- 取回结果与上表指纹不一致，即视为不可复算。
+- 输入噪声照实登记：B12 的 2000 字符切片含登录墙文案与页面招聘位（属页面上连续原文，未裁剪），这既是它能拿到 DOI 题录的原因，也是它的噪声来源；B10 的切片在摘要之后延续到 `Subject terms` 与通俗摘要。
+
+**重标规则（只重判被补全的 6 条，其余 17 条标注不变——它们的 `excerpt` 未变）**
+
+- 判据仍是 `event_definition.md` §2 / §3 / §4，逐条机械应用。
+- S 是硬闸（§3 第 2 步先于 A）：**期刊名本身不作具名承担者**，判例是 §6.6 的 B04（`A2 有载体线索但 S 不过 → 不算`）。
+- A2 成立需同时满足两件：文本里有载体线索（期刊名 / `published in` / DOI / 预印本库名 / 官方发布页域名）**且**条目 URL 指向该载体。本批条目 URL 是 Google News 聚合页，因此「只在标题尾部出现刊名」不构成 A2。
+
+**重标结果（先落盘，后跑模型）**
+
+- `benchmark_labels_def_body.json`，SHA256 前 16 位 `406e21aecda8729d`；标注完成时刻 **2026-11-07T23:02:05Z**。
+- 构成：`算` 12 条 / `不算` 10 条 / `判不了` 1 条（B10）。
+- 6 条逐条落格：B06 → `算`（`trial_result`）；B14 / B20 / B22 → `算`（`other`）；B12 → `不算`（S 不过，A2 的两个条件也不成立）；B10 → 仍 `判不了`。
+- **上述标注写入时，模型尚未在本批输入上运行过一次。** 结果见 §6.7.2。
+
+**本轮纪律**：这是重测量，不是第二次机会。测完即冻结——不据此改提示词、不换模型、不动门槛；若仍不过，直接写上限，不出第四版。
+
+**已知污染（照实登记，不隐去）**：本轮标注者同时是上一轮模型输出的读者，这层污染无法用时间戳封住；时序只能保证「标注与指纹先落盘、模型后运行」。另外这 6 条正文段的来源页面由标注者挑选，属测量条件的人为选择。
+
 ## 7. 中途被推翻的判断（保留被推翻版本与理由）
 
 1. **"dev 五项达标说明规则可用"**（原判断）→ 推翻。理由：dev 是调优集，词表就是照着它的失败清单补的；换到 test 立刻跌到 0.462 / 0.154 / 0.600。教训：调优集上的达标只能当"能跑"，不能当"能用"。
