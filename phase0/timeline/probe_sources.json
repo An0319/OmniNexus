@@ -1,0 +1,379 @@
+{
+  "probe_version": 2,
+  "topic": "clinical trial",
+  "probed_at_utc": "2026-11-07T21:38:00Z",
+  "note": "只存指纹与短引用，不存第三方原文；原文可由 request_url + fetched_at 重抓",
+  "results": [
+    {
+      "source_id": "google_news_rss_en",
+      "request_url": "https://news.google.com/rss/search?q=clinical+trial+when:30d&hl=en-US&gl=US&ceid=US:en",
+      "parser": "rss",
+      "note": "通用新闻检索 RSS；支持 when:30d 时间限定词；link 为 news.google.com 聚合页而非出版商原文",
+      "attempts": [
+        {
+          "at_utc": "2026-11-07T21:37:24Z",
+          "http_status": 200,
+          "bytes": 120721
+        }
+      ],
+      "fetched_at_utc": "2026-11-07T21:37:24Z",
+      "http_status": 200,
+      "bytes": 120721,
+      "sha256": "f227177e6791031790e35ba5b9be9e9a79dcada6e9be39111fc00025451e2870",
+      "elapsed_ms": 2071,
+      "ok": true,
+      "item_count": 89,
+      "items_with_link": 89,
+      "items_with_excerpt": 89,
+      "items_with_date": 89,
+      "first_item_date": "2026-10-13T07:00:00Z",
+      "last_item_date": "2026-11-07T21:35:37Z",
+      "sample_items": [
+        {
+          "title": "Boehringer, Microsoft team up to explore digital patient twins for clinical trials - Fierce Biotech",
+          "link": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxOemxaRU5ZbnVINjRBYk9ZOWt3aXhEMzQyaGlpUHhBXzFtY0k0OUthTmlPMlZleVBFNFREQkluQm9zYkIxdEpkNjl4emU1VUlTSTRvRk9sbXZ1eERIb3ZYVHFWV0Q2ZW9fSDhTU1dxX0lOSjBDMXQ2MG9yc3pLYi0wNktaUW9yWUl1RkljQUJKN2I2WW5yVTdpMDY1d0ZFM29mVDhtSkd3bjdMdw?oc=5",
+          "date": "Mon, 26 Oct 2026 07:00:00 GMT",
+          "excerpt": "Boehringer, Microsoft team up to explore digital patient twins for clinical trials    Fierce Biotech"
+        },
+        {
+          "title": "Kidney Week 2026 features late-breaking clinical trials in kidney care - News-Medical",
+          "link": "https://news.google.com/rss/articles/CBMiugFBVV95cUxQRVpXazFZb3RLMTUxVGEwc29lcURBSy1pdTZSZTN2Qy1ucDRpQi02NnYzYklXbGwyYjN0YzY2OUdpbGJMVnJBUUFhNjFSRVlCSUtMcWt1dUR6MGE4bXlLanI3TjRPM1ctZVU0NE5hS282RHVlNVl1OGNYdFFaVndWUlY5SmN4cU9FYU5tUlJNYW5EbDJYT21ZeFdTS3hXOXU0RW0ycDI5bmdHcnpJREQxNHpzaW5SQ085eGc?oc=5",
+          "date": "Sat, 24 Oct 2026 07:00:00 GMT",
+          "excerpt": "Kidney Week 2026 features late-breaking clinical trials in kidney care    News-Medical"
+        }
+      ]
+    },
+    {
+      "source_id": "google_news_rss_zh",
+      "request_url": "https://news.google.com/rss/search?q=%E4%B8%B4%E5%BA%8A%E8%AF%95%E9%AA%8C+when:30d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
+      "parser": "rss",
+      "note": "中文新闻检索 RSS；同一接口另一语言区",
+      "attempts": [
+        {
+          "at_utc": "2026-11-07T21:37:26Z",
+          "http_status": 200,
+          "bytes": 81930
+        }
+      ],
+      "fetched_at_utc": "2026-11-07T21:37:26Z",
+      "http_status": 200,
+      "bytes": 81930,
+      "sha256": "22165bf841e77ea77c5c0e28a49e9fc088c5bdf428f5ac69f4133513cd979d99",
+      "elapsed_ms": 1462,
+      "ok": true,
+      "item_count": 75,
+      "items_with_link": 75,
+      "items_with_excerpt": 74,
+      "items_with_date": 75,
+      "first_item_date": "2026-10-12T03:04:57Z",
+      "last_item_date": "2026-11-07T09:33:00Z",
+      "sample_items": [
+        {
+          "title": "9月份美国Clinicaltrial数据库临床试验数据显示—— 百利天恒新开临床试验数量最多 - 中国食品药品网",
+          "link": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE5GQ1lmbEE0VWlwckotX3ZFRVh2cGNRMjFPODEtaUdVd2FIcUFRaE1SaFdEY3VhMFpjVFRWWmYzRWRLSjBfWTdSSUhRdHR3eU8tWWQwYlJJLWJBSTEx?oc=5",
+          "date": "Thu, 22 Oct 2026 07:00:00 GMT",
+          "excerpt": "9月份美国Clinicaltrial数据库临床试验数据显示—— 百利天恒新开临床试验数量最多    中国食品药品网"
+        },
+        {
+          "title": "华东医药：关于控股子公司获得药物临床试验批准通知书的公告 - 东方财富",
+          "link": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE1zcE9lRXhZMHZnb1RvWUNDYzYtbV9QbmFjbzRfUkZtb1MwMU4yVkM1bUl0c3RPdjM4OUxwM2lGUDFwc1BxenFsQ2dsaVNIMjJKUmxNVU81V3lETFRnRkYzWA?oc=5",
+          "date": "Mon, 12 Oct 2026 07:00:00 GMT",
+          "excerpt": "华东医药：关于控股子公司获得药物临床试验批准通知书的公告    东方财富"
+        }
+      ]
+    },
+    {
+      "source_id": "bing_news_rss",
+      "request_url": "https://www.bing.com/news/search?q=clinical+trial&format=RSS",
+      "parser": "rss",
+      "note": "必应新闻 RSS；link 经 bing 跳转可落到出版商原文；description 为真实摘要",
+      "attempts": [
+        {
+          "at_utc": "2026-11-07T21:37:27Z",
+          "http_status": 200,
+          "bytes": 9599
+        }
+      ],
+      "fetched_at_utc": "2026-11-07T21:37:27Z",
+      "http_status": 200,
+      "bytes": 9599,
+      "sha256": "9453ecf5320092075cb02a641cd4681190d464719ac935e1abfa7d90bed295a3",
+      "elapsed_ms": 1509,
+      "ok": true,
+      "item_count": 11,
+      "items_with_link": 11,
+      "items_with_excerpt": 11,
+      "items_with_date": 11,
+      "first_item_date": "2018-12-04T08:00:00Z",
+      "last_item_date": "2026-11-07T13:15:00Z",
+      "sample_items": [
+        {
+          "title": "GI Innovation Initiates Global Clinical Trial of GI-102 in Combination with Next-Generation T cell engager, Dosing First Patient",
+          "link": "http://www.bing.com/news/apiclick.aspx?ref=FexRss&aid=&tid=6aef9a1a82894a98b11a6d18a7bf03c0&url=https%3a%2f%2fwww.thebionews.net%2fnews%2farticleView.html%3fidxno%3d29890&c=10613617926864071515&mkt=ko-kr",
+          "date": "Thu, 05 Nov 2026 03:36:00 GMT",
+          "excerpt": "[by Kang, In Hyo] GI Innovation Inc. announced on November 5 that the first patient has been dosed in a global clinical "
+        },
+        {
+          "title": "SynKIR-310’ Phase 1 clinical trial interim results slated for oral presentation at ASH 2026",
+          "link": "http://www.bing.com/news/apiclick.aspx?ref=FexRss&aid=&tid=6aef9a1a82894a98b11a6d18a7bf03c0&url=https%3a%2f%2fwww.thebionews.net%2fnews%2farticleView.html%3fidxno%3d29909&c=6521625458980604696&mkt=ko-kr",
+          "date": "Thu, 05 Nov 2026 10:47:00 GMT",
+          "excerpt": "[by Ji, Yong Jun] ‘SynKIR-310’ (development code), a chimeric antigen receptor T-cell (CAR-T) therapy candidate for hema"
+        }
+      ]
+    },
+    {
+      "source_id": "gdelt_doc_api",
+      "request_url": "https://api.gdeltproject.org/api/v2/doc/doc?query=clinical+trial&mode=artlist&format=json&maxrecords=40&sort=datedesc",
+      "parser": "gdelt_json",
+      "note": "GDELT 2.0 DOC API；无密钥；限速 1 次/5 秒，共享 IP 易 429",
+      "attempts": [
+        {
+          "at_utc": "2026-11-07T21:37:29Z",
+          "http_status": 200,
+          "bytes": 20893
+        }
+      ],
+      "fetched_at_utc": "2026-11-07T21:37:29Z",
+      "http_status": 200,
+      "bytes": 20893,
+      "sha256": "6464451a5978194e6262479bb7efe029fae12f3c60e872e88e1c81fcc2504be3",
+      "elapsed_ms": 19167,
+      "ok": true,
+      "item_count": 40,
+      "items_with_link": 40,
+      "items_with_excerpt": 0,
+      "items_with_date": 40,
+      "first_item_date": "2026-11-06T09:30:00Z",
+      "last_item_date": "2026-11-07T19:00:00Z",
+      "sample_items": [
+        {
+          "title": "IYH and XBI : Two Distinct Paths to Investing in Healthcare",
+          "link": "https://www.fool.com/coverage/etfs/2026/11/07/iyh-and-xbi-two-distinct-paths-to-investing-in-healthcare/",
+          "date": "20261107T190000Z",
+          "excerpt": ""
+        },
+        {
+          "title": "IYH and XBI : Two Distinct Paths to Investing in Healthcare",
+          "link": "https://www.fool.com/coverage/etfs/2026/11/07/iyh-and-xbi-two-distinct-paths-to-investing-in-healthcare/?source=iedfolrf0000001",
+          "date": "20261107T190000Z",
+          "excerpt": ""
+        }
+      ]
+    },
+    {
+      "source_id": "clinicaltrials_gov_api_v2",
+      "request_url": "https://clinicaltrials.gov/api/v2/studies?query.term=lung%20cancer&pageSize=30&sort=LastUpdatePostDate:desc",
+      "parser": "ctgov_json",
+      "note": "临床试验登记结构化事件源；无密钥；含 briefSummary 原文摘要",
+      "attempts": [
+        {
+          "at_utc": "2026-11-07T21:37:48Z",
+          "http_status": 200,
+          "bytes": 785318
+        }
+      ],
+      "fetched_at_utc": "2026-11-07T21:37:48Z",
+      "http_status": 200,
+      "bytes": 785318,
+      "sha256": "1c0f076354e07b17cb2ea73e0b763d76925041966c01c382b9c2f6b9e90cbcb8",
+      "elapsed_ms": 2578,
+      "ok": true,
+      "item_count": 30,
+      "items_with_link": 30,
+      "items_with_excerpt": 30,
+      "items_with_date": 30,
+      "first_item_date": "2015-06-29T00:00:00Z",
+      "last_item_date": "2026-11-06T00:00:00Z",
+      "sample_items": [
+        {
+          "title": "Study of INBRX-106 and INBRX-106 in Combination With Pembrolizumab (Keytruda®) in Subjects With Locally Advanced or Metastatic Solid Tumors (Hexavalent OX40 Ago",
+          "link": "https://clinicaltrials.gov/study/NCT04198766",
+          "date": "2019-12-13",
+          "excerpt": "This is a Phase 1/2, open-label, non-randomized, 4-part trial to determine the safety profile and identify the maximum t"
+        },
+        {
+          "title": "A Prospective ,Multicenter ,Non-interventional ,Real-world Study Observing Changes in Molecular Markers Osimertinib Targeted Therapy in EGFRm NSCLC",
+          "link": "https://clinicaltrials.gov/study/NCT06422546",
+          "date": "2024-05-21",
+          "excerpt": "A prospective ,multicenter ,non-interventional ,real-world study observing changes in molecular markers after three week"
+        }
+      ]
+    },
+    {
+      "source_id": "federal_register_api",
+      "request_url": "https://www.federalregister.gov/api/v1/documents.json?conditions%5Bterm%5D=clinical+trial&per_page=30&order=newest",
+      "parser": "fedreg_json",
+      "note": "美国联邦公报；政策类事件；含 abstract 原文摘要；无密钥",
+      "attempts": [
+        {
+          "at_utc": "2026-11-07T21:37:50Z",
+          "http_status": 200,
+          "bytes": 73821
+        }
+      ],
+      "fetched_at_utc": "2026-11-07T21:37:50Z",
+      "http_status": 200,
+      "bytes": 73821,
+      "sha256": "64c53e1ea20973954e9bc0a620b7341140f818ce6fd3056f2e380ee4432a9d55",
+      "elapsed_ms": 1917,
+      "ok": true,
+      "item_count": 30,
+      "items_with_link": 30,
+      "items_with_excerpt": 23,
+      "items_with_date": 30,
+      "first_item_date": "2026-10-06T00:00:00Z",
+      "last_item_date": "2026-11-06T00:00:00Z",
+      "sample_items": [
+        {
+          "title": "Medicare Program: Hospital Outpatient Prospective Payment and Ambulatory Surgical Center Payment Systems; and Quality Reporting Programs; including the Hospital",
+          "link": "https://www.federalregister.gov/documents/2026/11/06/2026-22739/medicare-program-hospital-outpatient-prospective-payment-and-ambulatory-surgical-center-payment",
+          "date": "2026-11-06",
+          "excerpt": "This final rule with comment period revises the Medicare Hospital Outpatient Prospective Payment System (OPPS) and the M"
+        },
+        {
+          "title": "Center for Scientific Review; Notice of Closed Meetings",
+          "link": "https://www.federalregister.gov/documents/2026/11/05/2026-22550/center-for-scientific-review-notice-of-closed-meetings",
+          "date": "2026-11-05",
+          "excerpt": ""
+        }
+      ]
+    },
+    {
+      "source_id": "arxiv_api",
+      "request_url": "http://export.arxiv.org/api/query?search_query=all:%22clinical%20trial%22&start=0&max_results=30&sortBy=submittedDate&sortOrder=descending",
+      "parser": "arxiv_xml",
+      "note": "论文预印本事件源；Atom 含 summary 原文摘要",
+      "attempts": [
+        {
+          "at_utc": "2026-11-07T21:37:52Z",
+          "http_status": 200,
+          "bytes": 74385
+        }
+      ],
+      "fetched_at_utc": "2026-11-07T21:37:52Z",
+      "http_status": 200,
+      "bytes": 74385,
+      "sha256": "40b82c64ed5d823b6577d51059dcde912fda2734a6ce2cbec99b3f33f527d938",
+      "elapsed_ms": 1639,
+      "ok": true,
+      "item_count": 30,
+      "items_with_link": 30,
+      "items_with_excerpt": 30,
+      "items_with_date": 30,
+      "first_item_date": "2026-10-09T17:05:15Z",
+      "last_item_date": "2026-11-05T17:55:43Z",
+      "sample_items": [
+        {
+          "title": "An Improved Minimization Method: Eliminating Shift and Variance Inflation While Maintaining Marginal Balance",
+          "link": "https://arxiv.org/pdf/2611.08378v1",
+          "date": "2026-11-05T17:55:43Z",
+          "excerpt": "Pocock and Simon's minimization method is a widely used approach for covariate-adaptive randomization in clinical trials"
+        },
+        {
+          "title": "Sample size calculation comparing two survival curves in the presence of nonproportional hazards utilizing the concept of Weighted Relative Time using two diffe",
+          "link": "https://arxiv.org/pdf/2611.07158v1",
+          "date": "2026-11-04T21:32:18Z",
+          "excerpt": "Sample size calculations in two-arm clinical trials with survival endpoint often utilize the proportional hazards (PH) a"
+        }
+      ]
+    },
+    {
+      "source_id": "yahoo_finance_rss",
+      "request_url": "https://feeds.finance.yahoo.com/rss/2.0/headline?s=XBI&region=US&lang=en-US",
+      "parser": "rss",
+      "note": "按标的代码的新闻 RSS；用于主体=标的场景；无主题检索",
+      "attempts": [
+        {
+          "at_utc": "2026-11-07T21:37:54Z",
+          "http_status": 200,
+          "bytes": 13577
+        }
+      ],
+      "fetched_at_utc": "2026-11-07T21:37:54Z",
+      "http_status": 200,
+      "bytes": 13577,
+      "sha256": "fcaade994bf76c768352c0dfc30dfe702c5635e0140e4943268b8e7d23abda54",
+      "elapsed_ms": 2111,
+      "ok": true,
+      "item_count": 20,
+      "items_with_link": 20,
+      "items_with_excerpt": 20,
+      "items_with_date": 20,
+      "first_item_date": "2026-10-19T03:15:13Z",
+      "last_item_date": "2026-11-07T17:35:02Z",
+      "sample_items": [
+        {
+          "title": "IYH and XBI: Two Distinct Paths to Investing in Healthcare",
+          "link": "https://www.fool.com/coverage/etfs/2026/11/07/iyh-and-xbi-two-distinct-paths-to-investing-in-healthcare/?.tsrc=rss",
+          "date": "Sat, 07 Nov 2026 17:35:02 +0000",
+          "excerpt": "XBI delivered stronger 1-year returns at 45%, but IYH's diversified portfolio weathered volatility far better, with a ma"
+        },
+        {
+          "title": "Decoding Healthcare ETFs: Different Sectors, Different Strategies",
+          "link": "https://www.fool.com/coverage/etfs/2026/11/07/decoding-healthcare-etfs-different-sectors-different-strategies/?.tsrc=rss",
+          "date": "Sat, 07 Nov 2026 15:35:02 +0000",
+          "excerpt": "RSPH offers broader sector diversification with lower volatility, while XBI delivers higher short-term gains but with st"
+        }
+      ]
+    },
+    {
+      "source_id": "cnbc_rss",
+      "request_url": "https://www.cnbc.com/id/100003114/device/rss/rss.html",
+      "parser": "rss",
+      "note": "通用财经新闻 RSS；无主题检索能力",
+      "attempts": [
+        {
+          "at_utc": "2026-11-07T21:37:56Z",
+          "http_status": 200,
+          "bytes": 20941
+        }
+      ],
+      "fetched_at_utc": "2026-11-07T21:37:56Z",
+      "http_status": 200,
+      "bytes": 20941,
+      "sha256": "79876d3e7dee205f927e7e08f6fef5fded900e8496c436cef9e55b9a88edf6a4",
+      "elapsed_ms": 1614,
+      "ok": true,
+      "item_count": 30,
+      "items_with_link": 30,
+      "items_with_excerpt": 30,
+      "items_with_date": 30,
+      "first_item_date": "2026-11-06T18:40:58Z",
+      "last_item_date": "2026-11-07T21:17:54Z",
+      "sample_items": [
+        {
+          "title": "Risk of Iran war escalation remains high despite Democratic sweep in U.S. midterm elections",
+          "link": "https://www.cnbc.com/2026/11/07/iran-war-midterm-election-oil-price-trump.html",
+          "date": "Sat, 07 Nov 2026 13:03:12 GMT",
+          "excerpt": "The U.S. and Iran are on a collision course as tensions in the Middle East simmer."
+        },
+        {
+          "title": "Trump offers UFC chief Dana White press secretary job",
+          "link": "https://www.cnbc.com/2026/11/07/trump-ufc-dana-white-press-secretary-offer.html",
+          "date": "Sat, 07 Nov 2026 21:17:54 GMT",
+          "excerpt": "President Donald Trump offered the job of press secretary to UFC president and CEO Dana White on Saturday."
+        }
+      ]
+    },
+    {
+      "source_id": "sina_finance_rss",
+      "request_url": "https://rss.sina.com.cn/finance/stock1.xml",
+      "parser": "rss",
+      "note": "中文财经 RSS；境外可达性待验",
+      "attempts": [
+        {
+          "at_utc": "2026-11-07T21:37:58Z",
+          "http_status": 404,
+          "bytes": 1010
+        }
+      ],
+      "fetched_at_utc": "2026-11-07T21:37:58Z",
+      "http_status": 404,
+      "bytes": 1010,
+      "sha256": "58f9100952a849d87108e23094cfb17dc24ea1ae998d8161228d2c12ea4c3170",
+      "elapsed_ms": 2021,
+      "failure_reason": "HTTP 404: <HTML>\n<HEAD>\n<META http-equiv=\"Content-Type\" content=\"text/html; charset=gb2312\">\n<TITLE> ҳ��û���ҵ� </TITLE>\n</HEAD>\n<BODY background=http://image2.sina.com.cn/home/images/tz-001.gif>\n<script type",
+      "ok": false
+    }
+  ]
+}

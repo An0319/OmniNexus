@@ -1,0 +1,279 @@
+{
+  "n_items": 25,
+  "n_labeled_events": 17,
+  "n_emitted": 16,
+  "lenient_recall": 0.882,
+  "strict_recall": 0.471,
+  "lenient_precision": 0.938,
+  "strict_precision": 0.5,
+  "action_accuracy": 0.8,
+  "subject_accuracy": 0.8,
+  "floors": {
+    "lenient_recall": 0.7,
+    "strict_recall": 0.45,
+    "lenient_precision": 0.7,
+    "action_accuracy": 0.6,
+    "subject_accuracy": 0.6
+  },
+  "pass": {
+    "lenient_recall": true,
+    "strict_recall": true,
+    "lenient_precision": true,
+    "action_accuracy": true,
+    "subject_accuracy": true
+  },
+  "rows": [
+    {
+      "id": "B01",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Roswell Park, Generate Biomedicines Launch Exclusive Clinical Trial of ‘Armored’ CAR T The",
+      "action": "trial_start",
+      "subject": "Roswell Park",
+      "action_ok": true,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B02",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "unparsed_action",
+      "title": "Industry-Sponsored Clinical Trial Accruals Report Update"
+    },
+    {
+      "id": "B03",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "unparsed_action",
+      "title": "Clinical trial offers hope for Parkinson’s patients"
+    },
+    {
+      "id": "B04",
+      "label_event": true,
+      "emitted": false,
+      "reject_reason": "unparsed_action",
+      "title": "Clinical trial applications advice pilot becomes permanent"
+    },
+    {
+      "id": "B05",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "unparsed_subject",
+      "title": "The 83% problem: Why clinical trials fail the Global South and how we can close the equity"
+    },
+    {
+      "id": "B06",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "AstraZeneca and Oracle launch global AI collaboration to advance clinical trial optimisati",
+      "action": "trial_start",
+      "subject": "AstraZeneca",
+      "action_ok": false,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B07",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "unparsed_action",
+      "title": "China’s rapid human trials draw western drugmakers — and safety concerns"
+    },
+    {
+      "id": "B08",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Breakthrough PTSD treatment achieves 68% remission rate in clinical trial",
+      "action": "trial_result",
+      "subject": "Breakthrough PTSD treatment",
+      "action_ok": true,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B09",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "unparsed_action",
+      "title": "Kidney Week 2026 features late-breaking clinical trials in kidney care"
+    },
+    {
+      "id": "B10",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Boehringer, Microsoft team up to explore digital patient twins for clinical trials",
+      "action": "partnership",
+      "subject": "Boehringer",
+      "action_ok": true,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B11",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "After two deaths in autoimmune cell therapy trial, Artiva is shutting down",
+      "action": "halt",
+      "subject": "Artiva",
+      "action_ok": true,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B12",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "GC Cell Presents GCC2005 Phase 1a Progress",
+      "action": "trial_result",
+      "subject": "GC Cell",
+      "action_ok": true,
+      "subject_ok": true,
+      "value_ok": false
+    },
+    {
+      "id": "B13",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "unparsed_action",
+      "title": "China Upends Global Drug Development With Cheap and Rapid Human Trials"
+    },
+    {
+      "id": "B14",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Two new candidate vaccines to join Ebola trial as treatment research advances",
+      "action": "trial_start",
+      "subject": "Two new candidate vaccines",
+      "action_ok": true,
+      "subject_ok": false,
+      "value_ok": true
+    },
+    {
+      "id": "B15",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "SynKIR-310’ Phase 1 clinical trial interim results slated for oral presentation at ASH 202",
+      "action": "trial_result",
+      "subject": "SynKIR-310’ Phase 1 clinical trial interim results slated",
+      "action_ok": true,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B16",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Two new Ebola vaccines to join DR Congo clinical trial",
+      "action": "trial_start",
+      "subject": "Two new Ebola vaccines",
+      "action_ok": true,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B17",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "Can Real-Time Clinical Trial Data Accelerate Oversight Without Compromising Evidence?"
+    },
+    {
+      "id": "B18",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Drug From Stony Brook-Developed Anti-Cancer Compounds Now in Clinical Trials",
+      "action": "trial_start",
+      "subject": "Drug From Stony Brook-Developed Anti-Cancer Compounds Now",
+      "action_ok": true,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B19",
+      "label_event": true,
+      "emitted": false,
+      "reject_reason": "unparsed_action",
+      "title": "Skyhawk’s drug trial takes flight in the US"
+    },
+    {
+      "id": "B20",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "WHO adds two more Ebola vaccines to clinical trial",
+      "action": "approval",
+      "subject": "WHO",
+      "action_ok": false,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B21",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Rescue treatment for medium vessel occlusion by intra-arterial tenecteplase: the RESCUE-TN",
+      "action": "publication",
+      "subject": "Rescue treatment",
+      "action_ok": true,
+      "subject_ok": false,
+      "value_ok": true
+    },
+    {
+      "id": "B22",
+      "label_event": false,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Guest Commentary: Florida’s healthier future starts with clinical trials",
+      "action": "trial_start",
+      "subject": "Guest Commentary"
+    },
+    {
+      "id": "B23",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Experimental pancreatic cancer vaccine shows promise in clinical trial",
+      "action": "trial_result",
+      "subject": "Experimental pancreatic cancer vaccine",
+      "action_ok": true,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B24",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Science 37 Named 2026 “BioTechnology Innovation of the Year” for its Direct-to-Patient Cli",
+      "action": "personnel",
+      "subject": "Science 37 Named 2026 “BioTechnology Innovation of the Year”",
+      "action_ok": false,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B25",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Hospitals Help: Henry Ford Health Participates in Clinical Trial to Improve Smoking Cessat",
+      "action": "trial_start",
+      "subject": "Hospitals Help",
+      "action_ok": true,
+      "subject_ok": false,
+      "value_ok": true
+    }
+  ]
+}

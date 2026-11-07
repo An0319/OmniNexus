@@ -1,0 +1,233 @@
+{
+  "n_items": 24,
+  "n_labeled_events": 13,
+  "n_emitted": 10,
+  "lenient_recall": 0.462,
+  "strict_recall": 0.154,
+  "lenient_precision": 0.6,
+  "strict_precision": 0.2,
+  "action_accuracy": 0.667,
+  "subject_accuracy": 0.667,
+  "floors": {
+    "lenient_recall": 0.7,
+    "strict_recall": 0.45,
+    "lenient_precision": 0.7,
+    "action_accuracy": 0.6,
+    "subject_accuracy": 0.6
+  },
+  "pass": {
+    "lenient_recall": false,
+    "strict_recall": false,
+    "lenient_precision": false,
+    "action_accuracy": true,
+    "subject_accuracy": true
+  },
+  "rows": [
+    {
+      "id": "B01",
+      "label_event": true,
+      "emitted": false,
+      "reject_reason": "unparsed_action",
+      "title": "Retatrutide, the newest weight-loss drug, helped people lose 30% of body weight, on par wi"
+    },
+    {
+      "id": "B02",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "HHS Launches Unprecedented Department-Wide Effort to Restore American Leadership in Clinic",
+      "action": "trial_start",
+      "subject": "HHS",
+      "action_ok": false,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B03",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Patient enrolment begins in a scientific trial to identify the first effective treatments ",
+      "action": "trial_start",
+      "subject": "Patient enrolment",
+      "action_ok": true,
+      "subject_ok": false,
+      "value_ok": true
+    },
+    {
+      "id": "B04",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "unparsed_action",
+      "title": "AI Research Team Could Streamline Clinical Trial Design"
+    },
+    {
+      "id": "B05",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "unparsed_action",
+      "title": "Empowering clinical trial design with agentic intelligence and real-world data"
+    },
+    {
+      "id": "B06",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Insilico Initiates Phase III Clinical Trial for Rentosertib, Its AI-Empowered TNIK Inhibit",
+      "action": "trial_start",
+      "subject": "Insilico Initiates Phase III Clinical Trial",
+      "action_ok": true,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B07",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Girl admitted to hospital 15 times a year joins new trial for asthma treatments | ITV News",
+      "action": "trial_start",
+      "subject": "Girl admitted",
+      "action_ok": true,
+      "subject_ok": false,
+      "value_ok": true
+    },
+    {
+      "id": "B08",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "unparsed_action",
+      "title": "Design, simulate, refine: simulation-guided clinical trials for accelerated drug developme"
+    },
+    {
+      "id": "B09",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "unparsed_action",
+      "title": "One of the world’s most prominent hospitals is testing how AI can revolutionize health car"
+    },
+    {
+      "id": "B10",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "CGTX Q1 2026 Earnings: Narrower-than-expected loss as clinical pipeline advances - Earning",
+      "action": "rejection",
+      "subject": "CGTX Q1 2026 Earnings",
+      "action_ok": false,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B11",
+      "label_event": false,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Retatrutide Dosing: What We Know So Far",
+      "action": "trial_start",
+      "subject": "Retatrutide Dosing"
+    },
+    {
+      "id": "B12",
+      "label_event": true,
+      "emitted": false,
+      "reject_reason": "unparsed_action",
+      "title": "Study finds bringing clinical trials closer to patients expands access to research"
+    },
+    {
+      "id": "B13",
+      "label_event": false,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "First patient in HER2-positive breast cancer clinical trial defies odds and inspires hope ",
+      "action": "trial_start",
+      "subject": "First patient"
+    },
+    {
+      "id": "B14",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "unparsed_action",
+      "title": "Patrick Clancy’s New Wife Is Dr. Rachel Danis – He’s Trying ‘Hard to Move On’"
+    },
+    {
+      "id": "B15",
+      "label_event": true,
+      "emitted": false,
+      "reject_reason": "unparsed_action",
+      "title": "Phase 2b Trial of a NaV1.8 Inhibitor for Acute Pain"
+    },
+    {
+      "id": "B16",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "ECU Health participates in ROADS metastatic cancer clinical trial",
+      "action": "trial_start",
+      "subject": "ECU Health participates",
+      "action_ok": true,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B17",
+      "label_event": true,
+      "emitted": false,
+      "reject_reason": "unparsed_action",
+      "title": "Safety, feasibility, and preliminary clinical outcomes of psilocybin-assisted therapy for "
+    },
+    {
+      "id": "B18",
+      "label_event": true,
+      "emitted": false,
+      "reject_reason": "unparsed_action",
+      "title": "Neurizon advances ALS trial in Q4 FY26"
+    },
+    {
+      "id": "B19",
+      "label_event": true,
+      "emitted": false,
+      "reject_reason": "unparsed_action",
+      "title": "Once again, child dies in gene-editing trial in China, rekindling debate on transparency a"
+    },
+    {
+      "id": "B20",
+      "label_event": false,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "First patient on clinical trial thankful for UT MD Anderson",
+      "action": "trial_start",
+      "subject": "First patient"
+    },
+    {
+      "id": "B21",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "unparsed_action",
+      "title": "Retatrutide for Weight Loss: Availability, Dosage, and More"
+    },
+    {
+      "id": "B22",
+      "label_event": true,
+      "emitted": false,
+      "reject_reason": "unparsed_action",
+      "title": "BriaCell Therapeutics Stock Pops 12% on FDA Clearance for New Prostate Cancer Trial"
+    },
+    {
+      "id": "B23",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "Cardiol Therapeutics Drops as Biotech Risk Appetite Fades — Could the Next Clinical Update"
+    },
+    {
+      "id": "B24",
+      "label_event": false,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "You want to join a clinical trial. Here’s what to know about the hurdles.",
+      "action": "trial_start",
+      "subject": "You want"
+    }
+  ]
+}
