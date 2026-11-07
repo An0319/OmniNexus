@@ -1,0 +1,291 @@
+{
+  "fetched_at_utc": "2026-11-07T13:56:22Z",
+  "sources": {
+    "DCOILWTICO": {
+      "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILWTICO",
+      "fetched_at_utc": "2026-11-07T13:56:22Z",
+      "second_fetch_at_utc": "2026-11-07T13:56:22Z",
+      "sha256": "90c95c17a2cdb9a3b4a8d393494d19a40e1eb7fa80943838036754d3be74a06e",
+      "second_sha256": "90c95c17a2cdb9a3b4a8d393494d19a40e1eb7fa80943838036754d3be74a06e",
+      "identical_on_refetch": true,
+      "rows": 2129,
+      "first": "1986-01-03",
+      "last": "2026-11-06",
+      "raw_lines": 10655,
+      "fetches": [
+        {
+          "fetched_at_utc": "2026-11-07T13:29:54Z",
+          "sha256": "90c95c17a2cdb9a3b4a8d393494d19a40e1eb7fa80943838036754d3be74a06e",
+          "rows": 2129,
+          "first": "1986-01-03",
+          "last": "2026-11-06",
+          "identical_on_refetch": true,
+          "refetch_diff_count": null,
+          "refetch_diff_max_abs": null
+        },
+        {
+          "fetched_at_utc": "2026-11-07T13:56:22Z",
+          "second_fetch_at_utc": "2026-11-07T13:56:22Z",
+          "sha256": "90c95c17a2cdb9a3b4a8d393494d19a40e1eb7fa80943838036754d3be74a06e",
+          "second_sha256": "90c95c17a2cdb9a3b4a8d393494d19a40e1eb7fa80943838036754d3be74a06e",
+          "identical_on_refetch": true,
+          "rows": 2129,
+          "first": "1986-01-03",
+          "last": "2026-11-06"
+        }
+      ]
+    },
+    "GASREGW": {
+      "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=GASREGW",
+      "fetched_at_utc": "2026-11-07T13:56:23Z",
+      "second_fetch_at_utc": "2026-11-07T13:56:23Z",
+      "sha256": "84f5722525c19970c34f4561e1c667713a3fdb9474f1ba3ca1cbba042aec893a",
+      "second_sha256": "84f5722525c19970c34f4561e1c667713a3fdb9474f1ba3ca1cbba042aec893a",
+      "identical_on_refetch": true,
+      "rows": 1884,
+      "first": "1990-08-24",
+      "last": "2026-11-06",
+      "raw_lines": 1891,
+      "fetches": [
+        {
+          "fetched_at_utc": "2026-11-07T13:29:55Z",
+          "sha256": "84f5722525c19970c34f4561e1c667713a3fdb9474f1ba3ca1cbba042aec893a",
+          "rows": 1884,
+          "first": "1990-08-24",
+          "last": "2026-11-06",
+          "identical_on_refetch": true,
+          "refetch_diff_count": null,
+          "refetch_diff_max_abs": null
+        },
+        {
+          "fetched_at_utc": "2026-11-07T13:56:23Z",
+          "second_fetch_at_utc": "2026-11-07T13:56:23Z",
+          "sha256": "84f5722525c19970c34f4561e1c667713a3fdb9474f1ba3ca1cbba042aec893a",
+          "second_sha256": "84f5722525c19970c34f4561e1c667713a3fdb9474f1ba3ca1cbba042aec893a",
+          "identical_on_refetch": true,
+          "rows": 1884,
+          "first": "1990-08-24",
+          "last": "2026-11-06"
+        }
+      ]
+    },
+    "XLV": {
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/XLV?period1=915148800&period2=1794009600&interval=1d&events=div%7Csplit&includeAdjustedClose=true",
+      "fetched_at_utc": "2026-11-07T13:56:23Z",
+      "second_fetch_at_utc": "2026-11-07T13:56:24Z",
+      "sha256": "2c1e0fb41a1a26791798a696f27e65be421260aa343e4b9d0b0be282c012502a",
+      "second_sha256": "a6f7fbcb43f8e8e35edb52eaa8c9aefcbe21c5b5c6b6fc6ccddbfd4fd40b3b47",
+      "identical_on_refetch": false,
+      "rows": 1453,
+      "first": "1999-01-08",
+      "last": "2026-11-06",
+      "refetch_diff_count": 1193,
+      "refetch_diff_max_abs": 6.103515625e-05,
+      "refetch_diff_last_dates": [
+        "2026-04-10",
+        "2026-05-01",
+        "2026-05-15",
+        "2026-05-22",
+        "2026-06-05"
+      ],
+      "fetches": [
+        {
+          "fetched_at_utc": "2026-11-07T13:29:55Z",
+          "sha256": "dd4b9d4882821e5416a65335f56334d088b493ae8a76cdf4d8b6faa2692f701c",
+          "rows": 1453,
+          "first": "1999-01-08",
+          "last": "2026-11-06",
+          "identical_on_refetch": false,
+          "refetch_diff_count": 1224,
+          "refetch_diff_max_abs": 5.340576171875e-05
+        },
+        {
+          "fetched_at_utc": "2026-11-07T13:56:23Z",
+          "second_fetch_at_utc": "2026-11-07T13:56:24Z",
+          "sha256": "2c1e0fb41a1a26791798a696f27e65be421260aa343e4b9d0b0be282c012502a",
+          "second_sha256": "a6f7fbcb43f8e8e35edb52eaa8c9aefcbe21c5b5c6b6fc6ccddbfd4fd40b3b47",
+          "identical_on_refetch": false,
+          "rows": 1453,
+          "first": "1999-01-08",
+          "last": "2026-11-06",
+          "refetch_diff_count": 1193,
+          "refetch_diff_max_abs": 6.103515625e-05,
+          "refetch_diff_last_dates": [
+            "2026-04-10",
+            "2026-05-01",
+            "2026-05-15",
+            "2026-05-22",
+            "2026-06-05"
+          ]
+        }
+      ]
+    },
+    "SLX": {
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/SLX?period1=1133395200&period2=1794009600&interval=1d&events=div%7Csplit&includeAdjustedClose=true",
+      "fetched_at_utc": "2026-11-07T13:56:25Z",
+      "second_fetch_at_utc": "2026-11-07T13:56:26Z",
+      "sha256": "815deee4182dea795e58ed7111cb192a27ba885cfeddb89cb934302aa911c91c",
+      "second_sha256": "35ba589f80ff7f0e86fff44e15f30dcd1ce0f34653fe234cdfbe3ccf5ed848b2",
+      "identical_on_refetch": false,
+      "rows": 1047,
+      "first": "2006-10-20",
+      "last": "2026-11-06",
+      "refetch_diff_count": 634,
+      "refetch_diff_max_abs": 1.9073486328125e-05,
+      "refetch_diff_last_dates": [
+        "2023-11-10",
+        "2023-11-17",
+        "2023-11-24",
+        "2023-12-01",
+        "2023-12-08"
+      ],
+      "fetches": [
+        {
+          "fetched_at_utc": "2026-11-07T13:29:57Z",
+          "sha256": "930ebf7d79152fe249eef722fcecf8c6b2a33ce12b86ef64f4d20c1a69363ba6",
+          "rows": 1047,
+          "first": "2006-10-20",
+          "last": "2026-11-06",
+          "identical_on_refetch": false,
+          "refetch_diff_count": 607,
+          "refetch_diff_max_abs": 1.9073486328125e-05
+        },
+        {
+          "fetched_at_utc": "2026-11-07T13:56:25Z",
+          "second_fetch_at_utc": "2026-11-07T13:56:26Z",
+          "sha256": "815deee4182dea795e58ed7111cb192a27ba885cfeddb89cb934302aa911c91c",
+          "second_sha256": "35ba589f80ff7f0e86fff44e15f30dcd1ce0f34653fe234cdfbe3ccf5ed848b2",
+          "identical_on_refetch": false,
+          "rows": 1047,
+          "first": "2006-10-20",
+          "last": "2026-11-06",
+          "refetch_diff_count": 634,
+          "refetch_diff_max_abs": 1.9073486328125e-05,
+          "refetch_diff_last_dates": [
+            "2023-11-10",
+            "2023-11-17",
+            "2023-11-24",
+            "2023-12-01",
+            "2023-12-08"
+          ]
+        }
+      ]
+    },
+    "XLB": {
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/XLB?period1=915148800&period2=1794009600&interval=1d&events=div%7Csplit&includeAdjustedClose=true",
+      "fetched_at_utc": "2026-11-07T13:56:27Z",
+      "second_fetch_at_utc": "2026-11-07T13:56:28Z",
+      "sha256": "4c6a515f6ba526cc27de7b3d2f931d6271049b7a58801879dc7ace9f9c0e6f89",
+      "second_sha256": "155b3d798d160f64d8543b9e603d8aa9a5ca385e4c60a0c6c37236a8681ea8d9",
+      "identical_on_refetch": false,
+      "rows": 1453,
+      "first": "1999-01-08",
+      "last": "2026-11-06",
+      "refetch_diff_count": 1173,
+      "refetch_diff_max_abs": 1.9073486328125e-05,
+      "refetch_diff_last_dates": [
+        "2026-01-23",
+        "2026-01-30",
+        "2026-04-03",
+        "2026-05-08",
+        "2026-06-12"
+      ],
+      "fetches": [
+        {
+          "fetched_at_utc": "2026-11-07T13:56:27Z",
+          "second_fetch_at_utc": "2026-11-07T13:56:28Z",
+          "sha256": "4c6a515f6ba526cc27de7b3d2f931d6271049b7a58801879dc7ace9f9c0e6f89",
+          "second_sha256": "155b3d798d160f64d8543b9e603d8aa9a5ca385e4c60a0c6c37236a8681ea8d9",
+          "identical_on_refetch": false,
+          "rows": 1453,
+          "first": "1999-01-08",
+          "last": "2026-11-06",
+          "refetch_diff_count": 1173,
+          "refetch_diff_max_abs": 1.9073486328125e-05,
+          "refetch_diff_last_dates": [
+            "2026-01-23",
+            "2026-01-30",
+            "2026-04-03",
+            "2026-05-08",
+            "2026-06-12"
+          ]
+        }
+      ]
+    },
+    "XLP": {
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/XLP?period1=915148800&period2=1794009600&interval=1d&events=div%7Csplit&includeAdjustedClose=true",
+      "fetched_at_utc": "2026-11-07T13:56:29Z",
+      "second_fetch_at_utc": "2026-11-07T13:56:31Z",
+      "sha256": "7a7989fca3fbb0ed5e0445fddaa87f7d70f6a553c178f9da8e88a5a737fd8355",
+      "second_sha256": "71b67601644e0a017536ab8cb13bc226bcc0457ba8344f55705454f36eb2b226",
+      "identical_on_refetch": false,
+      "rows": 1453,
+      "first": "1999-01-08",
+      "last": "2026-11-06",
+      "refetch_diff_count": 1175,
+      "refetch_diff_max_abs": 3.814697265625e-05,
+      "refetch_diff_last_dates": [
+        "2025-12-12",
+        "2025-12-26",
+        "2026-02-20",
+        "2026-03-06",
+        "2026-03-13"
+      ],
+      "fetches": [
+        {
+          "fetched_at_utc": "2026-11-07T13:56:29Z",
+          "second_fetch_at_utc": "2026-11-07T13:56:31Z",
+          "sha256": "7a7989fca3fbb0ed5e0445fddaa87f7d70f6a553c178f9da8e88a5a737fd8355",
+          "second_sha256": "71b67601644e0a017536ab8cb13bc226bcc0457ba8344f55705454f36eb2b226",
+          "identical_on_refetch": false,
+          "rows": 1453,
+          "first": "1999-01-08",
+          "last": "2026-11-06",
+          "refetch_diff_count": 1175,
+          "refetch_diff_max_abs": 3.814697265625e-05,
+          "refetch_diff_last_dates": [
+            "2025-12-12",
+            "2025-12-26",
+            "2026-02-20",
+            "2026-03-06",
+            "2026-03-13"
+          ]
+        }
+      ]
+    }
+  },
+  "weekly_controls": {
+    "path": "phase0\\controls\\data\\weekly_controls.csv",
+    "sha256": "2223f2c3613cec18e8c8b479f868542269b8f3cca159a171f464b3a47aef7ede",
+    "crude_ret": {
+      "rows": 2128,
+      "first": "1986-01-10",
+      "last": "2026-11-06"
+    },
+    "gas_ret": {
+      "rows": 1883,
+      "first": "1990-08-31",
+      "last": "2026-11-06"
+    },
+    "xlv_ret": {
+      "rows": 1452,
+      "first": "1999-01-15",
+      "last": "2026-11-06"
+    },
+    "slx_ret": {
+      "rows": 1046,
+      "first": "2006-10-27",
+      "last": "2026-11-06"
+    },
+    "xlb_ret": {
+      "rows": 1452,
+      "first": "1999-01-15",
+      "last": "2026-11-06"
+    },
+    "xlp_ret": {
+      "rows": 1452,
+      "first": "1999-01-15",
+      "last": "2026-11-06"
+    }
+  }
+}

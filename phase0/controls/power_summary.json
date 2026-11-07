@@ -1,0 +1,166 @@
+{
+  "reps": 60,
+  "grid": [
+    0.1,
+    0.15,
+    0.2,
+    0.25,
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5
+  ],
+  "curve": [
+    {
+      "r": 0.1,
+      "train": 0.2,
+      "validation": 0.06666666666666667,
+      "train_strict": 0.16666666666666666,
+      "validation_strict": 0.06666666666666667,
+      "both_same_dir": 0.0,
+      "peak_n_train": 293.0,
+      "peak_n_valid": 101.0,
+      "realized_k0_train": 0.11271674977850392,
+      "realized_k0_valid": 0.09991567099154217
+    },
+    {
+      "r": 0.15,
+      "train": 0.35,
+      "validation": 0.1,
+      "train_strict": 0.35,
+      "validation_strict": 0.08333333333333333,
+      "both_same_dir": 0.016666666666666666,
+      "peak_n_train": 293.0,
+      "peak_n_valid": 101.0,
+      "realized_k0_train": 0.17731810711611334,
+      "realized_k0_valid": 0.15909055354613927
+    },
+    {
+      "r": 0.2,
+      "train": 0.6333333333333333,
+      "validation": 0.23333333333333334,
+      "train_strict": 0.6166666666666667,
+      "validation_strict": 0.16666666666666666,
+      "both_same_dir": 0.16666666666666666,
+      "peak_n_train": 293.0,
+      "peak_n_valid": 101.0,
+      "realized_k0_train": 0.21921559943410263,
+      "realized_k0_valid": 0.21734735380218506
+    },
+    {
+      "r": 0.25,
+      "train": 0.6666666666666666,
+      "validation": 0.4166666666666667,
+      "train_strict": 0.6666666666666666,
+      "validation_strict": 0.2,
+      "both_same_dir": 0.3,
+      "peak_n_train": 293.0,
+      "peak_n_valid": 101.0,
+      "realized_k0_train": 0.2737902402868119,
+      "realized_k0_valid": 0.25460860029805454
+    },
+    {
+      "r": 0.3,
+      "train": 0.8833333333333333,
+      "validation": 0.5666666666666667,
+      "train_strict": 0.8833333333333333,
+      "validation_strict": 0.3333333333333333,
+      "both_same_dir": 0.5333333333333333,
+      "peak_n_train": 293.0,
+      "peak_n_valid": 101.0,
+      "realized_k0_train": 0.3099053597234792,
+      "realized_k0_valid": 0.3081047102722828
+    },
+    {
+      "r": 0.35,
+      "train": 0.9833333333333333,
+      "validation": 0.6833333333333333,
+      "train_strict": 0.9833333333333333,
+      "validation_strict": 0.35,
+      "both_same_dir": 0.6666666666666666,
+      "peak_n_train": 293.0,
+      "peak_n_valid": 101.0,
+      "realized_k0_train": 0.36472281814693197,
+      "realized_k0_valid": 0.3523815250699599
+    },
+    {
+      "r": 0.4,
+      "train": 0.9833333333333333,
+      "validation": 0.7833333333333333,
+      "train_strict": 0.9833333333333333,
+      "validation_strict": 0.48333333333333334,
+      "both_same_dir": 0.7666666666666667,
+      "peak_n_train": 293.0,
+      "peak_n_valid": 101.0,
+      "realized_k0_train": 0.40739826355227093,
+      "realized_k0_valid": 0.41241909791372877
+    },
+    {
+      "r": 0.45,
+      "train": 1.0,
+      "validation": 0.9666666666666667,
+      "train_strict": 1.0,
+      "validation_strict": 0.5833333333333334,
+      "both_same_dir": 0.9666666666666667,
+      "peak_n_train": 293.0,
+      "peak_n_valid": 101.0,
+      "realized_k0_train": 0.4625853571884073,
+      "realized_k0_valid": 0.46391933238341865
+    },
+    {
+      "r": 0.5,
+      "train": 0.9833333333333333,
+      "validation": 0.95,
+      "train_strict": 0.9833333333333333,
+      "validation_strict": 0.65,
+      "both_same_dir": 0.95,
+      "peak_n_train": 293.0,
+      "peak_n_valid": 101.0,
+      "realized_k0_train": 0.4897316112598348,
+      "realized_k0_valid": 0.47937363148545203
+    }
+  ],
+  "r80_train": {
+    "value": 0.2808,
+    "note": "线性内插"
+  },
+  "r50_train": {
+    "value": 0.1765,
+    "note": "线性内插"
+  },
+  "r80_train_strict": {
+    "value": 0.2808,
+    "note": "线性内插"
+  },
+  "r50_train_strict": {
+    "value": 0.1781,
+    "note": "线性内插"
+  },
+  "r80_validation": {
+    "value": 0.4045,
+    "note": "线性内插"
+  },
+  "r50_validation": {
+    "value": 0.2778,
+    "note": "线性内插"
+  },
+  "r80_validation_strict": {
+    "value": null,
+    "note": "高于网格上界 0.50，网格外"
+  },
+  "r50_validation_strict": {
+    "value": 0.4083,
+    "note": "线性内插"
+  },
+  "r80_both": {
+    "value": 0.4083,
+    "note": "线性内插"
+  },
+  "r50_both": {
+    "value": 0.2929,
+    "note": "线性内插"
+  },
+  "realized_k0_median": 0.31294484576645476,
+  "elapsed_s": 939.6
+}

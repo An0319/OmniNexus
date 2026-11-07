@@ -26,6 +26,12 @@ phase0/batch1_null_calibration.md
 phase0/batch1_null_calibration.svg
 # 过程账本同时含能源与临床结果字段，按练手账口径不入库，仅本地留存
 phase0/batch1.record.runs.jsonl
+# 阶段二对照实验：第三方原始序列与派生序列不入库（与 phase0/output/* 同口径），
+# 仓库内只保留 snapshot.json（来源 URL、抓取时刻、SHA256、行数、首末日期）
+phase0/controls/data/*
+!phase0/controls/data/snapshot.json
+# 功效模拟的逐次重复原始记录仅本地留存（仓库只保留 power_summary.json 与脚本）
+phase0/controls/power_raw*.jsonl
 
 # 探针本地产出（云端结果由 probe-results / probe-new-results 分支回传）
 probe_result.json

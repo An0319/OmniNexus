@@ -91,9 +91,9 @@ def roll_z(s: pd.Series) -> pd.Series:
     return (s - m) / sd
 
 
-def seg_xcorr(lead_z: pd.Series, lag_z: pd.Series, start, end) -> pd.DataFrame:
+def seg_xcorr(lead_z: pd.Series, lag_z: pd.Series, start, end, lags=None) -> pd.DataFrame:
     rows = []
-    for k in LAGS:
+    for k in (LAGS if lags is None else lags):
         shifted = lag_z.shift(-k)
         pair = pd.concat([lead_z.rename("lead"), shifted.rename("lag")], axis=1)
         last_t = end - pd.Timedelta(weeks=k)

@@ -100,31 +100,32 @@ def reproduce_published(built):
     return checks
 
 
-def peak_in_window(df):
-    win = df[(df["k"] >= 4) & (df["k"] <= 13)]
+def peak_in_window(df, window=(4, 13)):
+    win = df[(df["k"] >= window[0]) & (df["k"] <= window[1])]
     r = win.loc[win["corr"].idxmax()]
     return int(r["k"]), float(r["corr"]), int(r["n"])
 
 
-def abs_peak_in_window(df):
-    win = df[(df["k"] >= 4) & (df["k"] <= 13)]
+def abs_peak_in_window(df, window=(4, 13)):
+    win = df[(df["k"] >= window[0]) & (df["k"] <= window[1])]
     r = win.loc[win["corr"].abs().idxmax()]
     return int(r["k"]), float(r["corr"]), int(r["n"])
 
 
-def null_curve(lead_z, lag_z, span):
+def null_curve(lead_z, lag_z, span, lags=None, window=(4, 13)):
     """Every whole-week shift: in-window max corr, max |corr|, and each single lag k."""
+    lags = list(rb.LAGS if lags is None else lags)
     arr = lead_z.values
     index = lead_z.index
     L = len(arr)
     shifts = np.arange(1, L)
     pos = np.empty(L - 1, dtype=float)
     abso = np.empty(L - 1, dtype=float)
-    single = {int(k): np.empty(L - 1, dtype=float) for k in rb.LAGS}
+    single = {int(k): np.empty(L - 1, dtype=float) for k in lags}
     for i, s in enumerate(shifts):
         rolled = pd.Series(np.roll(arr, s), index=index)
         df = rb.seg_xcorr(rolled, lag_z, *span)
-        win = df[(df["k"] >= 4) & (df["k"] <= 13)]
+        win = df[(df["k"] >= window[0]) & (df["k"] <= window[1])]
         pos[i] = float(win["corr"].max())
         abso[i] = float(win["corr"].abs().max())
         for k in single:
