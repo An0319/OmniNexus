@@ -54,7 +54,18 @@ def main() -> int:
     ap.add_argument("--start", required=True)
     ap.add_argument("--end", required=True)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--extractor", choices=["rules", "model"], default="rules",
+                    help="rules=timeline.build_event；model=extract_model.extract_item（本机 Ollama）")
+    ap.add_argument("--cache", default=None, help="model 抽取的结果缓存，重跑不重复调用")
     args = ap.parse_args()
+
+    cache = None
+    if args.extractor == "model":
+        from extract_model import extract_item, warm_up  # noqa: PLC0415
+        cache = {}
+        if args.cache and Path(args.cache).exists():
+            cache = json.loads(Path(args.cache).read_text(encoding="utf-8"))
+        print(f"[warmup] {warm_up()}s（模型加载，不计入单条耗时）", file=sys.stderr)
 
     start = dt.date.fromisoformat(args.start)
     end = dt.date.fromisoformat(args.end)
@@ -77,7 +88,10 @@ def main() -> int:
         if raw_item is None:
             print(f"[warn] raw 快照里找不到 {it['id']}，可能快照已过期", file=sys.stderr)
             continue
-        ev, reason = build_event(raw_item, start, end)
+        if args.extractor == "model":
+            ev, reason = extract_item(raw_item, start, end, cache)
+        else:
+            ev, reason = build_event(raw_item, start, end)
         is_event_label = bool(lab["event"])
         if is_event_label:
             labeled_events += 1
@@ -146,6 +160,18 @@ def main() -> int:
     if args.out:
         Path(args.out).write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
         print(f"\n[write] {args.out}")
+    if args.cache and cache is not None:
+        Path(args.cache).write_text(json.dumps(cache, ensure_ascii=False, indent=2), encoding="utf-8")
+        lat = [v["stats"]["latency_s"] for v in cache.values() if v.get("stats")]
+        toc = [v["stats"]["output_tokens"] for v in cache.values() if v.get("stats", {}).get("output_tokens")]
+        print(json.dumps({
+            "cache_entries": len(cache),
+            "latency_s_avg": round(sum(lat) / len(lat), 2) if lat else None,
+            "latency_s_max": max(lat) if lat else None,
+            "output_tokens_avg": round(sum(toc) / len(toc), 1) if toc else None,
+            "cost_cny_per_item": 0.0,
+            "cost_note": "本机 Ollama 推理，无 API 计费；成本仅为电费与占用时长",
+        }, ensure_ascii=False, indent=2))
     return 0
 
 

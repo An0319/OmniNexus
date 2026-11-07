@@ -1,0 +1,237 @@
+{
+  "n_items": 25,
+  "n_labeled_events": 13,
+  "n_emitted": 7,
+  "lenient_recall": 0.538,
+  "strict_recall": 0.308,
+  "lenient_precision": 1.0,
+  "strict_precision": 0.571,
+  "action_accuracy": 0.571,
+  "subject_accuracy": 1.0,
+  "floors": {
+    "lenient_recall": 0.7,
+    "strict_recall": 0.45,
+    "lenient_precision": 0.7,
+    "action_accuracy": 0.6,
+    "subject_accuracy": 0.6
+  },
+  "pass": {
+    "lenient_recall": false,
+    "strict_recall": false,
+    "lenient_precision": true,
+    "action_accuracy": false,
+    "subject_accuracy": true
+  },
+  "rows": [
+    {
+      "id": "B01",
+      "label_event": true,
+      "emitted": false,
+      "reject_reason": "unparsed_subject",
+      "title": "Pilot phase clinical trial of a wearable, electrochemical aptamer-based patch for continuo"
+    },
+    {
+      "id": "B02",
+      "label_event": true,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "NIH redefines ‘clinical trials,’ dividing researchers"
+    },
+    {
+      "id": "B03",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "Should My Child Join a Clinical Trial? What Parents Need to Know"
+    },
+    {
+      "id": "B04",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "PATHWAYS clinical trial paused following new MHRA advice",
+      "action": "halt",
+      "subject": "PATHWAYS clinical trial",
+      "action_ok": true,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B05",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "Clinical trials and environmental sustainability: review of key considerations to develop "
+    },
+    {
+      "id": "B06",
+      "label_event": true,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "MHRA statement on Pathways clinical trial"
+    },
+    {
+      "id": "B07",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "The global clinical trial landscape for glaucoma over the past three decades: current stat"
+    },
+    {
+      "id": "B08",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "iGraphCTC: an inter-connected graph convolutional network for comprehensive clinical trial"
+    },
+    {
+      "id": "B09",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "A large-scale database for clinical trial outcomes and features"
+    },
+    {
+      "id": "B10",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "Key Questions to Ask When Considering a Clinical Trial"
+    },
+    {
+      "id": "B11",
+      "label_event": true,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "New guidance on the conduct of clinical trials during public health emergencies in the EU"
+    },
+    {
+      "id": "B12",
+      "label_event": true,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "Effects of daily multivitamin–multimineral and cocoa extract supplementation on epigenetic"
+    },
+    {
+      "id": "B13",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "Six Steps to Evaluating Conflicting Menopause Information Online"
+    },
+    {
+      "id": "B14",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "Quality Improvement Methods Can Improve Clinical Trial Design"
+    },
+    {
+      "id": "B15",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "Globally competitive UK-wide data-enabled clinical trials: the time is now"
+    },
+    {
+      "id": "B16",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "How we orchestrate clinical trials to deliver hope for patients"
+    },
+    {
+      "id": "B17",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "TrialMatchAI: an end-to-end AI-powered clinical trial recommendation system to streamline "
+    },
+    {
+      "id": "B18",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "Clinical Trials: What Patients Should Know"
+    },
+    {
+      "id": "B19",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "PAHO launches Clinical Trial Accelerator to strengthen research across the Americas",
+      "action": "trial_start",
+      "subject": "PAHO",
+      "action_ok": false,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B20",
+      "label_event": true,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "FDA urges clinical trial sponsors to report the results of their studies"
+    },
+    {
+      "id": "B21",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Mizzou launches comprehensive clinical trials resource",
+      "action": "trial_start",
+      "subject": "Mizzou",
+      "action_ok": false,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B22",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Government drives forward its 150-day clinical trial target",
+      "action": "trial_start",
+      "subject": "Government",
+      "action_ok": false,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B23",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Investigational Pancreatic Cancer Vaccine Shows Lasting Results in Early Trial, Supporting",
+      "action": "trial_result",
+      "subject": "Investigational Pancreatic Cancer Vaccine",
+      "action_ok": true,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B24",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Launch of clinical trial reforms",
+      "action": "policy",
+      "subject": "clinical trial reforms",
+      "action_ok": true,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B25",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "FDA unveils plan for real-time review of clinical trial data, with AstraZeneca and Amgen a",
+      "action": "policy",
+      "subject": "FDA",
+      "action_ok": true,
+      "subject_ok": true,
+      "value_ok": true
+    }
+  ]
+}

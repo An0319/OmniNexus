@@ -1,0 +1,104 @@
+{
+  "probed_at_utc": "2026-11-07T21:59:34Z",
+  "endpoint": "http://127.0.0.1:11434",
+  "api_style": "ollama /api/chat, JSON Schema 约束",
+  "models_available": [
+    "mgraffam/qwen3.5-opus4.6-heretic:latest",
+    "satgeze/qwenpaw-9b-heretic-1m:Q4_K_M",
+    "haervwe/qwen3-vl-8b-heretic:latest",
+    "medgemma1.5:4b-it-q4_K_M",
+    "fervent_mcclintock/translategemma-4b-instruction-tuned:Q5_K_M",
+    "haervwe/qwen3-vl-4b-heretic:latest",
+    "svjack/Qwen3-4B-Instruct-2507-heretic:latest",
+    "igorls/gemma-4-E4B-it-heretic-GGUF:Q6_K"
+  ],
+  "results": [
+    {
+      "model": "svjack/Qwen3-4B-Instruct-2507-heretic:latest",
+      "id": "B01",
+      "latency_s": 74.45,
+      "prompt_tokens": 326,
+      "output_tokens": 91,
+      "json_valid": true,
+      "excerpt_verbatim": true,
+      "title_short": "Roswell Park, Generate Biomedicines Launch Exclusive Clinical Trial of ‘Armored’ CAR T The",
+      "is_event": true,
+      "action": "launch"
+    },
+    {
+      "model": "svjack/Qwen3-4B-Instruct-2507-heretic:latest",
+      "id": "B02",
+      "latency_s": 1.31,
+      "prompt_tokens": 296,
+      "output_tokens": 77,
+      "json_valid": true,
+      "excerpt_verbatim": true,
+      "title_short": "Industry-Sponsored Clinical Trial Accruals Report Update",
+      "is_event": true,
+      "action": "update"
+    },
+    {
+      "model": "svjack/Qwen3-4B-Instruct-2507-heretic:latest",
+      "id": "B03",
+      "latency_s": 1.13,
+      "prompt_tokens": 291,
+      "output_tokens": 66,
+      "json_valid": true,
+      "excerpt_verbatim": true,
+      "title_short": "Clinical trial offers hope for Parkinson’s patients",
+      "is_event": true,
+      "action": "offers"
+    },
+    {
+      "model": "mgraffam/qwen3.5-opus4.6-heretic:latest",
+      "id": "B01",
+      "latency_s": 75.28,
+      "prompt_tokens": 314,
+      "output_tokens": 627,
+      "json_valid": true,
+      "excerpt_verbatim": false,
+      "title_short": "Roswell Park, Generate Biomedicines Launch Exclusive Clinical Trial of ‘Armored’ CAR T The",
+      "is_event": true,
+      "action": "approval"
+    },
+    {
+      "model": "mgraffam/qwen3.5-opus4.6-heretic:latest",
+      "id": "B02",
+      "latency_s": 14.53,
+      "prompt_tokens": 284,
+      "output_tokens": 529,
+      "json_valid": true,
+      "excerpt_verbatim": true,
+      "title_short": "Industry-Sponsored Clinical Trial Accruals Report Update",
+      "is_event": true,
+      "action": "rejection"
+    },
+    {
+      "model": "mgraffam/qwen3.5-opus4.6-heretic:latest",
+      "id": "B03",
+      "latency_s": 15.73,
+      "prompt_tokens": 279,
+      "output_tokens": 575,
+      "json_valid": true,
+      "excerpt_verbatim": false,
+      "title_short": "Clinical trial offers hope for Parkinson’s patients",
+      "is_event": true,
+      "action": "policy"
+    },
+    {
+      "model": "satgeze/qwenpaw-9b-heretic-1m:Q4_K_M",
+      "id": "B01",
+      "error": "HTTPError: HTTP Error 500: Internal Server Error"
+    },
+    {
+      "model": "satgeze/qwenpaw-9b-heretic-1m:Q4_K_M",
+      "id": "B02",
+      "error": "TimeoutError: timed out"
+    },
+    {
+      "model": "satgeze/qwenpaw-9b-heretic-1m:Q4_K_M",
+      "id": "B03",
+      "error": "TimeoutError: timed out"
+    }
+  ]
+}

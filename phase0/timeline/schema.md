@@ -27,7 +27,7 @@
 | `fetched_at_utc` | string ISO8601Z | 是 | 抓到该条目的时刻（UTC），不是事件发生时间 |
 | `excerpt` | string | 是 | 原文片段（≥20 字符），逐字取自源文本，不做改写 |
 | `excerpt_kind` | `headline` \| `summary` \| `abstract` | 是 | 片段类型；只有标题可用的条目标 `headline` |
-| `extract_method` | string | 是 | 抽取器版本，当前固定 `rules_v2`（词表版本号，规则表在 `timeline.py` 的 `ACTION_PATTERNS`） |
+| `extract_method` | string | 是 | 抽取器版本：规则抽取器 `rules_v2`（词表在 `timeline.py` 的 `ACTION_PATTERNS`）；模型抽取器 `model_v1`（提示词与校验在 `extract_model.py`）。同一份 `events.json` 里不混用 |
 | `sources` | array | 是 | 去重合并后的全部报道：`[{source_url, source_name, url_kind, fetched_at_utc, excerpt}]`，至少 1 条，按抓取时刻升序 |
 
 ## 3. 动作闭集（`action`）
@@ -62,6 +62,15 @@
 | `subject_not_in_text` | 指定了 `--entity`，但文本里没出现该主体 |
 | `not_an_event` | 标题以 Why/How/Opinion/Analysis 等开头或以问号结尾，判为评论/解释稿而非事件 |
 | `duplicate` | 与已入表事件合并（并入 `sources`，不单独成行）。**只在新闻源之间合并**：Federal Register / ClinicalTrials / arXiv 每条是独立文书，标题相近不等于同一事件 |
+
+模型抽取器（`extract_model.py`）额外产出的两个拒绝理由：
+
+| reason | 判据 |
+|---|---|
+| `schema_invalid` | 模型输出缺必填字段、字段类型不符，或 `action` / `value_kind` / `reject_reason` 落在枚举外；经一次修复重试仍不合法 |
+| `missing_excerpt` | 模型给出的摘要片段不是原文逐字子串，或去空白后 <20 字符 |
+
+两者都属"模型没给出可核结果"，一律不进表；不许用"取最相近动作"之类兜底。
 
 ## 5. 输出文件契约
 

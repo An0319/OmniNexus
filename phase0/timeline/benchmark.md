@@ -119,7 +119,7 @@ val 未达标的新增主因（与 test 不同）：
 - 问句只在**标题末尾**检测，标题中段的问句（`Should My Child Join a Clinical Trial? What Parents Need to Know`）漏过，成为唯一 FP。
 - 机构声明（`MHRA statement on Pathways clinical trial`）、政府目标（`Government drives forward its 150-day …`）在词表里没有锚点 → `unparsed_action` 漏掉。
 
-### 6.4 三个集合放在一起看
+### 6.4 规则抽取器：三个集合放在一起看
 
 | 集合 | 规则 | lenient recall | strict recall | lenient precision | action acc | subject acc |
 |---|---|---|---|---|---|---|
@@ -129,6 +129,82 @@ val 未达标的新增主因（与 test 不同）：
 
 结论（A 级，来自上表的实跑数字）：**同一个抽取器在调优集上五项达标，在两个未参与调参的窗口上都没有达到下限**。因此当前状态只能宣称"命令能跑通、字段可核、有显式失败态"，**不能宣称"时间线质量达标"**。
 
+### 6.5 模型抽取（`model_v1`，本机 Ollama）
+
+#### 6.5.1 接口可用性（先于效果确认）
+
+| 项 | 实测 |
+|---|---|
+| 端点 | `http://127.0.0.1:11434`（Ollama 本地 HTTP API，`/api/chat`） |
+| 本机模型数 | 8 个（`model_probe.json` 的 `models_available` 全列） |
+| 选型 | `svjack/Qwen3-4B-Instruct-2507-heretic:latest`（探针里唯一 3/3 JSON 合法且摘要逐字命中 3/3 的 4B 模型；`mgraffam/qwen3.5-opus4.6` 单条 14.5–15.7s 且摘要逐字 2/3 失败，未采用） |
+| 计费 | 无 API key、无调用计费；成本只有电费与占机时间 |
+| `format` 传 JSON Schema 是否强制 `enum` | **不强制**。实测（A 级）：给 `enum:["approval","halt"]`，模型仍返回 `{"action":"Trial X halted by sponsor"}`。因此闭集靠提示词全列 + 代码校验兜，不靠解码器 |
+
+探针命令与产物：`python phase0/timeline/probe_model.py` → `phase0/timeline/model_probe.json`（只存延迟、token 数、JSON 合法与否、摘要是否逐字，不存模型输出原文）。
+
+#### 6.5.2 抽取口径（与规则抽取器同一套字段与拒绝态）
+
+- 模型只决定"是不是事件、主体、动作、动作锚点、宾语、定量值、拒绝理由"这 8 项；其余字段由代码补齐。
+- 代码侧硬校验：`time` 取源发布时间（不采信模型自报的时间）；`excerpt` 必须是原文逐字子串且 ≥20 字；`subject` 必须在原文出现；`action` 必须落在 `schema.md` 闭集内。
+- 不合法先做一次修复重试（把全枚举与失败原因塞回提示词）；仍不合法 → `schema_invalid` 显式拒绝，不猜。
+- 抽不出 → 模型返回 `is_event=false` + `reject_reason`（`not_an_event` / `unparsed_action` / `unparsed_subject` 三选一），代码照写进 `rejects`。
+
+#### 6.5.3 命令与成本
+
+```
+python phase0/timeline/eval_benchmark.py --items phase0/timeline/benchmark_items_dev.json \
+  --raw phase0/timeline/out/raw_items.json --labels phase0/timeline/benchmark_labels_dev.json \
+  --start 2026-10-01 --end 2026-11-08 --extractor model \
+  --cache phase0/timeline/out_model/model_cache_dev2.json \
+  --out phase0/timeline/benchmark_dev_model_result.json
+
+python phase0/timeline/eval_benchmark.py --items phase0/timeline/benchmark_items_val.json \
+  --raw phase0/timeline/out_val/raw_items.json --labels phase0/timeline/benchmark_labels_val.json \
+  --start 2026-02-01 --end 2026-04-30 --extractor model \
+  --cache phase0/timeline/out_model/model_cache_val.json \
+  --out phase0/timeline/benchmark_val_model_result.json
+```
+
+| 成本项 | dev（25 条） | val（25 条） |
+|---|---|---|
+| 单条耗时均值 | 1.27s | 1.15s |
+| 单条耗时最大 | 1.85s | 1.86s |
+| 输出 token 均值 | 78.1 | 70.6 |
+| 每条费用 | 0 元（本机推理，无计费） | 0 元 |
+
+模型首次调用有一次性加载开销（探针首条 74.45s）；`warm_up()` 已单列，不计入单条耗时。
+
+#### 6.5.4 dev 结果（调优集，可改口径）
+
+```
+{"n_items": 25, "n_labeled_events": 17, "n_emitted": 14,
+ "lenient_recall": 0.765, "strict_recall": 0.529, "lenient_precision": 0.929,
+ "strict_precision": 0.643, "action_accuracy": 0.846, "subject_accuracy": 0.769}
+```
+
+五项下限全部达标（A 级，`benchmark_dev_model_result.json`）。达成路径是三版迭代：v1 只靠 `format` 传 schema → `action` 出枚举外、`action_text` 出数组、缺字段，0 条入表；v2 改提示词全列闭集 + 代码校验 + 一次修复重试 → lenient recall 0.706 / strict 0.353 / action 0.500；v3 加动作逐值释义、冲突消解规则、两条 few-shot → 上表数字。
+
+#### 6.5.5 val 结果（未参与调参，只测一次）
+
+```
+{"n_items": 25, "n_labeled_events": 13, "n_emitted": 7,
+ "lenient_recall": 0.538, "strict_recall": 0.308, "lenient_precision": 1.000,
+ "strict_precision": 0.571, "action_accuracy": 0.571, "subject_accuracy": 1.000}
+```
+
+| 指标 | 下限 | 实测 | 判定 |
+|---|---|---|---|
+| lenient recall | 0.70 | **0.538** | **未达标** |
+| strict recall | 0.45 | **0.308** | **未达标** |
+| lenient precision | 0.70 | 1.000 | 过 |
+| action accuracy | 0.60 | **0.571** | **未达标** |
+| subject accuracy | 0.60 | 1.000 | 过 |
+
+val 未达标的主因（A 级，逐条见结果文件 `rows`）：13 条人工事件里有 6 条被模型自己判成 `not_an_event`（B02 NIH 重新定义临床试验、B06 MHRA 声明、B11 公共卫生期间试验指引、B12 论文标题、B20 FDA 要求上报结果）、1 条 `unparsed_subject`（B01 论文标题）。模型对"论文题/声明题/指引题"一律按 `is_event=false` 拒绝：precision 满分（7 条入表全对）、subject 满分，但 recall 掉到 0.538。动作偏差与规则路线同形：7 条入表里 B19（PAHO 启动加速器）、B21（Mizzou 上线资源）、B22（Government drives forward…）三条机构/资源类动作被判成 `trial_start`，只有 B04/B23/B24/B25 动作对（0.571）。
+
+结论（照实报，未下调门槛）：**`model_v1` 在 val 上五项中三项未达标，模型路线以当前口径判定为未通过**。dev 与 val 的落差与规则路线同形——调优集达标、留出窗口不达标。本集合已用掉唯一一次验证机会，不得再以调参后的 `model_v1.x` 回测 val。
+
 ## 7. 中途被推翻的判断（保留被推翻版本与理由）
 
 1. **"dev 五项达标说明规则可用"**（原判断）→ 推翻。理由：dev 是调优集，词表就是照着它的失败清单补的；换到 test 立刻跌到 0.462 / 0.154 / 0.600。教训：调优集上的达标只能当"能跑"，不能当"能用"。
@@ -137,11 +213,13 @@ val 未达标的新增主因（与 test 不同）：
 4. **"去重能自动把同一事件的多家报道合成一条"**（原判断）→ 部分推翻。理由：dev 快照 165 条只合并了 2 条；WHO 埃博拉疫苗在 dev 内有 B14/B16 两条近重复未合并，因为标题 Jaccard 未达 0.55 且 Google News 每条 link 是不同聚合页 URL。阈值 0.55 是拍的，没有独立调过；它是否合适属未核实项。
 5. **"另建 `other` 动作词表（death/award/earnings）就能提 recall"**（计划过、未采纳，C 级推演）→ 暂不采纳。理由：`other` 若与 `halt` 争最早命中位置，会把手上的 dev B11（"两例死亡后 Artiva 关停"，人工标 halt）判成 `other`；当前没有第二条证据说明该换。登记为下一轮待验证项，未实跑，故只算推断。
 6. **"Google News 能把聚合链接解析回出版商原文"**（原判断，最早做可核性时）→ 推翻，见 `datasource_report.md`：完整链接 GET 后 final_url 仍是 `news.google.com`，页面无 `na-u` 标记；只能标 `url_kind=aggregator`。
+7. **"词表补丁到头了，换模型就能过线"**（原判断，本批动手前）→ 推翻。理由：`model_v1` 在 dev 五项全过（0.765 / 0.529 / 0.929 / 0.846 / 0.769），换到未参与调参的 val 掉到 0.538 / 0.308 / 1.000 / 0.571 / 1.000，三项未达标。模型解决的是"论文题没有动词"这类语义缺口的一半（它能识别是论文，但按规则判 `not_an_event` 拒绝），没解决"声明题/指引题该不该算事件"的标注口径问题。换模型不等于换掉方法层缺口。
+8. **"Ollama 的 `format` 传 JSON Schema 能强制枚举"**（原设计依赖）→ 推翻。理由：实测传 `enum:["approval","halt"]` 仍返回枚举外字符串；模型路线因此改为"提示词全列闭集 + 代码校验 + 一次修复重试"，闭集由代码而非解码器保证。
 
 ## 8. 下一轮该补什么（登记，不在本批做）
 
 - 动作判定加距离约束（动作词必须与主语同段且宾语匹配），替代"全局最早命中"。触发条件：要提升 action accuracy 到 0.6 以上。
 - `other` 词表（death / award / earnings / guidance 之外的机构动作）单独建，并用 dev+val 双窗口回归确认不与 `halt`/`policy` 抢位。
 - 问句/评论稿识别从"标题末尾问号"扩到"标题内任意问号 + 首词表"，覆盖标题中段问句。
-- 学习式抽取（模型参与）时，输出必须受 schema 约束解码，抽不出返回显式失败态；本批只做了规则基线，未接模型。
+- 模型抽取已接入（`extract_model.py`，`model_v1`），但 val 未达标：下一步要先解决"论文题/声明题/指引题算不算事件"的标注口径，再谈模型 Recall；在此之前不改 `model_v1` 口径，也不回测 val。
 - 历史窗口检索量偏小（3 个月 26 条）：时间线要真正可用需多源补齐（Bing News / GDELT / 官方源已实测可用，GDELT 缺摘要不能进表）。
