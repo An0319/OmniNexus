@@ -7,6 +7,8 @@
  * 尤其：证伪用「完成勾 + 印章边框」，绝不与运行失败共享视觉；未通过用空心圆。
  */
 
+import { useI18n } from '../i18n/I18nProvider'
+import type { MessageKey } from '../i18n/messages.zh'
 import type { VerdictStatus } from '../types'
 
 export type SignalState =
@@ -18,14 +20,14 @@ export type SignalState =
   | 'forward'
   | 'running'
 
-const STATE_LABEL: Record<SignalState, string> = {
-  verified: 'VERIFIED · 通过',
-  falsified: 'FALSIFIED · 证伪',
-  grayzone: 'GRAY ZONE · 灰区',
-  nodata: 'NO DATA · 无数据',
-  notpassed: 'NOT PASSED · 未通过',
-  forward: 'FORWARD-LOOK · 前视不计入',
-  running: 'RUNNING · 运行中',
+export const STATE_LABEL_KEY: Record<SignalState, MessageKey> = {
+  verified: 'badge.verified',
+  falsified: 'badge.falsified',
+  grayzone: 'badge.grayzone',
+  nodata: 'badge.nodata',
+  notpassed: 'badge.notpassed',
+  forward: 'badge.forward',
+  running: 'badge.running',
 }
 
 const STATE_ICON: Record<SignalState, string> = {
@@ -47,12 +49,13 @@ export const VERDICT_STATE: Record<VerdictStatus, SignalState> = {
 }
 
 export function SignalBadge({ state }: { state: SignalState }) {
+  const { t } = useI18n()
   return (
     <span className={`badge-${state}`}>
       <span className="badge-state-icon" aria-hidden="true">
         {STATE_ICON[state]}
       </span>
-      {STATE_LABEL[state]}
+      {t(STATE_LABEL_KEY[state])}
     </span>
   )
 }

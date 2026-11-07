@@ -12,19 +12,8 @@
 
 import budgetRaw from '../../chains/project_budget.json'
 import revisionsRaw from '../../chains/revisions.json'
-import chain01Profile from '../../chains/chain01.profile.json'
-import chain10Profile from '../../chains/chain10.profile.json'
-import chain20Profile from '../../chains/chain20.profile.json'
-import chain01ZSeries from '../../chains/chain01.zseries.json'
-import chain10ZSeries from '../../chains/chain10.zseries.json'
-import snapshot01 from '../../data/snapshot_chain01.json'
-import snapshot10 from '../../data/snapshot_chain10.json'
-import snapshot20 from '../../data/snapshot_chain20.json'
 import streakRaw from '../../data/streak.json'
 import budgetRunsRaw from '../../chains/project_budget.runs.jsonl?raw'
-import runs01Raw from '../../chains/chain01.record.runs.jsonl?raw'
-import runs10Raw from '../../chains/chain10.record.runs.jsonl?raw'
-import runs20Raw from '../../chains/chain20.record.runs.jsonl?raw'
 import type {
   Budget,
   ChainView,
@@ -41,24 +30,47 @@ export const streak = streakRaw as unknown as Streak
 export const budget = budgetRaw as unknown as Budget
 export const revisions = revisionsRaw as unknown as RevisionsFile
 
-export const profiles = [
-  chain01Profile,
-  chain10Profile,
-  chain20Profile,
-] as unknown as Profile[]
+type JsonModule<T> = { default: T }
 
-const snapshots: Record<string, Snapshot> = {
-  chain01: snapshot01 as unknown as Snapshot,
-  chain10: snapshot10 as unknown as Snapshot,
-  chain20: snapshot20 as unknown as Snapshot,
+/**
+ * 链清单按目录实际文件驱动，不在代码里写死数量与顺序：
+ * - chains/<id>.profile.json       链配置（必需，决定链是否存在）
+ * - data/snapshot_<id>.json        日更快照（可选，缺失 → 未运行灰态）
+ * - chains/<id>.zseries.json       周频归一序列（可选，缺失 → 无数据空态）
+ * - chains/<id>.record.runs.jsonl  运行账本（可选，缺失 → 空账本）
+ * 新增链只需放入以上文件，本模块与任何组件均无需改动。
+ */
+const profileModules = import.meta.glob<JsonModule<Profile>>('../../chains/*.profile.json', {
+  eager: true,
+})
+const snapshotModules = import.meta.glob<JsonModule<Snapshot>>('../../data/snapshot_*.json', {
+  eager: true,
+})
+const zSeriesModules = import.meta.glob<JsonModule<ZSeries>>('../../chains/*.zseries.json', {
+  eager: true,
+})
+const runLedgerModules = import.meta.glob<string>('../../chains/*.record.runs.jsonl', {
+  eager: true,
+  query: '?raw',
+  import: 'default',
+})
+
+function byChainId<T extends { chain_id: string }>(
+  modules: Record<string, JsonModule<T>>,
+): Record<string, T> {
+  return Object.fromEntries(
+    Object.values(modules).map((module) => [module.default.chain_id, module.default]),
+  )
 }
 
-// chain20 无 zseries 产出（隔夜快传导链未做周频归一）→ null，前端走「无数据」灰态。
-export const zSeriesById: Record<string, ZSeries | null> = {
-  chain01: chain01ZSeries as unknown as ZSeries,
-  chain10: chain10ZSeries as unknown as ZSeries,
-  chain20: null,
-}
+/** 链清单：按 profile 自带的 chain_id 排序，与文件名无关；新增文件自动登记。 */
+export const profiles: Profile[] = Object.values(profileModules)
+  .map((module) => module.default)
+  .sort((a, b) => a.chain_id.localeCompare(b.chain_id))
+
+const snapshots = byChainId(snapshotModules)
+// 无 zseries 产出的链不登记（如 chain20），前端走「无数据」灰态，不伪造曲线。
+const zSeriesById = byChainId(zSeriesModules)
 
 /** 逐行解析 append-only 运行账本（JSONL，空行忽略）。 */
 function parseJsonl(raw: string): RunLedgerEvent[] {
@@ -69,11 +81,17 @@ function parseJsonl(raw: string): RunLedgerEvent[] {
     .map((line) => JSON.parse(line) as RunLedgerEvent)
 }
 
-export const runLedgers: Record<string, RunLedgerEvent[]> = {
-  chain01: parseJsonl(runs01Raw),
-  chain10: parseJsonl(runs10Raw),
-  chain20: parseJsonl(runs20Raw),
-}
+const ledgerRawById: Record<string, string> = Object.fromEntries(
+  Object.entries(runLedgerModules).map(([path, raw]) => [
+    path.match(/([^/]+)\.record\.runs\.jsonl$/)?.[1] ?? path,
+    raw,
+  ]),
+)
+
+/** 运行账本按链清单对齐：无账本文件的链给空数组，表格据此显示「—」。 */
+export const runLedgers: Record<string, RunLedgerEvent[]> = Object.fromEntries(
+  profiles.map((profile) => [profile.chain_id, parseJsonl(ledgerRawById[profile.chain_id] ?? '')]),
+)
 
 export const budgetRuns = parseJsonl(budgetRunsRaw)
 
@@ -133,10 +151,11 @@ export function buildTimeline(): TimelineEvent[] {
       id: `attempt-${attempt.n}`,
       kind: 'attempt',
       date: attempt.date,
-      title: `有效尝试 #${attempt.n} · ${attempt.title}`,
+      title: attempt.title,
       body: attempt.note,
       chainId: attempt.chain_id,
       countsAsAttempt: true,
+      attemptNo: attempt.n,
     })
   }
 
@@ -146,7 +165,6 @@ export function buildTimeline(): TimelineEvent[] {
         id: `revision-${chainId}-${index}`,
         kind: 'revision',
         date: entry.date,
-        title: `${chainId} · 修订登记`,
         body: entry.reason,
         chainId,
         countsAsAttempt: entry.counts_as_attempt,
@@ -159,7 +177,6 @@ export function buildTimeline(): TimelineEvent[] {
       id: `reset-${reset.utc_date}`,
       kind: 'reset',
       date: reset.utc_date,
-      title: 'T1 计时主动重置 · 运维事件',
       body: reset.reason,
       countsAsAttempt: false,
     })

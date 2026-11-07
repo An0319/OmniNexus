@@ -6,6 +6,7 @@
  */
 
 import { fmtShortDate } from '../format'
+import { useI18n } from '../i18n/I18nProvider'
 import type { ZSeries } from '../types'
 
 const WIDTH = 720
@@ -13,16 +14,22 @@ const HEIGHT = 220
 const PLOT = { left: 44, right: 700, top: 16, bottom: 168 }
 
 export function ZSeriesChart({ series }: { series: ZSeries | null }) {
+  const { t } = useI18n()
   const points = series?.points ?? []
   if (!series || points.length === 0) {
     return (
       <div className="z-chart-card z-chart-card--empty">
-        <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="z-chart" role="img" aria-label="无周频归一数据">
+        <svg
+          viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+          className="z-chart"
+          role="img"
+          aria-label={t('chart.z.ariaEmpty')}
+        >
           <text x={WIDTH / 2} y={94} textAnchor="middle" className="chart-empty-symbol">
             ∅
           </text>
           <text x={WIDTH / 2} y={120} textAnchor="middle" className="chart-empty-copy">
-            本链无周频归一产出 · 暂不提供 z 曲线
+            {t('chart.z.empty')}
           </text>
         </svg>
       </div>
@@ -64,18 +71,22 @@ export function ZSeriesChart({ series }: { series: ZSeries | null }) {
       <div className="z-chart-legend">
         <span className="z-legend-item">
           <i className="z-legend-a" />
-          领先面 z（学术/指数热度）
+          {t('chart.z.lead')}
         </span>
         <span className="z-legend-item">
           <i className="z-legend-b" />
-          滞后面 z（板块周收益率）
+          {t('chart.z.lag')}
         </span>
       </div>
       <svg
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         className="z-chart"
         role="img"
-        aria-label={`双序列 z-score 曲线，共 ${points.length} 周，${fmtShortDate(points[0].date)} 至 ${fmtShortDate(points[lastIndex].date)}`}
+        aria-label={t('chart.z.aria', {
+          count: points.length,
+          start: fmtShortDate(points[0].date),
+          end: fmtShortDate(points[lastIndex].date),
+        })}
       >
         {[1, 0, -1].map((value) => (
           <line
@@ -99,9 +110,7 @@ export function ZSeriesChart({ series }: { series: ZSeries | null }) {
           <span key={index}>{fmtShortDate(points[index]?.date)}</span>
         ))}
       </div>
-      <p className="chart-caption">
-        共享周一对齐 x 轴，各序列独立 z 归一（无量纲，可比的是形状）。缺失周保留显式断口，不跨段连线。
-      </p>
+      <p className="chart-caption">{t('chart.z.caption')}</p>
     </div>
   )
 }

@@ -5,79 +5,80 @@
 
 import { SignalBadge } from '../components/SignalBadge'
 import { fmtFixed3 } from '../format'
+import { useI18n } from '../i18n/I18nProvider'
+import type { MessageKey } from '../i18n/messages.zh'
 
-const GLOSSARY: { term: string; plain: string }[] = [
-  { term: 'k = 1（滞后位）', plain: '领先面序列向前平移 1 周后，与滞后面对齐比较；k=1 即领先一周。' },
-  { term: 'ρ（相关系数）', plain: '两条序列同向/反向变动的程度，取值 −1 至 +1；本看板一律三位小数带符号。' },
-  { term: '判定线 0.300', plain: '协议事先写死的通过门槛；窗口内最优 |ρ| 达不到它，就是未通过。' },
-  { term: '弱信号带 ±0.190', plain: '描述性的过渡区间，不是通过标准；落在带内不改变判定，只说明值得复看。' },
-  { term: '噪声中位（零分布）', plain: '把序列相位打乱后重算出的「无关系基准线」；只有链 20 做了这项标定。' },
-  { term: 'k = 0（前视位）', plain: '同一周共动，收盘时间上不可交易，只作诊断保留，不计入结论。' },
+const GLOSSARY: { termKey: MessageKey; plainKey: MessageKey }[] = [
+  { termKey: 'about.glossary.g1.term', plainKey: 'about.glossary.g1.plain' },
+  { termKey: 'about.glossary.g2.term', plainKey: 'about.glossary.g2.plain' },
+  { termKey: 'about.glossary.g3.term', plainKey: 'about.glossary.g3.plain' },
+  { termKey: 'about.glossary.g4.term', plainKey: 'about.glossary.g4.plain' },
+  { termKey: 'about.glossary.g5.term', plainKey: 'about.glossary.g5.plain' },
+  { termKey: 'about.glossary.g6.term', plainKey: 'about.glossary.g6.plain' },
 ]
 
 export function About() {
+  const { t } = useI18n()
   return (
     <>
       <section className="lede">
-        <h1>这套流水线在做什么</h1>
+        <h1>{t('about.lede.title')}</h1>
         <p>
-          一句话：<strong>把「先锁定、后结算、公开留痕」做成可审计的流程</strong>
-          。所有结论都在见数据之前把判定线写死，之后只允许登记修订、不允许静默改参。
+          {t('about.lede.prefix')}
+          <strong>{t('about.lede.strong')}</strong>
+          {t('about.lede.tail')}
         </p>
       </section>
 
       <section aria-labelledby="why-title">
         <h2 className="section-title" id="why-title">
-          为什么判定线是 0.300，不是 0.05
+          {t('about.why.title')}
         </h2>
         <div className="detail-card prose">
+          <p>{t('about.why.p1')}</p>
           <p>
-            0.05 是「单次假设检验」的显著性习惯值。在扫描大量候选关系、反复试滞后位的场景里，它会把噪声当成发现：
-            试得越多，撞出「显著」的概率越高。这正是 p-hacking 的入口，也是 Kaggle 里 public LB 分数好看、private
-            LB 结算打回的原因。
+            {t('about.why.p2.prefix')}
+            <strong>{t('about.why.p2.strong1', { pass: fmtFixed3(0.3) })}</strong>
+            {t('about.why.p2.mid')}
+            <strong>{t('about.why.p2.strong2')}</strong>
+            {t('about.why.p2.tail')}
           </p>
-          <p>
-            我们的做法是两件事叠加：<strong>把门槛抬高到 {fmtFixed3(0.3)}</strong>
-            ，并且<strong>把尝试次数直接做成预算</strong>——全项目只有 3 次换链额度，用掉一次就少一次，不许看结果后改参数重跑。
-            门槛拦掉大部分噪声，预算拦掉「反复试直到好看」。
-          </p>
-          <p>
-            代价是：真实但微弱的关系会被判为未通过。这是可接受的——宁可漏掉弱信号，也不把噪声包装成结论。
-          </p>
+          <p>{t('about.why.p3')}</p>
         </div>
       </section>
 
       <section aria-labelledby="loop-title">
         <h2 className="section-title" id="loop-title">
-          三步：先锁定 · 后结算 · 公开留痕
+          {t('about.loop.title')}
         </h2>
         <div className="about-grid">
           <article className="about-card">
-            <span className="eyebrow">STEP 1 · 先锁定</span>
-            <div className="panel-title">判定参数写死在见数据之前</div>
-            <p>滞后窗口、判定线、弱信号带在一次尝试开始前登记入链配置，并留下配置指纹。</p>
+            <span className="eyebrow">{t('about.loop.step1.eyebrow')}</span>
+            <div className="panel-title">{t('about.loop.step1.title')}</div>
+            <p>{t('about.loop.step1.body')}</p>
           </article>
           <article className="about-card">
-            <span className="eyebrow">STEP 2 · 后结算</span>
-            <div className="panel-title">按锁定的口径出具判定</div>
-            <p>达标才叫通过；未达标是未通过；作者可裁定整链证伪。证伪是好消息，不是事故。</p>
+            <span className="eyebrow">{t('about.loop.step2.eyebrow')}</span>
+            <div className="panel-title">{t('about.loop.step2.title')}</div>
+            <p>{t('about.loop.step2.body')}</p>
           </article>
           <article className="about-card">
-            <span className="eyebrow">STEP 3 · 公开留痕</span>
-            <div className="panel-title">尝试、修订、运维事件全部可查</div>
-            <p>每次改动登记原因与是否消耗预算；运行账本 append-only，账户外操作在物理上不存在。</p>
+            <span className="eyebrow">{t('about.loop.step3.eyebrow')}</span>
+            <div className="panel-title">{t('about.loop.step3.title')}</div>
+            <p>{t('about.loop.step3.body')}</p>
           </article>
         </div>
       </section>
 
       <section aria-labelledby="states-title">
         <h2 className="section-title" id="states-title">
-          六态徽章 · 三通道冗余
+          {t('about.states.title')}
         </h2>
         <div className="detail-card">
           <p className="prose-lead">
-            每个状态都同时用<strong>颜色 + 图形/图案 + 文字</strong>
-            表达，因此截图、灰度打印、色觉差异下都不丢信息。
+            {t('about.states.prefix')}
+            <strong>{t('about.states.strong')}</strong>
+            {t('about.states.tail')}
           </p>
           <div className="badge-showcase">
             <SignalBadge state="verified" />
@@ -87,22 +88,20 @@ export function About() {
             <SignalBadge state="notpassed" />
             <SignalBadge state="forward" />
           </div>
-          <p className="chart-caption">
-            证伪使用冷色的「完成勾 + 印章边框」，与运行失败严格区分——判定是正常产出，故障才是红色警告。
-          </p>
+          <p className="chart-caption">{t('about.states.caption')}</p>
         </div>
       </section>
 
       <section aria-labelledby="glossary-title">
         <h2 className="section-title" id="glossary-title">
-          术语速览
+          {t('about.glossary.title')}
         </h2>
         <div className="detail-card">
           <dl className="glossary">
             {GLOSSARY.map((item) => (
-              <div className="glossary-row" key={item.term}>
-                <dt>{item.term}</dt>
-                <dd>{item.plain}</dd>
+              <div className="glossary-row" key={item.termKey}>
+                <dt>{t(item.termKey)}</dt>
+                <dd>{t(item.plainKey)}</dd>
               </div>
             ))}
           </dl>
@@ -111,19 +110,21 @@ export function About() {
 
       <section aria-labelledby="repro-title">
         <h2 className="section-title" id="repro-title">
-          复现指引
+          {t('about.repro.title')}
         </h2>
         <div className="detail-card prose">
           <ol className="repro-steps">
-            <li>申请一个免费的 OpenAlex API key，写入本地 <code>openalex_key.local</code>（已被 .gitignore 拦截，绝不入库）。</li>
-            <li>安装依赖后运行阶段 0 流水线，产出各链的周频缓存与交叉相关表。</li>
-            <li>运行物化脚本，生成看板所需快照（profile / zseries / revisions）。</li>
-            <li>启动看板 dev 服务，对着本仓库的 data/ 与 chains/ 只读渲染。</li>
-            <li>全部数据源、判定参数与修订记录均随仓库公开，可逐位复核。</li>
+            <li>
+              {t('about.repro.step1.prefix')}
+              <code>{t('about.repro.step1.code')}</code>
+              {t('about.repro.step1.tail')}
+            </li>
+            <li>{t('about.repro.step2')}</li>
+            <li>{t('about.repro.step3')}</li>
+            <li>{t('about.repro.step4')}</li>
+            <li>{t('about.repro.step5')}</li>
           </ol>
-          <p className="chart-caption">
-            本页为方法论演示与公开留痕，不构成任何投资建议；历史表现不代表未来结果。
-          </p>
+          <p className="chart-caption">{t('about.repro.caption')}</p>
         </div>
       </section>
     </>

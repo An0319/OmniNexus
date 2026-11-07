@@ -175,12 +175,14 @@ export interface TimelineEvent {
   date: string
   /** 可选精确时间戳。 */
   at?: string
-  /** 链标题 / 事件标题。 */
-  title: string
+  /** 尝试类事件的账本原始标题（不参与翻译）；修订/运维事件无原始标题，标题由展示层按 kind 组合。 */
+  title?: string
   /** 一句话原因/结论。 */
   body: string
   chainId?: string
   countsAsAttempt?: boolean
+  /** 尝试类事件的有效尝试序号（标题前缀插值）。 */
+  attemptNo?: number
 }
 
 /** 链视图：profile + snapshot + z 曲线 + 项目预算账本合成。总览卡片与链详情页共用。 */

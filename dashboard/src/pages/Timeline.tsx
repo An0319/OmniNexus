@@ -6,16 +6,25 @@
 
 import { budgetRuns, buildTimeline, runLedgers } from '../data'
 import { fmtUtc } from '../format'
+import { useI18n } from '../i18n/I18nProvider'
+import type { MessageKey } from '../i18n/messages.zh'
 import type { TimelineEvent, TimelineKind } from '../types'
 
-const KIND_META: Record<TimelineKind, { label: string; dot: string }> = {
-  attempt: { label: '尝试 ATTEMPT', dot: 'is-attempt' },
-  revision: { label: '修订 REVISION', dot: 'is-revision' },
-  reset: { label: '运维事件 RESET', dot: 'is-reset' },
+const KIND_META: Record<TimelineKind, { labelKey: MessageKey; dot: string }> = {
+  attempt: { labelKey: 'timeline.kind.attempt', dot: 'is-attempt' },
+  revision: { labelKey: 'timeline.kind.revision', dot: 'is-revision' },
+  reset: { labelKey: 'timeline.kind.reset', dot: 'is-reset' },
 }
 
 function TimelineRow({ event }: { event: TimelineEvent }) {
+  const { t } = useI18n()
   const meta = KIND_META[event.kind]
+  const title =
+    event.kind === 'attempt'
+      ? `${t('timeline.attemptTitle', { n: event.attemptNo ?? '' })} · ${event.title ?? ''}`
+      : event.kind === 'revision'
+        ? t('timeline.revisionTitle', { chainId: event.chainId ?? '' })
+        : t('timeline.resetTitle')
   return (
     <div className="revision-entry">
       <div className="revision-connector-col">
@@ -25,12 +34,14 @@ function TimelineRow({ event }: { event: TimelineEvent }) {
       <div className="revision-body">
         <div className="revision-meta">
           <span className="revision-ts">{event.date}</span>
-          <span className={`tl-tag tl-tag--${event.kind}`}>{meta.label}</span>
+          <span className={`tl-tag tl-tag--${event.kind}`}>{t(meta.labelKey)}</span>
           {event.chainId && <span className="revision-author">{event.chainId}</span>}
-          {event.countsAsAttempt && <span className="tl-tag tl-tag--budget">计入预算</span>}
+          {event.countsAsAttempt && (
+            <span className="tl-tag tl-tag--budget">{t('timeline.countsBudget')}</span>
+          )}
         </div>
         <div className="revision-change">
-          <span className="revision-change-key">{event.title}</span>
+          <span className="revision-change-key">{title}</span>
         </div>
         <div className="revision-reason">{event.body}</div>
       </div>
@@ -39,18 +50,19 @@ function TimelineRow({ event }: { event: TimelineEvent }) {
 }
 
 function RunLedger() {
+  const { t } = useI18n()
   const chains = Object.keys(runLedgers)
   return (
     <div className="ledger-block">
       <table className="ledger-table">
         <thead>
           <tr>
-            <th scope="col">链</th>
-            <th scope="col">最近登记（UTC）</th>
-            <th scope="col">指纹（前 12）</th>
-            <th scope="col">实质指纹（前 12）</th>
-            <th scope="col">预算已用</th>
-            <th scope="col">修订已见</th>
+            <th scope="col">{t('timeline.ledger.chain')}</th>
+            <th scope="col">{t('timeline.ledger.lastRegistered')}</th>
+            <th scope="col">{t('timeline.ledger.fingerprint')}</th>
+            <th scope="col">{t('timeline.ledger.substantive')}</th>
+            <th scope="col">{t('timeline.ledger.budgetUsed')}</th>
+            <th scope="col">{t('timeline.ledger.revisionsSeen')}</th>
           </tr>
         </thead>
         <tbody>
@@ -86,29 +98,29 @@ function RunLedger() {
           </li>
         ))}
       </ul>
-      <p className="chart-caption">
-        运行账本是 append-only 事件流：预算账本每次写入都留一条（含时间与序号），账户外操作在物理上不存在。
-      </p>
+      <p className="chart-caption">{t('timeline.ledger.caption')}</p>
     </div>
   )
 }
 
 export function Timeline() {
+  const { t } = useI18n()
   const events = buildTimeline()
 
   return (
     <>
       <section className="lede">
-        <h1>公开审计：尝试、修订与运维事件</h1>
+        <h1>{t('timeline.lede.title')}</h1>
         <p>
-          预注册的全部动作按 UTC 日期倒序留痕。三类事件各有独立形制——<strong>修订会标注是否消耗尝试预算</strong>
-          ，运维事件（如主动重置）与故障分开陈述：重置是运维事件，不是事故。
+          {t('timeline.lede.prefix')}
+          <strong>{t('timeline.lede.strong')}</strong>
+          {t('timeline.lede.tail')}
         </p>
       </section>
 
       <section aria-labelledby="c8-title">
         <h2 className="section-title" id="c8-title">
-          C8 · 时间线 · 共 {events.length} 条
+          {t('timeline.title', { count: events.length })}
         </h2>
         <div className="detail-card">
           <div className="revision-timeline">
@@ -121,7 +133,7 @@ export function Timeline() {
 
       <section aria-labelledby="ledger-title">
         <h2 className="section-title" id="ledger-title">
-          运行账本 · 指纹留痕
+          {t('timeline.ledger.title')}
         </h2>
         <div className="detail-card">
           <RunLedger />

@@ -10,6 +10,7 @@
 
 import { useId, useState } from 'react'
 import { fmtCorr, fmtFixed3 } from '../format'
+import { useI18n } from '../i18n/I18nProvider'
 import type { Judgement, Metric, Profile } from '../types'
 
 interface Props {
@@ -27,6 +28,7 @@ const HEIGHT = 300
 const PLOT = { left: 48, right: 704, top: 24, bottom: 240 }
 
 export function LagProfileChart({ metrics, judgement, forwardLook, empty = false, excludeForward = false }: Props) {
+  const { t } = useI18n()
   const [active, setActive] = useState<number | null>(null)
   const patternId = useId().replace(/[:]/g, '')
 
@@ -114,8 +116,11 @@ export function LagProfileChart({ metrics, judgement, forwardLook, empty = false
         role="img"
         aria-label={
           empty
-            ? '交叉相关滞后剖面图，无可用数据'
-            : `交叉相关滞后剖面图，滞后 k=${visibleKs[0] ?? 0} 至 k=${visibleKs[visibleKs.length - 1] ?? 0} 的皮尔逊相关系数`
+            ? t('chart.lag.ariaEmpty')
+            : t('chart.lag.aria', {
+                start: visibleKs[0] ?? 0,
+                end: visibleKs[visibleKs.length - 1] ?? 0,
+              })
         }
       >
         <defs>
@@ -167,12 +172,18 @@ export function LagProfileChart({ metrics, judgement, forwardLook, empty = false
                 className={`lag-bar-group${highlighted ? ' is-highlighted' : ''}`}
                 tabIndex={0}
                 role="button"
-                aria-label={`滞后 k=${k}，${metrics
-                  .map((metric) => {
-                    const point = metric.lags.find((lag) => lag.k === k)
-                    return `${metric.name}相关系数 ${fmtCorr(point?.corr ?? null)}`
-                  })
-                  .join('，')}${isForward ? '，前视位不计入可交易结论' : ''}`}
+                aria-label={`${t('chart.lag.barAria', {
+                  k,
+                  metrics: metrics
+                    .map((metric) => {
+                      const point = metric.lags.find((lag) => lag.k === k)
+                      return t('chart.lag.barMetric', {
+                        name: metric.name,
+                        corr: fmtCorr(point?.corr ?? null),
+                      })
+                    })
+                    .join('，'),
+                })}${isForward ? t('chart.lag.barForward') : ''}`}
                 onMouseEnter={() => setActive(k)}
                 onMouseLeave={() => setActive(null)}
                 onFocus={() => setActive(k)}
@@ -243,38 +254,39 @@ export function LagProfileChart({ metrics, judgement, forwardLook, empty = false
               ∅
             </text>
             <text x={WIDTH / 2} y={158} textAnchor="middle" className="chart-empty-copy">
-              无有效周数据 · NO DATA
+              {t('chart.lag.empty')}
             </text>
           </g>
         )}
 
         <text x={(PLOT.left + PLOT.right) / 2} y={292} textAnchor="middle" className="lag-axis-title">
-          滞后 k（周）· 正值表示前序序列领先
+          {t('chart.lag.axis')}
         </text>
       </svg>
 
-      <p className="chart-scroll-hint">图表按 720 设计宽度绘制；窄屏可左右滑动查看全部滞后位。</p>
+      <p className="chart-scroll-hint">{t('chart.lag.scrollHint')}</p>
 
-      <div className="reference-legend" aria-label="参考线图例">
+      <div className="reference-legend" aria-label={t('chart.lag.legendAria')}>
         <span>
           <i className="legend-threshold" />
-          判定线 {fmtFixed3(passCorr)}
+          {t('chart.lag.legendThreshold', { value: fmtFixed3(passCorr) })}
         </span>
         {band !== null && (
           <span>
             <i className="legend-band" />
-            弱信号带 ±{fmtFixed3(band)}
+            {t('chart.lag.legendBand', { value: fmtFixed3(band) })}
           </span>
         )}
         {median !== null && (
           <span>
             <i className="legend-noise" />
-            噪声中位 {fmtFixed3(median)}
+            {t('chart.lag.legendNoise', { value: fmtFixed3(median) })}
           </span>
         )}
         {forwardK !== null && (
           <span>
-            <i className="legend-forward" />k = {forwardK} 前视位
+            <i className="legend-forward" />
+            {t('chart.lag.legendForward', { k: forwardK })}
           </span>
         )}
         {metrics.length > 1 && (
@@ -287,11 +299,7 @@ export function LagProfileChart({ metrics, judgement, forwardLook, empty = false
         )}
       </div>
 
-      {median === null && (
-        <p className="chart-caption">
-          本链未做零分布相位标定，故不绘制「噪声中位」参照线；判定只依判定线与弱信号带。
-        </p>
-      )}
+      {median === null && <p className="chart-caption">{t('chart.lag.caption')}</p>}
     </div>
   )
 }

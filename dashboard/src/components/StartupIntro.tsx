@@ -11,6 +11,8 @@ import {
   useRef,
   useState,
 } from "react"
+import { useI18n } from "../i18n/I18nProvider"
+import type { MessageKey } from "../i18n/messages.zh"
 
 export type IntroProgress = {
   /** 已完成的加载阶段数 */
@@ -35,13 +37,19 @@ type StartupIntroProps = {
   ready?: boolean
 }
 
-const domains = [
-  { code: "ACA", label: "ACADEMIC", x: 180, y: 188, side: "left" },
-  { code: "PUB", label: "PUBLIC", x: 118, y: 458, side: "left" },
-  { code: "NWS", label: "NEWS", x: 254, y: 714, side: "left" },
-  { code: "FIN", label: "MARKET", x: 1260, y: 188, side: "right" },
-  { code: "IND", label: "INDUSTRY", x: 1322, y: 458, side: "right" },
-  { code: "ALT", label: "ALTERNATIVE", x: 1186, y: 714, side: "right" },
+const domains: {
+  code: string
+  labelKey: MessageKey
+  x: number
+  y: number
+  side: "left" | "right"
+}[] = [
+  { code: "ACA", labelKey: "intro.domain.academic", x: 180, y: 188, side: "left" },
+  { code: "PUB", labelKey: "intro.domain.public", x: 118, y: 458, side: "left" },
+  { code: "NWS", labelKey: "intro.domain.news", x: 254, y: 714, side: "left" },
+  { code: "FIN", labelKey: "intro.domain.market", x: 1260, y: 188, side: "right" },
+  { code: "IND", labelKey: "intro.domain.industry", x: 1322, y: 458, side: "right" },
+  { code: "ALT", labelKey: "intro.domain.alternative", x: 1186, y: 714, side: "right" },
 ]
 
 const paths = [
@@ -95,11 +103,12 @@ const FIRST_PASS_MS = 12200
 const REDUCED_MIN_HOLD_MS = 900
 
 function SkipControl({ onSkip }: { onSkip: () => void }) {
+  const { t } = useI18n()
   return (
     <button className="intro-skip" type="button" onClick={onSkip}>
-      <span>跳过</span>
+      <span>{t("intro.skip.zh")}</span>
       <span className="intro-skip-divider" aria-hidden="true" />
-      <span>SKIP</span>
+      <span>{t("intro.skip.en")}</span>
     </button>
   )
 }
@@ -112,6 +121,7 @@ function SkipControl({ onSkip }: { onSkip: () => void }) {
  * 不引入新图形语言。
  */
 function ProgressTrack({ progress }: { progress: IntroProgress }) {
+  const { t } = useI18n()
   const total = Math.max(1, Math.floor(progress.total))
   const done = Math.min(Math.max(0, Math.floor(progress.done)), total)
   const xs = Array.from({ length: total }, (_, i) =>
@@ -129,7 +139,7 @@ function ProgressTrack({ progress }: { progress: IntroProgress }) {
         />
       ))}
       <text x={720} y={622} textAnchor="middle" className="progress-meta">
-        {(progress.label ?? "ALIGNING SOURCES").toUpperCase()} ·{" "}
+        {(progress.label ?? t("intro.progress.fallback")).toUpperCase()} ·{" "}
         {String(done).padStart(2, "0")}/{String(total).padStart(2, "0")}
       </text>
       {done >= total ? (
@@ -151,6 +161,7 @@ export default function StartupIntro({
   progress,
   ready = false,
 }: StartupIntroProps) {
+  const { t } = useI18n()
   const [exiting, setExiting] = useState(false)
   const [cycle, setCycle] = useState(0)
   const [sceneVisible, setSceneVisible] = useState(true)
@@ -233,7 +244,7 @@ export default function StartupIntro({
     <div
       className={`startup-intro${exiting ? " startup-intro--exiting" : ""}`}
       data-cycle={cycle}
-      aria-label="跨域数据对齐与推理链启动视觉"
+      aria-label={t("intro.aria")}
     >
       <div className="intro-aurora" aria-hidden="true" />
 
@@ -341,7 +352,7 @@ export default function StartupIntro({
                 textAnchor={domain.side === "left" ? "start" : "end"}
                 className="domain-label"
               >
-                {domain.label}
+                {t(domain.labelKey)}
               </text>
             </g>
           ))}
@@ -409,8 +420,8 @@ export default function StartupIntro({
       ) : null}
 
       <div className="intro-system-note" aria-hidden="true">
-        <span>INFERENCE CORE</span>
-        <span>ALIGN / TRACE / EXPLAIN</span>
+        <span>{t("intro.system.core")}</span>
+        <span>{t("intro.system.motto")}</span>
       </div>
 
       <SkipControl onSkip={beginExit} />
