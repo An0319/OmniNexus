@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>批次一验证报告：临床 XBI（正式账）</title>
+<style>
+:root{--ink:#1f2733;--muted:#5d6675;--line:#e2e5ea;--bg:#ffffff;--soft:#f6f7f9;--accent:#b0562f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--soft);color:var(--ink);
+ font-family:system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif;
+ font-size:16px;line-height:1.75}
+main{max-width:1040px;margin:0 auto;padding:56px 48px 80px;background:var(--bg)}
+h1{font-size:28px;line-height:1.35;margin:0 0 14px;letter-spacing:-.2px}
+h2{font-size:20px;margin:42px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+h3{font-size:16px;margin:26px 0 10px;color:#2c3542}
+p{margin:12px 0}
+blockquote{margin:14px 0;padding:12px 16px;border-left:3px solid var(--accent);
+ background:#fbf5f1;color:#513b31}
+code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:13px;
+ background:#f1f3f6;padding:1px 5px;border-radius:4px}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--soft);font-weight:600}
+ul{margin:10px 0 10px 22px}
+li{margin:6px 0}
+figure{margin:26px 0;text-align:center}
+figure svg{max-width:100%;height:auto;border:1px solid var(--line)}
+figcaption{font-size:13px;color:var(--muted);margin-top:8px;text-align:left}
+@media print{body{background:#fff}main{padding:0;max-width:none}}
+</style>
+</head>
+<body>
+<main>
+<h1>批次一验证报告：临床 XBI（正式账）</h1>
+<p>报告日期：2026-11-07 ｜ 预注册锚点：<code>8b63fb1</code> ｜ 留出段：未开封 ｜ 判定尝试：<code>attempt #1</code></p>
+<p>本文件为<strong>对外版</strong>，只包含临床 XBI 正式账。</p>
+<blockquote><strong>归属说明</strong>：能源 N1 为练手账，其结果不进入本报告；本报告仅报临床 XBI 正式账。</blockquote>
+<h2>1. 命题原文</h2>
+<p>引自 <code>phase0/preregistration_clinical_xbi.md</code> §1：</p>
+<blockquote>产业界新登记的临床试验数量（ClinicalTrials.gov，lead sponsor class = <code>INDUSTRY</code>，<code>INTERVENTIONAL</code>，按 <code>StudyFirstPostDate</code> 周度计数）<strong>系统性领先</strong> State Street SPDR S&amp;P Biotech ETF（XBI）的周收益率 <strong>4–13 周</strong>；方向为正：新登记数量上行后，XBI 后续 4–13 周的周收益倾向为正。</blockquote>
+<h2>2. 预注册时间锚</h2>
+<table><thead><tr><th>项</th><th>值</th></tr></thead><tbody><tr><td>提交哈希</td><td><code>8b63fb1c58df7120321d1bd8d78a25eb93d6a724</code>（短哈希 <code>8b63fb1</code>）</td></tr><tr><td>提交信息</td><td><code>docs: add batch-1 preregistration drafts for energy N1 and clinical XBI</code></td></tr><tr><td>提交对象时间</td><td><code>2026-11-07T15:48:56+09:00</code>（<code>2026-11-07T06:48:56Z</code>）。这是 Git 提交对象自带的时间，不是推送时刻</td></tr><tr><td>推送时刻</td><td><strong>无独立记录</strong>。仓库与本地均未保留 push 的起止时间戳，因此无法证明远端在开跑前已可见该提交；可核验的只有提交对象时间与提交内容</td></tr><tr><td>外部核验</td><td><code>https://github.com/An0319/OmniNexus/commit/8b63fb1c58df7120321d1bd8d78a25eb93d6a724</code></td></tr><tr><td>远端分支</td><td><code>origin/main</code>，推送范围 <code>0d5f835..8b63fb1</code></td></tr><tr><td>首次数据抓取</td><td>Yahoo chart API：XBI <code>06:52:56Z</code>（见快照旁注 <code>fetched_at_utc</code>）；ClinicalTrials.gov <code>06:55:15Z</code></td></tr><tr><td>先后顺序</td><td>提交对象时间 <code>06:48:56Z</code> 早于最早一次抓取 <code>06:52:56Z</code>；这只证明「提交先于取数」，不能证明「远端先于取数可见」</td></tr><tr><td>锁定内容</td><td>命题、数据口径、样本窗口、三段切分、<code>lag_range=[0,13]</code>、<code>pass_window=[4,13]</code>、<code>pass_corr=0.3</code>、<code>noise_band=0.19</code>、方向为正、指标数量 1</td></tr></tbody></table>
+<p>过程账本 <code>phase0/batch1.record.runs.jsonl</code>（本地路径，不随仓库分发）同时记录能源与临床两账的结果字段。按能源稿 §10 的练手账口径，该账本不入库、仅本地留存，因此不作为对外证据。对外可核的过程证据是锚定 commit <code>8b63fb1</code>：能证明这些条款确实在该提交里、且该提交现在在远端，但 commit 时间为客户端时间，不能证明远端在开跑前已可见。随附的临床逐格 CSV 与临床快照旁注用于复算。</p>
+<h2>3. 数据与快照</h2>
+<h3>3.1 临床 XBI</h3>
+<table><thead><tr><th>项</th><th>实测</th></tr></thead><tbody><tr><td>端点</td><td><code>https://clinicaltrials.gov/api/v2/studies</code></td></tr><tr><td>筛选</td><td><code>AREA[LeadSponsorClass]INDUSTRY AND AREA[StudyType]INTERVENTIONAL AND AREA[StudyFirstPostDate]RANGE[2016-11-07,2026-10-30]</code></td></tr><tr><td>记录数</td><td>56,443</td></tr><tr><td>分页</td><td><code>pageSize=1000</code> + <code>pageToken</code>，共 57 页；记录数与同条件 API <code>totalCount</code> 相等，无漏页</td></tr><tr><td>纯度</td><td>全部 <code>INDUSTRY</code> + <code>INTERVENTIONAL</code>；<code>StudyFirstPostDate</code> 缺失 0</td></tr><tr><td>周桶</td><td>521 周（<code>2016-11-11</code>–<code>2026-10-30</code>）；<code>2024-09-13</code> 为确认真实 0（直接区间查询返回 0 条）</td></tr><tr><td>滞后面</td><td>Yahoo chart API v8，<code>XBI</code> 日线 <code>adjclose</code>，2514 个交易日（<code>2016-11-07</code>–<code>2026-11-06</code>），空值 0</td></tr><tr><td>快照旁注</td><td><code>phase0/output/batch1_snapshot_clinical.md</code>、<code>batch1_snapshot_yahoo_XBI.md</code></td></tr></tbody></table>
+<h3>3.2 临床记录数 4,337 差的窗口解释</h3>
+<p>预注册 §9 的可得性探针口径为 <code>2016-01-01</code>–<code>2026-11-06</code>，记录 <code>totalCount=60780</code>；实际抓取使用锁定样本窗口 <code>2016-11-07</code>–<code>2026-10-30</code>，得到 56,443 条。差额可由同条件 <code>totalCount</code> 实查完全分解：</p>
+<table><thead><tr><th>区间</th><th><code>totalCount</code></th></tr></thead><tbody><tr><td><code>2016-01-01</code>–<code>2026-11-06</code>（预注册 §9 探针）</td><td>60,780</td></tr><tr><td><code>2016-11-07</code>–<code>2026-10-30</code>（锁定样本，实际抓取）</td><td>56,443</td></tr><tr><td><code>2016-01-01</code>–<code>2016-11-06</code>（被排除的头部）</td><td>4,181</td></tr><tr><td><code>2026-10-31</code>–<code>2026-11-06</code>（被排除的尾部）</td><td>156</td></tr><tr><td>三段之和</td><td>60,780</td></tr></tbody></table>
+<p>差额 <code>4,337 = 4,181 + 156</code>，全部来自日期窗口不同：不是翻页漏页（抓取记录数等于同条件 <code>totalCount</code>），不是筛选条件变化，也不是预估误差。预注册稿的锁定条款未改；锚定 commit <code>8b63fb1</code> 之后仅追加状态与修订记录。</p>
+<h2>4. 方法</h2>
+<h3>4.1 三段切分（锁定，未改）</h3>
+<table><thead><tr><th>段</th><th>周标签范围</th><th>用途</th><th>是否产生判定</th></tr></thead><tbody><tr><td>训练</td><td><code>2016-11-11</code>–<code>2022-12-30</code>；z 预热后有效段自 <code>2017-05-05</code></td><td>管线自检、对齐与缺失诊断</td><td>否</td></tr><tr><td>验证</td><td><code>2023-01-06</code>–<code>2024-12-27</code></td><td>第一次正式判定</td><td>是</td></tr><tr><td>留出</td><td><code>2025-01-03</code>–<code>2026-10-30</code></td><td>验证段成立后才开封一次</td><td>确认</td></tr></tbody></table>
+<h3>4.2 计算口径</h3>
+<ul><li>两面分别做滚动 52 周 z-score，<code>min_periods=26</code>，只用当期及过去 52 周，不使用未来值。</li><li>对 <code>k=0..13</code> 计算 <code>corr(lead_z_t, lag_z_{t+k})</code>，按周标签配对，pairwise complete；每个 k 报样本量 <code>n</code>。</li><li><strong>段内配对约束</strong>：一对样本的领先周 <code>t</code> 与滞后周 <code>t+k</code> 必须同时落在该段内，即 <code>t &lt;= 段末 - k 周</code>。验证段末端就是留出截断点，此前已满足该约束；训练段复核时发现只约束了 <code>t</code>，已按同一规则修正并重算，<code>n</code> 随 <code>k</code> 递减。该修正只改训练段诊断数字，验证段与判定不受影响。</li><li>判定只看 <code>[4,13]</code> 内的最大正相关；<code>k=0..3</code> 只打印，不参与判定。</li></ul>
+<h3>4.3 留出段封存与实测</h3>
+<table><thead><tr><th>项</th><th>实测</th></tr></thead><tbody><tr><td>封存范围</td><td>周标签 <code>2025-01-03</code>–<code>2026-10-30</code></td></tr><tr><td>默认读取上限</td><td><code>2024-12-27</code></td></tr><tr><td>开封开关</td><td>仅显式传入 <code>--open-holdout</code>；本次未传</td></tr><tr><td>磁盘原始件最大日期</td><td>Clinical <code>2026-10-30</code>、XBI <code>2026-11-06</code></td></tr><tr><td>加载后最大日期</td><td>领先面与滞后面全部 <code>2024-12-27</code></td></tr><tr><td>载入的留出段行数</td><td>0（脚本内断言通过）</td></tr><tr><td>截断副本</td><td>未生成；保留全量原始件</td></tr></tbody></table>
+<h3>4.4 计次</h3>
+<table><thead><tr><th>项</th><th>登记</th></tr></thead><tbody><tr><td>有效尝试</td><td><code>attempt #1</code></td></tr><tr><td>技术重跑</td><td>2 次，均为代码 bug，<code>counts_as_attempt=false</code>（详见修订表与结案登记）</td></tr><tr><td>参数改动</td><td>无。<code>lag_range</code>、<code>pass_window</code>、<code>pass_corr</code>、<code>noise_band</code>、筛选条件、字段、窗口、切分点、标准化参数、指标数量、标的均未改</td></tr><tr><td>剩余尝试</td><td>2 次，本次不使用</td></tr></tbody></table>
+<h2>5. 结果</h2>
+<h3>5.1 临床 XBI（正式账）</h3>
+<p>训练段窗口内峰值 <code>+0.0578</code>（<code>k=11</code>，<code>n=285</code>）；验证段窗口内峰值 <code>+0.2035</code>（<code>k=13</code>，<code>n=91</code>）。</p>
+<table><thead><tr><th>段</th><th>窗口内最大正相关</th><th>落点</th><th>n</th><th>判定用？</th></tr></thead><tbody><tr><td>训练</td><td>+0.0578</td><td>k=11</td><td>285</td><td>否（仅诊断）</td></tr><tr><td>验证</td><td>+0.2035</td><td>k=13</td><td>91</td><td>是</td></tr></tbody></table>
+<p>逐格数值（<code>k</code>、<code>n</code>、相关系数）：</p>
+<table><thead><tr><th>k</th><th>训练 n</th><th>训练 r</th><th>验证 n</th><th>验证 r</th></tr></thead><tbody><tr><td>0</td><td>295</td><td>-0.0854</td><td>104</td><td>+0.0240</td></tr><tr><td>1</td><td>295</td><td>-0.1023</td><td>103</td><td>-0.1010</td></tr><tr><td>2</td><td>294</td><td>+0.0152</td><td>102</td><td>+0.0364</td></tr><tr><td>3</td><td>293</td><td>-0.0129</td><td>101</td><td>+0.0488</td></tr><tr><td>4</td><td>292</td><td>-0.0283</td><td>100</td><td>-0.0387</td></tr><tr><td>5</td><td>291</td><td>+0.0156</td><td>99</td><td>+0.0642</td></tr><tr><td>6</td><td>290</td><td>-0.1208</td><td>98</td><td>+0.0294</td></tr><tr><td>7</td><td>289</td><td>-0.0619</td><td>97</td><td>+0.0122</td></tr><tr><td>8</td><td>288</td><td>-0.0287</td><td>96</td><td>-0.2363</td></tr><tr><td>9</td><td>287</td><td>-0.0286</td><td>95</td><td>+0.0316</td></tr><tr><td>10</td><td>286</td><td>+0.0561</td><td>94</td><td>+0.1088</td></tr><tr><td>11</td><td>285</td><td>+0.0578</td><td>93</td><td>-0.0321</td></tr><tr><td>12</td><td>284</td><td>-0.0803</td><td>92</td><td>-0.1056</td></tr><tr><td>13</td><td>283</td><td>-0.0414</td><td>91</td><td>+0.2035</td></tr></tbody></table>
+<figure><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 520" width="920" height="520" role="img" aria-labelledby="t-clinical_xbi">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<title id="t-clinical_xbi">临床 XBI：产业界新登记试验数 → XBI 周收益率</title>
+<rect x="74" y="58" width="812" height="398" fill="#fbfbfc" stroke="#e2e4e8"/>
+<rect x="320.8" y="58" width="568.2" height="398" fill="#eef2f7"/>
+<text x="331.84615384615387" y="80" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="13" fill="#8892a0">判定窗口 [4,13]</text>
+<line x1="74" y1="456.0" x2="886" y2="456.0" stroke="#eceef1"/>
+<text x="64" y="460.0" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="end">-0.3</text>
+<line x1="74" y1="397.5" x2="886" y2="397.5" stroke="#eceef1"/>
+<text x="64" y="401.5" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="end">-0.2</text>
+<line x1="74" y1="338.9" x2="886" y2="338.9" stroke="#eceef1"/>
+<text x="64" y="342.9" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="end">-0.1</text>
+<line x1="74" y1="280.4" x2="886" y2="280.4" stroke="#eceef1"/>
+<text x="64" y="284.4" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="end">+0.0</text>
+<line x1="74" y1="221.9" x2="886" y2="221.9" stroke="#eceef1"/>
+<text x="64" y="225.9" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="end">+0.1</text>
+<line x1="74" y1="163.4" x2="886" y2="163.4" stroke="#eceef1"/>
+<text x="64" y="167.4" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="end">+0.2</text>
+<line x1="74" y1="104.8" x2="886" y2="104.8" stroke="#eceef1"/>
+<text x="64" y="108.8" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="end">+0.3</text>
+<text x="74.0" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">0</text>
+<text x="136.5" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">1</text>
+<text x="198.9" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">2</text>
+<text x="261.4" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">3</text>
+<text x="323.8" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">4</text>
+<text x="386.3" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">5</text>
+<text x="448.8" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">6</text>
+<text x="511.2" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">7</text>
+<text x="573.7" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">8</text>
+<text x="636.2" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">9</text>
+<text x="698.6" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">10</text>
+<text x="761.1" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">11</text>
+<text x="823.5" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">12</text>
+<text x="886.0" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">13</text>
+<text x="480.0" y="508" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="13" fill="#4a5160" text-anchor="middle">领先周数 k（lead_z_t 对 lag_z_(t+k)）</text>
+<line x1="74" y1="169.2" x2="886" y2="169.2" stroke="#c98a2e" stroke-width="1.3" stroke-dasharray="4 4"/>
+<text x="880" y="162.2" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#a9701d" text-anchor="end">噪声带 0.19</text>
+<line x1="74" y1="104.8" x2="886" y2="104.8" stroke="#2f7d4f" stroke-width="1.5" stroke-dasharray="7 4"/>
+<text x="880" y="97.8" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#256640" text-anchor="end">通过线 0.30</text>
+<line x1="74" y1="280.4" x2="886" y2="280.4" stroke="#9aa1ab"/>
+<polyline points="74.0,330.4 136.5,340.3 198.9,271.5 261.4,288.0 323.8,297.0 386.3,271.3 448.8,351.1 511.2,316.6 573.7,297.2 636.2,297.1 698.6,247.6 761.1,246.6 823.5,327.4 886.0,304.7" fill="none" stroke="#4c6f8c" stroke-width="2.4"/>
+<circle cx="74.0" cy="330.4" r="3.6" fill="#4c6f8c"/>
+<circle cx="136.5" cy="340.3" r="3.6" fill="#4c6f8c"/>
+<circle cx="198.9" cy="271.5" r="3.6" fill="#4c6f8c"/>
+<circle cx="261.4" cy="288.0" r="3.6" fill="#4c6f8c"/>
+<circle cx="323.8" cy="297.0" r="3.6" fill="#4c6f8c"/>
+<circle cx="386.3" cy="271.3" r="3.6" fill="#4c6f8c"/>
+<circle cx="448.8" cy="351.1" r="3.6" fill="#4c6f8c"/>
+<circle cx="511.2" cy="316.6" r="3.6" fill="#4c6f8c"/>
+<circle cx="573.7" cy="297.2" r="3.6" fill="#4c6f8c"/>
+<circle cx="636.2" cy="297.1" r="3.6" fill="#4c6f8c"/>
+<circle cx="698.6" cy="247.6" r="3.6" fill="#4c6f8c"/>
+<circle cx="761.1" cy="246.6" r="3.6" fill="#4c6f8c"/>
+<circle cx="823.5" cy="327.4" r="3.6" fill="#4c6f8c"/>
+<circle cx="886.0" cy="304.7" r="3.6" fill="#4c6f8c"/>
+<polyline points="74.0,266.4 136.5,339.5 198.9,259.1 261.4,251.9 323.8,303.1 386.3,242.8 448.8,263.2 511.2,273.3 573.7,418.7 636.2,261.9 698.6,216.7 761.1,299.2 823.5,342.2 886.0,161.3" fill="none" stroke="#b0562f" stroke-width="2.4"/>
+<circle cx="74.0" cy="266.4" r="3.6" fill="#b0562f"/>
+<circle cx="136.5" cy="339.5" r="3.6" fill="#b0562f"/>
+<circle cx="198.9" cy="259.1" r="3.6" fill="#b0562f"/>
+<circle cx="261.4" cy="251.9" r="3.6" fill="#b0562f"/>
+<circle cx="323.8" cy="303.1" r="3.6" fill="#b0562f"/>
+<circle cx="386.3" cy="242.8" r="3.6" fill="#b0562f"/>
+<circle cx="448.8" cy="263.2" r="3.6" fill="#b0562f"/>
+<circle cx="511.2" cy="273.3" r="3.6" fill="#b0562f"/>
+<circle cx="573.7" cy="418.7" r="3.6" fill="#b0562f"/>
+<circle cx="636.2" cy="261.9" r="3.6" fill="#b0562f"/>
+<circle cx="698.6" cy="216.7" r="3.6" fill="#b0562f"/>
+<circle cx="761.1" cy="299.2" r="3.6" fill="#b0562f"/>
+<circle cx="823.5" cy="342.2" r="3.6" fill="#b0562f"/>
+<circle cx="886.0" cy="161.3" r="3.6" fill="#b0562f"/>
+<circle cx="886.0" cy="161.3" r="8" fill="none" stroke="#b0562f" stroke-width="2"/>
+<text x="872.0" y="145.3" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="13" fill="#8f4224" text-anchor="end">峰值 +0.2035 @ k=13</text>
+<text x="573.7" y="444.7" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b3a2a" text-anchor="middle">k=8：-0.2363</text>
+<line x1="90" y1="104" x2="112" y2="104" stroke="#4c6f8c" stroke-width="2.4"/>
+<text x="120" y="108" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#4a5160">训练段（仅诊断）</text>
+<line x1="90" y1="124" x2="112" y2="124" stroke="#b0562f" stroke-width="2.4"/>
+<text x="120" y="128" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#4a5160">验证段（判定）</text>
+<text x="74" y="36" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="15" font-weight="600" fill="#1f2733">临床 XBI：产业界新登记试验数 → XBI 周收益率</text>
+</svg><figcaption>图 1 · 临床 XBI：训练段与验证段相关性曲线（横轴 <code>k=0..13</code>；橙虚线 <code>0.19</code> 为噪声带，绿虚线 <code>0.30</code> 为通过线；SVG 文件 <code>phase0/batch1_curve_clinical_xbi.svg</code>）</figcaption></figure>
+<p>另记一条事实：验证段 <code>k=8</code> 的相关系数为 <code>-0.2363</code>（<code>n=96</code>），是验证段 14 个滞后位中绝对值最大的一格。</p>
+<h3>5.2 训练段与验证段的一致性</h3>
+<table><thead><tr><th>账</th><th>训练峰值</th><th>验证峰值</th><th>位置差</th><th>相关系数比值</th><th>是否一致</th></tr></thead><tbody><tr><td>临床 XBI</td><td>k=11，+0.0578</td><td>k=13，+0.2035</td><td>2 周</td><td>3.5</td><td>否</td></tr></tbody></table>
+<p>训练段没有给出可迁移的形态：验证段峰值的位置与训练段不同，相关系数也不同。这里只报<strong>相关系数比值</strong>（验证段峰值 ÷ 训练段峰值），它不是效应量，也不作倍数解读。该差异不改变机械判定（判定只看验证段），但说明不能把训练段结果当作预期证据。</p>
+<h2>6. 判定（按稿子条款机械执行）</h2>
+<p><strong>临床 XBI → 灰区</strong>。依据 <code>phase0/preregistration_clinical_xbi.md</code> §5：<code>0.19 &lt;= peak_corr &lt; 0.3</code> 定义为灰区，灰区不构成「成立」。实测 <code>+0.2035</code> 落在灰区，距通过线 <code>0.3</code> 差 <code>0.0965</code>，按预注册词表记为「灰区」，不写「成立」，也不写「接近成立」这类措辞。</p>
+<p>为什么是机械裁决：判定线在开跑前写入并以 commit <code>8b63fb1</code> 固定；本次未改任何参数，未用训练段结果回调阈值，未用剩余尝试重跑；判定只读验证段 <code>[4,13]</code> 的峰值，不读留出段。裁决过程没有人为挑选空间。</p>
+<p>另记一条事实，不参与判定：验证段 <code>k=8</code> 为 <code>-0.2363</code>（<code>n=96</code>），位于窗口内且方向为负，与命题方向相反；<code>k=12</code> 为 <code>-0.1056</code>，方向同样为负。判定仍按 §5 只看窗口内最大正相关；这些负值不被挑选，也不被隐去。</p>
+<h2>7. 留出段未开封</h2>
+<ul><li>留出段 <code>2025-01-03</code>–<code>2026-10-30</code> <strong>未开封</strong>，开封次数 0。</li><li>磁盘上保留了含留出段行的全量原始件，但<strong>未对其做任何计算或查看</strong>；主脚本在不加 <code>--open-holdout</code> 时硬截断到 <code>2024-12-27</code>，实测载入留出段行数为 0。</li><li>未生成截断副本；未二次开封；未用留出段结果反向修改任何参数。</li><li>依据 §4 与 §8：验证段未判「成立」时，留出段永久封存。本批次临床账未成立，留出段不再开封。</li></ul>
+<h2>8. 局限</h2>
+<ul><li>只验证「领先—滞后关联」，不声称因果；相关系数不构成因果证据。</li><li>单一标的、单一指标、周频；未扣交易成本，未做流动性检验。</li><li><strong>多重比较与家族错误率</strong>：14 个滞后位 × 1 个指标，判定又取窗口内最大值，存在选择效应；<code>0.19</code> / <code>0.30</code> 两条线不控制家族错误率，未做 Bonferroni 或 FDR 校正。</li><li><strong>样本重叠与自相关</strong>：周收益率配 13 周滞后，相邻 <code>k</code> 共用大量同一批周值；表中 <code>n</code> 是配对行数，不是独立样本数，有效样本远小于 <code>n</code>，相关系数的标准误被低估。</li><li><strong>判定线来源</strong>：<code>0.19</code> 约合零分布 p95（实测 <code>0.188</code>）；<code>0.30</code> 不是零分布分位，而是在 p99（<code>0.218–0.248</code>）之上的跨链经验补偿。两条线都不是本批数据自身校准，本批未重跑零分布（预注册 §5 规定开跑前不动线）。</li><li><strong>峰值落在窗口边缘</strong>：验证段峰值 <code>k=13</code> 是窗口右边界，且该格 <code>n=91</code> 为窗口内最小；边缘峰值缺少相邻 <code>k</code> 的形态支撑（<code>k=12</code> 为负）。</li><li><strong>ETF 规模与成分变化</strong>：XBI 的成分与权重随时间调整，历史 <code>adjclose</code> 不能完全代表当前篮子；规模变化也会改变流动性与定价。</li><li><strong>周频对齐与时点可交易性</strong>：周标签固定为周五，信号可执行时点落在下一交易日；未检验开盘/收盘可成交价差，也未检验信号发布到执行的时滞。</li><li><strong>52 周 z 不消除季节性</strong>：滚动 z-score 只做水平与波动归一，不剔除季节性、周期性或结构性断点。</li><li>临床计数以 <code>StudyFirstPostDate</code> 为登记时点，申办方后续更新不回改历史；样本内该字段缺失为 0，但上游长期稳定性未逐条核验。</li><li><strong>数据源可回改</strong>：ClinicalTrials.gov 与 Yahoo 均可能修订历史；本仓库只保留抓取时点快照，无法防止上游回改。</li><li>训练段仅作诊断，其峰值位置与验证段不一致，不构成对验证段结果的支撑，也不能外推到其他窗口。</li><li>未做事后子组分析（地区、阶段、招募状态）；如做，只能标为事后探索，不得改写判定。</li></ul>
+<h2>9. 数据与代码位置</h2>
+<p>逐格结果：<code>phase0/output/batch1_xcorr_clinical_xbi_train.csv</code>、<code>phase0/output/batch1_xcorr_clinical_xbi_validation.csv</code>；快照旁注：<code>phase0/output/batch1_snapshot_clinical.md</code>、<code>phase0/output/batch1_snapshot_yahoo_XBI.md</code>；跑数脚本：<code>phase0/run_batch1.py</code>；报告生成脚本：<code>phase0/build_batch1_report.py</code>。上述逐格结果与快照旁注已在 <code>.gitignore</code> 中按具体路径精确放行、待本次提交。原始大件（56,443 条记录与日线行情）体积较大，仍留在本地 <code>phase0/output/</code> 未入库，可按快照旁注记录的端点与筛选条件重取。练手账（能源 N1）的证据不入库，仅本地留存，不在本报告范围。数据均为公开源，无隐私内容。</p>
+</main>
+</body>
+</html>

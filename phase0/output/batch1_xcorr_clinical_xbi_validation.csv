@@ -1,0 +1,15 @@
+k,n,corr,account,segment
+0,104,0.02395549038933783,clinical_xbi,validation
+1,103,-0.10099181749706203,clinical_xbi,validation
+2,102,0.036385713763553124,clinical_xbi,validation
+3,101,0.04879790261287968,clinical_xbi,validation
+4,100,-0.038723183036569866,clinical_xbi,validation
+5,99,0.06419397048839852,clinical_xbi,validation
+6,98,0.029369483132159382,clinical_xbi,validation
+7,97,0.012187331883335116,clinical_xbi,validation
+8,96,-0.23633735705235354,clinical_xbi,validation
+9,95,0.03163325677889693,clinical_xbi,validation
+10,94,0.10883864575027312,clinical_xbi,validation
+11,93,-0.03212905354684173,clinical_xbi,validation
+12,92,-0.10560229925059712,clinical_xbi,validation
+13,91,0.20353470199210694,clinical_xbi,validation

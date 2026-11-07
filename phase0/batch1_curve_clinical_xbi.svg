@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 520" width="920" height="520" role="img" aria-labelledby="t-clinical_xbi">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<title id="t-clinical_xbi">临床 XBI：产业界新登记试验数 → XBI 周收益率</title>
+<rect x="74" y="58" width="812" height="398" fill="#fbfbfc" stroke="#e2e4e8"/>
+<rect x="320.8" y="58" width="568.2" height="398" fill="#eef2f7"/>
+<text x="331.84615384615387" y="80" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="13" fill="#8892a0">判定窗口 [4,13]</text>
+<line x1="74" y1="456.0" x2="886" y2="456.0" stroke="#eceef1"/>
+<text x="64" y="460.0" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="end">-0.3</text>
+<line x1="74" y1="397.5" x2="886" y2="397.5" stroke="#eceef1"/>
+<text x="64" y="401.5" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="end">-0.2</text>
+<line x1="74" y1="338.9" x2="886" y2="338.9" stroke="#eceef1"/>
+<text x="64" y="342.9" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="end">-0.1</text>
+<line x1="74" y1="280.4" x2="886" y2="280.4" stroke="#eceef1"/>
+<text x="64" y="284.4" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="end">+0.0</text>
+<line x1="74" y1="221.9" x2="886" y2="221.9" stroke="#eceef1"/>
+<text x="64" y="225.9" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="end">+0.1</text>
+<line x1="74" y1="163.4" x2="886" y2="163.4" stroke="#eceef1"/>
+<text x="64" y="167.4" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="end">+0.2</text>
+<line x1="74" y1="104.8" x2="886" y2="104.8" stroke="#eceef1"/>
+<text x="64" y="108.8" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="end">+0.3</text>
+<text x="74.0" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">0</text>
+<text x="136.5" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">1</text>
+<text x="198.9" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">2</text>
+<text x="261.4" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">3</text>
+<text x="323.8" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">4</text>
+<text x="386.3" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">5</text>
+<text x="448.8" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">6</text>
+<text x="511.2" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">7</text>
+<text x="573.7" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">8</text>
+<text x="636.2" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">9</text>
+<text x="698.6" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">10</text>
+<text x="761.1" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">11</text>
+<text x="823.5" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">12</text>
+<text x="886.0" y="478" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7380" text-anchor="middle">13</text>
+<text x="480.0" y="508" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="13" fill="#4a5160" text-anchor="middle">领先周数 k（lead_z_t 对 lag_z_(t+k)）</text>
+<line x1="74" y1="169.2" x2="886" y2="169.2" stroke="#c98a2e" stroke-width="1.3" stroke-dasharray="4 4"/>
+<text x="880" y="162.2" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#a9701d" text-anchor="end">噪声带 0.19</text>
+<line x1="74" y1="104.8" x2="886" y2="104.8" stroke="#2f7d4f" stroke-width="1.5" stroke-dasharray="7 4"/>
+<text x="880" y="97.8" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#256640" text-anchor="end">通过线 0.30</text>
+<line x1="74" y1="280.4" x2="886" y2="280.4" stroke="#9aa1ab"/>
+<polyline points="74.0,330.4 136.5,340.3 198.9,271.5 261.4,288.0 323.8,297.0 386.3,271.3 448.8,351.1 511.2,316.6 573.7,297.2 636.2,297.1 698.6,247.6 761.1,246.6 823.5,327.4 886.0,304.7" fill="none" stroke="#4c6f8c" stroke-width="2.4"/>
+<circle cx="74.0" cy="330.4" r="3.6" fill="#4c6f8c"/>
+<circle cx="136.5" cy="340.3" r="3.6" fill="#4c6f8c"/>
+<circle cx="198.9" cy="271.5" r="3.6" fill="#4c6f8c"/>
+<circle cx="261.4" cy="288.0" r="3.6" fill="#4c6f8c"/>
+<circle cx="323.8" cy="297.0" r="3.6" fill="#4c6f8c"/>
+<circle cx="386.3" cy="271.3" r="3.6" fill="#4c6f8c"/>
+<circle cx="448.8" cy="351.1" r="3.6" fill="#4c6f8c"/>
+<circle cx="511.2" cy="316.6" r="3.6" fill="#4c6f8c"/>
+<circle cx="573.7" cy="297.2" r="3.6" fill="#4c6f8c"/>
+<circle cx="636.2" cy="297.1" r="3.6" fill="#4c6f8c"/>
+<circle cx="698.6" cy="247.6" r="3.6" fill="#4c6f8c"/>
+<circle cx="761.1" cy="246.6" r="3.6" fill="#4c6f8c"/>
+<circle cx="823.5" cy="327.4" r="3.6" fill="#4c6f8c"/>
+<circle cx="886.0" cy="304.7" r="3.6" fill="#4c6f8c"/>
+<polyline points="74.0,266.4 136.5,339.5 198.9,259.1 261.4,251.9 323.8,303.1 386.3,242.8 448.8,263.2 511.2,273.3 573.7,418.7 636.2,261.9 698.6,216.7 761.1,299.2 823.5,342.2 886.0,161.3" fill="none" stroke="#b0562f" stroke-width="2.4"/>
+<circle cx="74.0" cy="266.4" r="3.6" fill="#b0562f"/>
+<circle cx="136.5" cy="339.5" r="3.6" fill="#b0562f"/>
+<circle cx="198.9" cy="259.1" r="3.6" fill="#b0562f"/>
+<circle cx="261.4" cy="251.9" r="3.6" fill="#b0562f"/>
+<circle cx="323.8" cy="303.1" r="3.6" fill="#b0562f"/>
+<circle cx="386.3" cy="242.8" r="3.6" fill="#b0562f"/>
+<circle cx="448.8" cy="263.2" r="3.6" fill="#b0562f"/>
+<circle cx="511.2" cy="273.3" r="3.6" fill="#b0562f"/>
+<circle cx="573.7" cy="418.7" r="3.6" fill="#b0562f"/>
+<circle cx="636.2" cy="261.9" r="3.6" fill="#b0562f"/>
+<circle cx="698.6" cy="216.7" r="3.6" fill="#b0562f"/>
+<circle cx="761.1" cy="299.2" r="3.6" fill="#b0562f"/>
+<circle cx="823.5" cy="342.2" r="3.6" fill="#b0562f"/>
+<circle cx="886.0" cy="161.3" r="3.6" fill="#b0562f"/>
+<circle cx="886.0" cy="161.3" r="8" fill="none" stroke="#b0562f" stroke-width="2"/>
+<text x="872.0" y="145.3" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="13" fill="#8f4224" text-anchor="end">峰值 +0.2035 @ k=13</text>
+<text x="573.7" y="444.7" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#6b3a2a" text-anchor="middle">k=8：-0.2363</text>
+<line x1="90" y1="104" x2="112" y2="104" stroke="#4c6f8c" stroke-width="2.4"/>
+<text x="120" y="108" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#4a5160">训练段（仅诊断）</text>
+<line x1="90" y1="124" x2="112" y2="124" stroke="#b0562f" stroke-width="2.4"/>
+<text x="120" y="128" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#4a5160">验证段（判定）</text>
+<text x="74" y="36" font-family="system-ui,-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="15" font-weight="600" fill="#1f2733">临床 XBI：产业界新登记试验数 → XBI 周收益率</text>
+</svg>

@@ -13,6 +13,16 @@ phase0/output/*
 !phase0/output/openalex_weekly_chain10.csv
 !phase0/output/sector_weekly_chain10.csv
 !phase0/output/xcorr_chain10.csv
+# 批次一证据：只放行临床 XBI 正式账（逐格相关、快照旁注；公开源、无隐私，体积 < 5KB/份）
+!phase0/output/batch1_xcorr_clinical_xbi_train.csv
+!phase0/output/batch1_xcorr_clinical_xbi_validation.csv
+!phase0/output/batch1_snapshot_clinical.md
+!phase0/output/batch1_snapshot_yahoo_XBI.md
+# 能源 N1 为练手账：其证据、内部归档与曲线图一律不入库，仅本地留存
+phase0/batch1_internal_archive.md
+phase0/batch1_curve_energy_n1.svg
+# 过程账本同时含能源与临床结果字段，按练手账口径不入库，仅本地留存
+phase0/batch1.record.runs.jsonl
 
 # 探针本地产出（云端结果由 probe-results / probe-new-results 分支回传）
 probe_result.json
