@@ -1,0 +1,200 @@
+[
+  {
+    "id": "REG-BF-01",
+    "claim": "WTI 原油会在 2026 年 3 月内触及 100 美元/桶（按日频收盘价）",
+    "registered_at": "2026-02-24T09:00:00Z",
+    "expires_on": "2026-03-31",
+    "provenance": {
+      "kind": "backfill_selftest",
+      "note": "回填测试：用已发生事实构造的历史预测；registered_at 是构造的申报时刻，不是实时注册证据"
+    },
+    "criterion": {
+      "syntax_version": "criterion/v1",
+      "source": {"provider": "fred", "id": "DCOILWTICO", "field": "value"},
+      "window": {"start": "2026-03-01", "end": "2026-03-31"},
+      "aggregate": "max",
+      "comparator": "gte",
+      "threshold": 100,
+      "unit": "USD/barrel",
+      "min_observations": 15,
+      "coverage_slack_days": 7,
+      "settlement_lag_days": 3
+    }
+  },
+  {
+    "id": "REG-BF-02",
+    "claim": "WTI 原油 2026 年 1 月的最高收盘价会站上 80 美元/桶",
+    "registered_at": "2025-12-29T09:00:00Z",
+    "expires_on": "2026-01-31",
+    "provenance": {
+      "kind": "backfill_selftest",
+      "note": "回填测试：用已发生事实构造的历史预测；registered_at 是构造的申报时刻，不是实时注册证据"
+    },
+    "criterion": {
+      "syntax_version": "criterion/v1",
+      "source": {"provider": "fred", "id": "DCOILWTICO", "field": "value"},
+      "window": {"start": "2026-01-01", "end": "2026-01-31"},
+      "aggregate": "max",
+      "comparator": "gte",
+      "threshold": 80,
+      "unit": "USD/barrel",
+      "min_observations": 15,
+      "coverage_slack_days": 7,
+      "settlement_lag_days": 3
+    }
+  },
+  {
+    "id": "REG-BF-03",
+    "claim": "标普 500（SPY）2026 年二季度最后一个交易日收盘价不低于 740 美元",
+    "registered_at": "2026-03-30T09:00:00Z",
+    "expires_on": "2026-06-30",
+    "provenance": {
+      "kind": "backfill_selftest",
+      "note": "回填测试：用已发生事实构造的历史预测；registered_at 是构造的申报时刻，不是实时注册证据"
+    },
+    "criterion": {
+      "syntax_version": "criterion/v1",
+      "source": {"provider": "yahoo", "id": "SPY", "field": "adjclose"},
+      "window": {"start": "2026-04-01", "end": "2026-06-30"},
+      "aggregate": "last",
+      "comparator": "gte",
+      "threshold": 740,
+      "unit": "USD (adjclose)",
+      "min_observations": 50,
+      "coverage_slack_days": 7,
+      "settlement_lag_days": 3
+    }
+  },
+  {
+    "id": "REG-BF-04",
+    "claim": "医疗板块 ETF（XLV）2026 年一季末收盘价不低于 160 美元",
+    "registered_at": "2025-12-29T09:00:00Z",
+    "expires_on": "2026-03-31",
+    "provenance": {
+      "kind": "backfill_selftest",
+      "note": "回填测试：用已发生事实构造的历史预测；registered_at 是构造的申报时刻，不是实时注册证据"
+    },
+    "criterion": {
+      "syntax_version": "criterion/v1",
+      "source": {"provider": "yahoo", "id": "XLV", "field": "adjclose"},
+      "window": {"start": "2026-01-01", "end": "2026-03-31"},
+      "aggregate": "last",
+      "comparator": "gte",
+      "threshold": 160,
+      "unit": "USD (adjclose)",
+      "min_observations": 50,
+      "coverage_slack_days": 7,
+      "settlement_lag_days": 3
+    }
+  },
+  {
+    "id": "REG-BF-05",
+    "claim": "美国常规零售汽油 2026 年 9 月周均价不低于 4.3 美元/加仑（要求至少 8 个周度观测）",
+    "registered_at": "2026-08-31T09:00:00Z",
+    "expires_on": "2026-09-30",
+    "provenance": {
+      "kind": "backfill_selftest",
+      "note": "回填测试：构造的「观测数不足」压力用例，用于验证第三种判定状态存在且不折算为未命中"
+    },
+    "criterion": {
+      "syntax_version": "criterion/v1",
+      "source": {"provider": "fred", "id": "GASREGW", "field": "value"},
+      "window": {"start": "2026-09-01", "end": "2026-09-30"},
+      "aggregate": "mean",
+      "comparator": "gte",
+      "threshold": 4.3,
+      "unit": "USD/gallon",
+      "min_observations": 8,
+      "coverage_slack_days": 10,
+      "settlement_lag_days": 3
+    }
+  },
+  {
+    "id": "REG-BF-06",
+    "claim": "美国 10 年期国债收益率 2026 年 9 月内最高收盘会达到 5.2%",
+    "registered_at": "2026-08-31T09:00:00Z",
+    "expires_on": "2026-09-30",
+    "provenance": {
+      "kind": "backfill_selftest",
+      "note": "回填测试：用已发生事实构造的历史预测；registered_at 是构造的申报时刻，不是实时注册证据"
+    },
+    "criterion": {
+      "syntax_version": "criterion/v1",
+      "source": {"provider": "fred", "id": "DGS10", "field": "value"},
+      "window": {"start": "2026-09-01", "end": "2026-09-30"},
+      "aggregate": "max",
+      "comparator": "gte",
+      "threshold": 5.2,
+      "unit": "percent",
+      "min_observations": 15,
+      "coverage_slack_days": 7,
+      "settlement_lag_days": 3
+    }
+  },
+  {
+    "id": "REG-BF-07",
+    "claim": "黄金 ETF（GLD）2026 年 6 月末收盘价不低于 400 美元",
+    "registered_at": "2026-05-29T09:00:00Z",
+    "expires_on": "2026-06-30",
+    "provenance": {
+      "kind": "backfill_selftest",
+      "note": "回填测试：用已发生事实构造的历史预测；registered_at 是构造的申报时刻，不是实时注册证据"
+    },
+    "criterion": {
+      "syntax_version": "criterion/v1",
+      "source": {"provider": "yahoo", "id": "GLD", "field": "adjclose"},
+      "window": {"start": "2026-06-01", "end": "2026-06-30"},
+      "aggregate": "last",
+      "comparator": "gte",
+      "threshold": 400,
+      "unit": "USD (adjclose)",
+      "min_observations": 15,
+      "coverage_slack_days": 7,
+      "settlement_lag_days": 3
+    }
+  },
+  {
+    "id": "REG-BF-08",
+    "claim": "生物科技 ETF（XBI）2026 年二季度累计涨幅不低于 15%",
+    "registered_at": "2026-04-30T09:00:00Z",
+    "expires_on": "2026-06-30",
+    "provenance": {
+      "kind": "backfill_selftest",
+      "note": "回填测试：用已发生事实构造的历史预测；registered_at 是构造的申报时刻，不是实时注册证据"
+    },
+    "criterion": {
+      "syntax_version": "criterion/v1",
+      "source": {"provider": "yahoo", "id": "XBI", "field": "adjclose"},
+      "window": {"start": "2026-05-01", "end": "2026-06-30"},
+      "aggregate": "pct_change",
+      "comparator": "gte",
+      "threshold": 15,
+      "unit": "percent",
+      "min_observations": 30,
+      "coverage_slack_days": 7,
+      "settlement_lag_days": 3
+    }
+  },
+  {
+    "id": "REG-BF-09",
+    "claim": "美国常规零售汽油 2026 年 10 月周均价不低于 4.0 美元/加仑（要求窗口被完整覆盖）",
+    "registered_at": "2026-09-30T09:00:00Z",
+    "expires_on": "2026-10-31",
+    "provenance": {
+      "kind": "backfill_selftest",
+      "note": "回填测试：构造的「窗口覆盖不足」压力用例，用于验证数据滞后会落到无法判定而不是未命中"
+    },
+    "criterion": {
+      "syntax_version": "criterion/v1",
+      "source": {"provider": "fred", "id": "GASREGW", "field": "value"},
+      "window": {"start": "2026-10-01", "end": "2026-10-31"},
+      "aggregate": "mean",
+      "comparator": "gte",
+      "threshold": 4.0,
+      "unit": "USD/gallon",
+      "min_observations": 4,
+      "coverage_slack_days": 3,
+      "settlement_lag_days": 3
+    }
+  }
+]

@@ -1,0 +1,313 @@
+{
+  "at": "2026-11-08T12:00:00Z",
+  "passed": true,
+  "ledger": "phase0\\registry\\backfill.ledger.jsonl",
+  "ledger_bytes": 22151,
+  "ledger_chain": {
+    "ok": true,
+    "count": 19,
+    "problems": [],
+    "head_sha256": "68f5fe1b86b7e435794afff58c7f8654a622fd4679602ce46a23b9fe6521ac1f"
+  },
+  "events": [
+    {
+      "id": "REG-BF-01",
+      "claim_canonical": "FRED:DCOILWTICO 在 2026-03-01 至 2026-03-31 窗口内，窗口内最大观测值 ≥ 100 USD/barrel（至少 15 个观测）",
+      "verdict": "hit",
+      "reason_code": null,
+      "value": 104.69,
+      "n": 22
+    },
+    {
+      "id": "REG-BF-02",
+      "claim_canonical": "FRED:DCOILWTICO 在 2026-01-01 至 2026-01-31 窗口内，窗口内最大观测值 ≥ 80 USD/barrel（至少 15 个观测）",
+      "verdict": "miss",
+      "reason_code": null,
+      "value": 64.77,
+      "n": 20
+    },
+    {
+      "id": "REG-BF-03",
+      "claim_canonical": "Yahoo Finance:SPY 在 2026-04-01 至 2026-06-30 窗口内，窗口内最后一个观测值 ≥ 740 USD (adjclose)（至少 50 个观测）",
+      "verdict": "hit",
+      "reason_code": null,
+      "value": 744.920227,
+      "n": 62
+    },
+    {
+      "id": "REG-BF-04",
+      "claim_canonical": "Yahoo Finance:XLV 在 2026-01-01 至 2026-03-31 窗口内，窗口内最后一个观测值 ≥ 160 USD (adjclose)（至少 50 个观测）",
+      "verdict": "miss",
+      "reason_code": null,
+      "value": 145.409744,
+      "n": 61
+    },
+    {
+      "id": "REG-BF-05",
+      "claim_canonical": "FRED:GASREGW 在 2026-09-01 至 2026-09-30 窗口内，窗口内观测均值 ≥ 4.3 USD/gallon（至少 8 个观测）",
+      "verdict": "undetermined",
+      "reason_code": "INSUFFICIENT_OBSERVATIONS",
+      "value": null,
+      "n": 4
+    },
+    {
+      "id": "REG-BF-06",
+      "claim_canonical": "FRED:DGS10 在 2026-09-01 至 2026-09-30 窗口内，窗口内最大观测值 ≥ 5.2 percent（至少 15 个观测）",
+      "verdict": "hit",
+      "reason_code": null,
+      "value": 5.29,
+      "n": 21
+    },
+    {
+      "id": "REG-BF-07",
+      "claim_canonical": "Yahoo Finance:GLD 在 2026-06-01 至 2026-06-30 窗口内，窗口内最后一个观测值 ≥ 400 USD (adjclose)（至少 15 个观测）",
+      "verdict": "miss",
+      "reason_code": null,
+      "value": 368.380005,
+      "n": 21
+    },
+    {
+      "id": "REG-BF-08",
+      "claim_canonical": "Yahoo Finance:XBI 在 2026-05-01 至 2026-06-30 窗口内，窗口首末观测涨跌幅（%） ≥ 15 percent（至少 30 个观测）",
+      "verdict": "hit",
+      "reason_code": null,
+      "value": 21.457864,
+      "n": 41
+    },
+    {
+      "id": "REG-BF-09",
+      "claim_canonical": "FRED:GASREGW 在 2026-10-01 至 2026-10-31 窗口内，窗口内观测均值 ≥ 4 USD/gallon（至少 4 个观测）",
+      "verdict": "undetermined",
+      "reason_code": "WINDOW_NOT_COVERED",
+      "value": null,
+      "n": 4
+    }
+  ],
+  "reconcile": {
+    "registered": 9,
+    "verified": 9,
+    "no_verdict": 0,
+    "hit": 4,
+    "miss": 3,
+    "undetermined": 2,
+    "decided": 7,
+    "hit_rate": {
+      "k": 4,
+      "n": 7,
+      "ci95": [
+        25.0,
+        84.2
+      ],
+      "point": null,
+      "point_reported": false,
+      "rule": "样本 n<20 只报区间、不报点估计"
+    },
+    "by_source": {
+      "fred:DCOILWTICO": {
+        "hit": 1,
+        "miss": 1,
+        "undetermined": 0,
+        "no_verdict": 0
+      },
+      "yahoo:SPY": {
+        "hit": 1,
+        "miss": 0,
+        "undetermined": 0,
+        "no_verdict": 0
+      },
+      "yahoo:XLV": {
+        "hit": 0,
+        "miss": 1,
+        "undetermined": 0,
+        "no_verdict": 0
+      },
+      "fred:GASREGW": {
+        "hit": 0,
+        "miss": 0,
+        "undetermined": 2,
+        "no_verdict": 0
+      },
+      "fred:DGS10": {
+        "hit": 1,
+        "miss": 0,
+        "undetermined": 0,
+        "no_verdict": 0
+      },
+      "yahoo:GLD": {
+        "hit": 0,
+        "miss": 1,
+        "undetermined": 0,
+        "no_verdict": 0
+      },
+      "yahoo:XBI": {
+        "hit": 1,
+        "miss": 0,
+        "undetermined": 0,
+        "no_verdict": 0
+      }
+    },
+    "note": "undetermined 不计入命中率分母；未判定与无法判定分开计数"
+  },
+  "assertions": [
+    {
+      "name": "register:all",
+      "ok": true,
+      "detail": "注册 9/9 条"
+    },
+    {
+      "name": "register:probe_complete",
+      "ok": true,
+      "detail": "每条注册都带完整数据源指纹（SHA256 / 行数 / 首末日期）"
+    },
+    {
+      "name": "ledger:append_only",
+      "ok": true,
+      "detail": "追加前 13807 字节，追加后 22151 字节，前缀逐字节一致"
+    },
+    {
+      "name": "verify:one_verdict_per_event",
+      "ok": true,
+      "detail": "新增 9 条判定，覆盖 9 个事件"
+    },
+    {
+      "name": "verdict:hit_present",
+      "ok": true,
+      "detail": "hit 4 条：REG-BF-01, REG-BF-03, REG-BF-06, REG-BF-08"
+    },
+    {
+      "name": "verdict:miss_present",
+      "ok": true,
+      "detail": "miss 3 条：REG-BF-02, REG-BF-04, REG-BF-07"
+    },
+    {
+      "name": "verdict:undetermined_present",
+      "ok": true,
+      "detail": "undetermined 2 条：REG-BF-05, REG-BF-09"
+    },
+    {
+      "name": "reconcile:undetermined_not_in_denominator",
+      "ok": true,
+      "detail": "命中率分母 7 = hit 4 + miss 3；undetermined 2 单列"
+    },
+    {
+      "name": "reconcile:small_sample_interval_only",
+      "ok": true,
+      "detail": "n=7<20，只报区间 [25.0, 84.2]，不给点估计"
+    },
+    {
+      "name": "criterion:claim_independent",
+      "ok": true,
+      "detail": "删除 claim 文本后重判，全部结论与观测值不变"
+    },
+    {
+      "name": "verdict:source_failure_is_undetermined",
+      "ok": true,
+      "detail": "undetermined/SOURCE_UNREACHABLE（注入取数失败，不记 miss）"
+    },
+    {
+      "name": "verdict:aggregate_undefined",
+      "ok": true,
+      "detail": "undetermined/AGGREGATE_UNDEFINED（首值为 0，不记 miss）"
+    },
+    {
+      "name": "verify:frozen_after_decided",
+      "ok": true,
+      "detail": "hit/miss 事件全部拒绝重跑，账本未增长"
+    },
+    {
+      "name": "verify:criterion_hash_guard",
+      "ok": true,
+      "detail": "CRITERION_TAMPERED: REG-BF-01 的判据与注册时哈希不一致，拒绝据此判定"
+    },
+    {
+      "name": "verify:not_due_skipped",
+      "ok": true,
+      "detail": "状态 not_due，账本未增长"
+    },
+    {
+      "name": "reject:vague_claim",
+      "ok": true,
+      "detail": "claim 含含糊表述 ['大概率', '大概率上涨']；判据必须机器可判，含糊句子在注册这一刻就拒绝"
+    },
+    {
+      "name": "reject:missing_criterion",
+      "ok": true,
+      "detail": "注册请求缺少字段 ['criterion']"
+    },
+    {
+      "name": "reject:null_criterion",
+      "ok": true,
+      "detail": "criterion 必须是对象；没有结构化判据的预测不得注册"
+    },
+    {
+      "name": "reject:unknown_comparator",
+      "ok": true,
+      "detail": "comparator='approximately' 不在 ('gte', 'lte')"
+    },
+    {
+      "name": "reject:unknown_provider",
+      "ok": true,
+      "detail": "未知数据源 provider='bloomberg'；可选 ['fred', 'yahoo']"
+    },
+    {
+      "name": "reject:bogus_series",
+      "ok": true,
+      "detail": "数据源当下取不到，拒绝注册：HTTP 404（https://fred.stlouisfed.org/graph/fredgraph.csv?id=NOT_A_SERIES_XYZ）"
+    },
+    {
+      "name": "reject:nan_threshold",
+      "ok": true,
+      "detail": "threshold 必须是有限数值，收到 nan"
+    },
+    {
+      "name": "reject:window_after_expiry",
+      "ok": true,
+      "detail": "判据窗口末 2026-04-30 超出到期日 2026-03-31"
+    },
+    {
+      "name": "reject:live_after_expiry",
+      "ok": true,
+      "detail": "live 注册在到期日 2026-01-31 之后才写入（2026-11-08）；历史补录必须标 provenance.kind=backfill_selftest"
+    },
+    {
+      "name": "reject:unknown_field",
+      "ok": true,
+      "detail": "注册请求含未知字段 ['confidence']"
+    },
+    {
+      "name": "reject:bad_expiry_date",
+      "ok": true,
+      "detail": "expires_on 不是合法日期：'2026-02-30'"
+    },
+    {
+      "name": "reject:duplicate_id",
+      "ok": true,
+      "detail": "id REG-BF-01 已注册"
+    },
+    {
+      "name": "cli:at_required",
+      "ok": true,
+      "detail": "exit=2"
+    },
+    {
+      "name": "cli:vague_rejected",
+      "ok": true,
+      "detail": "exit=2，账本未创建"
+    },
+    {
+      "name": "cli:reconcile_runs",
+      "ok": true,
+      "detail": "exit=0"
+    },
+    {
+      "name": "ledger:hash_chain",
+      "ok": true,
+      "detail": "19 条记录，head=68f5fe1b86b7，问题 0 个"
+    },
+    {
+      "name": "code:no_wall_clock",
+      "ok": true,
+      "detail": "本目录脚本没有读取系统时钟"
+    }
+  ]
+}
