@@ -1,0 +1,18 @@
+{
+  "id": "REG-API-DEMO-BAD-03",
+  "claim": "10 年期美债收益率在 2026 年 10 月的最高读数不低于 4.0%",
+  "registered_at": "2026-10-31T00:00:00Z",
+  "expires_on": "2026-11-05",
+  "criterion": {
+    "syntax_version": "criterion/v1",
+    "source": {"provider": "fred", "id": "DGS10", "field": "value"},
+    "window": {"start": "2026-10-01", "end": "2026-10-30"},
+    "aggregate": "max",
+    "comparator": "gte",
+    "threshold": 4.0,
+    "unit": "percent",
+    "min_observations": 15,
+    "coverage_slack_days": 5,
+    "settlement_lag_days": 3
+  }
+}

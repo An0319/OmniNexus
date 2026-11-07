@@ -1,0 +1,19 @@
+{
+  "id": "REG-API-DEMO-03",
+  "claim": "美国普通汽油零售均价在 2026 年 10 月最后一个观测不低于 3.0 美元/加仑",
+  "registered_at": "2026-10-01T00:00:00Z",
+  "expires_on": "2026-11-04",
+  "criterion": {
+    "syntax_version": "criterion/v1",
+    "source": {"provider": "fred", "id": "GASREGW", "field": "value"},
+    "window": {"start": "2026-10-01", "end": "2026-10-30"},
+    "aggregate": "last",
+    "comparator": "gte",
+    "threshold": 3.0,
+    "unit": "USD/gallon",
+    "min_observations": 2,
+    "coverage_slack_days": 0,
+    "settlement_lag_days": 3
+  },
+  "provenance": {"kind": "backfill_selftest", "note": "接口层演示：回填记录，用于演示「窗口未被覆盖」这一失败态"}
+}

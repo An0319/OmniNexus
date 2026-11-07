@@ -1,0 +1,18 @@
+{
+  "id": "REG-API-DEMO-BAD-02",
+  "claim": "某个不存在的美联储序列在 2026 年 10 月不低于 1",
+  "registered_at": "2026-11-07T23:06:00Z",
+  "expires_on": "2026-11-30",
+  "criterion": {
+    "syntax_version": "criterion/v1",
+    "source": {"provider": "fred", "id": "NOSUCHSERIES", "field": "value"},
+    "window": {"start": "2026-10-01", "end": "2026-10-31"},
+    "aggregate": "last",
+    "comparator": "gte",
+    "threshold": 1,
+    "unit": "index",
+    "min_observations": 10,
+    "coverage_slack_days": 5,
+    "settlement_lag_days": 3
+  }
+}
