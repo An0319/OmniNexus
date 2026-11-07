@@ -1,0 +1,248 @@
+{
+  "n_items": 23,
+  "n_labeled_events": 12,
+  "n_undecidable": 1,
+  "n_emitted": 12,
+  "lenient_recall": 0.833,
+  "strict_recall": 0.583,
+  "lenient_precision": 0.833,
+  "strict_precision": 0.583,
+  "action_accuracy": 0.7,
+  "subject_accuracy": 0.9,
+  "alt_lenient_recall": 0.769,
+  "alt_strict_recall": 0.538,
+  "alt_lenient_precision": 0.833,
+  "alt_strict_precision": 0.583,
+  "floors": {
+    "lenient_recall": 0.7,
+    "strict_recall": 0.45,
+    "lenient_precision": 0.7,
+    "action_accuracy": 0.6,
+    "subject_accuracy": 0.6
+  },
+  "pass": {
+    "lenient_recall": true,
+    "strict_recall": true,
+    "lenient_precision": true,
+    "action_accuracy": true,
+    "subject_accuracy": true
+  },
+  "rows": [
+    {
+      "id": "B01",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "First Gene-Edited Pig Kidney Transplant Clinical Trial Begins at NYU Langone Health",
+      "action": "trial_start",
+      "subject": "NYU Langone Health",
+      "action_ok": true,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B02",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "First-ever cancer clinical trial launched at VCU Health Tappahannock Hospital",
+      "action": "trial_start",
+      "subject": "VCU Health Tappahannock Hospital",
+      "action_ok": true,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B03",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "Minimizing Missing Data in Clinical Trials"
+    },
+    {
+      "id": "B04",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "AI and innovation in clinical trials - npj Digital Medicine"
+    },
+    {
+      "id": "B05",
+      "label_event": false,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Private equity moves into clinical trials",
+      "action": "partnership",
+      "subject": "Private equity"
+    },
+    {
+      "id": "B06",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Liraglutide in mild to moderate Alzheimer’s disease: a phase 2b clinical trial",
+      "action": "trial_result",
+      "subject": "Liraglutide",
+      "action_ok": true,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B07",
+      "label_event": true,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "Decline in commercial clinical trial recruitment selling patients short, says ABPI"
+    },
+    {
+      "id": "B08",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "UK industry clinical trials: Translating actions into impact"
+    },
+    {
+      "id": "B09",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "Learn more about how we can establish a foundation for cancer clinical trials in Canada."
+    },
+    {
+      "id": "B10",
+      "label_event": null,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "Longitudinal clinical trial enrollment trends across 341 US FDA-approved drugs and their g",
+      "note": "补正文后仍判不了：摘要+结论+通俗摘要里没有期刊名/DOI/预印本库（只有 Subject terms: Clinical trials, Drug development），内容为趋势分析、无 A1 动作；标题尾部『| Communications Medicine』是新闻聚合标题的来源后缀，条目 URL 亦不指向该刊，A2 的两个条件都不成立"
+    },
+    {
+      "id": "B11",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Lilly's triple agonist, retatrutide, delivered weight loss of up to an average of 71.2 lbs",
+      "action": "trial_result",
+      "subject": "Lilly's triple agonist, retatrutide",
+      "action_ok": true,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B12",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "Analysis of phase II and phase III clinical trial terminations from 2013 to 2023"
+    },
+    {
+      "id": "B13",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Groundbreaking £50m MRC centre will overhaul clinical trials",
+      "action": "partnership",
+      "subject": "MRC centre",
+      "action_ok": false,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B14",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "MRC Centre of Research Excellence in Clinical Trial Innovation in partnership with NIHR",
+      "action": "partnership",
+      "subject": "MRC Centre of Research Excellence in Clinical Trial Innovation",
+      "action_ok": false,
+      "subject_ok": false,
+      "value_ok": true
+    },
+    {
+      "id": "B15",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "UAE & Saudi Arabia: Why Clinical Trials are gaining real momentum"
+    },
+    {
+      "id": "B16",
+      "label_event": false,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Alzheimer’s drug developers accuse clinical trial sites of faking data",
+      "action": "rejection",
+      "subject": "Alzheimer’s drug developers"
+    },
+    {
+      "id": "B17",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "Clinical Trial Innovation in Action: Best Practice Consensus Recommendations for Implement"
+    },
+    {
+      "id": "B18",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "Patients to benefit sooner as UK boosts clinical trials attractiveness with faster assessm",
+      "action": "policy",
+      "subject": "UK",
+      "action_ok": true,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B19",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "UAB Vascular Surgery and Biostatistics partner to lead WARRIORS Clinical Trial",
+      "action": "partnership",
+      "subject": "UAB Vascular Surgery and Biostatistics",
+      "action_ok": true,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B20",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "ACT-BT – new initiative to improve access to brain tumour clinical trials",
+      "action": "trial_start",
+      "subject": "ACT-BT",
+      "action_ok": false,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B21",
+      "label_event": true,
+      "emitted": true,
+      "reject_reason": null,
+      "title": "UCLA Health launches novel clinical trial for recurrent prostate cancer",
+      "action": "trial_start",
+      "subject": "UCLA Health",
+      "action_ok": true,
+      "subject_ok": true,
+      "value_ok": true
+    },
+    {
+      "id": "B22",
+      "label_event": true,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "Four Penn studies named among nation’s top clinical research advances"
+    },
+    {
+      "id": "B23",
+      "label_event": false,
+      "emitted": false,
+      "reject_reason": "not_an_event",
+      "title": "Clinical Trials Highlights issue 29 - January 2026"
+    }
+  ]
+}
