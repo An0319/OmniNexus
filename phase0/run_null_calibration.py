@@ -635,17 +635,23 @@ def section_probe(recs, abs_recs, single_map, accounts):
         "| 账 | 段 | 窗口 `max|corr|` 取到于 k | 该格实测 r | n | 全平移 P(\\|null\\|≥\\|r\\|) | 远平移 P(\\|null\\|≥\\|r\\|) |",
         "|---|---|---|---|---|---|---|",
     ]
+    csv_notes = []
     for r in recs:
         a = abs_recs[(r["name"], r["seg"])]
         av = abs(r["abs_obs"])
+        n_all = len(a["all"])
+        n_full = int(np.sum(a["all"] >= av))
+        n_csv = int(np.sum(np.round(a["all"], 6) >= av))
+        note = (f"{LABELS[r['name']]} {r['seg']} 行用 CSV 复算为 {n_csv}/{n_all}")
+        note += "，与本文一致" if n_csv == n_full else f"（本文为 {n_full}/{n_all}）"
+        csv_notes.append(note)
         out.append(f"| {LABELS[r['name']]} | {r['seg']} | {r['abs_k']} | {sign4(r['abs_obs'])} | {r['abs_n']} "
                    f"| {frac(int(np.sum(a['all'] >= av)), len(a['all']))} "
                    f"| {frac(int(np.sum(a['far'] >= av)), len(a['far']))} |")
 
     out += [
         "",
-        "本表计数按全精度相关值比较；随附 CSV 只保留 6 位小数，若用 CSV 复算该表会略低"
-        "（峰值附近有个别取值恰好卡在阈值这一侧），故本表以脚本全精度计数为准。",
+        "本表按全精度比较，CSV 只保留 6 位小数；" + "；".join(csv_notes) + "。",
     ]
 
     if t_ref is not None:
