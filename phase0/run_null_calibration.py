@@ -31,9 +31,17 @@ Outputs (both written by the SAME run when accounts == all; never retyped):
   phase0/batch1_null_calibration_clinical.md     clinical account only (tracked)
   phase0/batch1_null_calibration_clinical.csv    per-shift values       (tracked)
 
-Usage (from the repository root):
+Usage (run from the repository root):
   python phase0/run_null_calibration.py                  # both accounts
   python phase0/run_null_calibration.py --accounts clinical   # clinical only
+
+Not self-contained: the script reads the local raw inputs
+phase0/output/batch1_clinical_weekly_counts.csv and
+phase0/output/batch1_yahoo_XBI_daily.csv, which are NOT tracked in the
+repository.  A clean clone therefore cannot regenerate these documents from
+the script.  The supported external recompute path is the tracked per-shift
+CSV phase0/batch1_null_calibration_clinical.csv -> section 3 of the clinical
+document.
 """
 from __future__ import annotations
 
@@ -235,11 +243,11 @@ def header(accounts, clinical_export):
     if clinical_export:
         scope = ("本文只含**临床 XBI**（正式账）一本账，不含另一本账（能源 N1，练手账）的任何结果；"
                  "合订版 `batch1_null_calibration.md` 含该账结果且不入库。"
-                 "**两文数值不可互相引用。**")
+                 "**两文数值不可逐格等同引用。**")
         title = "# 批次一零分布校准：临床 XBI（事后方法学校准，对外版）"
     else:
         scope = ("本文同时含**临床 XBI** 与**能源 N1** 两本账的结果。对外版 "
-                 "`batch1_null_calibration_clinical.md` 只含临床账；**两文数值不可互相引用**。"
+                 "`batch1_null_calibration_clinical.md` 只含临床账；**两文数值不可逐格等同引用**。"
                  "本文不入库，仅本地留存。")
         title = "# 批次一零分布校准（事后方法学校准，两本账合订）"
     return [
@@ -634,6 +642,12 @@ def section_probe(recs, abs_recs, single_map, accounts):
                    f"| {frac(int(np.sum(a['all'] >= av)), len(a['all']))} "
                    f"| {frac(int(np.sum(a['far'] >= av)), len(a['far']))} |")
 
+    out += [
+        "",
+        "本表计数按全精度相关值比较；随附 CSV 只保留 6 位小数，若用 CSV 复算该表会略低"
+        "（峰值附近有个别取值恰好卡在阈值这一侧），故本表以脚本全精度计数为准。",
+    ]
+
     if t_ref is not None:
         out += [
             "",
@@ -938,7 +952,10 @@ def assemble(recs, abs_recs, single_map, accounts, n_all, n_far, built, clinical
     body += [
         "数据基线：`batch1_xcorr_*.csv` 中的逐格数值由本脚本复算并逐格断言一致；"
         "逐平移取值见 `batch1_null_calibration_clinical.csv`。"
-        "本文件由 `phase0/run_null_calibration.py` 生成，正文不含手写结果数字（只含方法阈值与格式）。", ""]
+        "本文件由 `phase0/run_null_calibration.py` 生成，正文不含手写结果数字（只含方法阈值与格式）。"
+        "该脚本不是自包含的：它读取本地未入库的原始件（`phase0/output/batch1_clinical_weekly_counts.csv`、"
+        "`batch1_yahoo_XBI_daily.csv`），干净克隆下无法用它重生成本文；"
+        "对外复算路径是随附的逐平移 CSV → 本文第 3 节。", ""]
     return body
 
 
