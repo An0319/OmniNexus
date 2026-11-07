@@ -21,6 +21,9 @@ phase0/output/*
 # 能源 N1 为练手账：其证据、内部归档与曲线图一律不入库，仅本地留存
 phase0/batch1_internal_archive.md
 phase0/batch1_curve_energy_n1.svg
+# 零分布校准的合订版含能源账结果，同样不入库；对外只放行临床版与逐平移 CSV（无忽略规则，直接入库）
+phase0/batch1_null_calibration.md
+phase0/batch1_null_calibration.svg
 # 过程账本同时含能源与临床结果字段，按练手账口径不入库，仅本地留存
 phase0/batch1.record.runs.jsonl
 
