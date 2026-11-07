@@ -32,6 +32,7 @@ phase0/controls/data/*
 !phase0/controls/data/snapshot.json
 # 功效模拟的逐次重复原始记录仅本地留存（仓库只保留 power_summary.json 与脚本）
 phase0/controls/power_raw*.jsonl
+phase0/controls/paths_raw*.jsonl
 
 # 探针本地产出（云端结果由 probe-results / probe-new-results 分支回传）
 probe_result.json

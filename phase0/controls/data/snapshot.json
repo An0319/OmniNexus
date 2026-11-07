@@ -252,6 +252,98 @@
           ]
         }
       ]
+    },
+    "DCOILWTICO_DAILY": {
+      "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILWTICO",
+      "fetched_at_utc": "2026-11-07T17:38:25Z",
+      "second_fetch_at_utc": "2026-11-07T17:38:25Z",
+      "sha256": "90c95c17a2cdb9a3b4a8d393494d19a40e1eb7fa80943838036754d3be74a06e",
+      "second_sha256": "90c95c17a2cdb9a3b4a8d393494d19a40e1eb7fa80943838036754d3be74a06e",
+      "identical_on_refetch": true,
+      "freq": "daily",
+      "rows": 9537,
+      "first": "1986-01-02",
+      "last": "2026-11-03",
+      "refetch_diff_count": 0,
+      "refetch_diff_max_abs": 0.0,
+      "raw_lines": 10655,
+      "fetches": [
+        {
+          "fetched_at_utc": "2026-11-07T17:38:25Z",
+          "second_fetch_at_utc": "2026-11-07T17:38:25Z",
+          "sha256": "90c95c17a2cdb9a3b4a8d393494d19a40e1eb7fa80943838036754d3be74a06e",
+          "second_sha256": "90c95c17a2cdb9a3b4a8d393494d19a40e1eb7fa80943838036754d3be74a06e",
+          "identical_on_refetch": true,
+          "freq": "daily",
+          "rows": 9537,
+          "first": "1986-01-02",
+          "last": "2026-11-03",
+          "refetch_diff_count": 0,
+          "refetch_diff_max_abs": 0.0
+        }
+      ]
+    },
+    "UGA": {
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/UGA?period1=1104537600&period2=1794096000&interval=1d&events=div%7Csplit&includeAdjustedClose=true",
+      "fetched_at_utc": "2026-11-07T17:38:27Z",
+      "second_fetch_at_utc": "2026-11-07T17:38:27Z",
+      "sha256": "98c7e404b1cbf0a753317623fa9a7196b12b6239826734961996f4152e1100dc",
+      "second_sha256": "1debfe5ae46734c18d8c842975e34a574666e1a06da7c5415c9b15d37afeea78",
+      "identical_on_refetch": false,
+      "freq": "daily",
+      "rows": 4704,
+      "first": "2008-02-28",
+      "last": "2026-11-06",
+      "refetch_diff_count": 0,
+      "refetch_diff_max_abs": 0.0,
+      "raw_lines": 1,
+      "fetches": [
+        {
+          "fetched_at_utc": "2026-11-07T17:38:27Z",
+          "second_fetch_at_utc": "2026-11-07T17:38:27Z",
+          "sha256": "98c7e404b1cbf0a753317623fa9a7196b12b6239826734961996f4152e1100dc",
+          "second_sha256": "1debfe5ae46734c18d8c842975e34a574666e1a06da7c5415c9b15d37afeea78",
+          "identical_on_refetch": false,
+          "freq": "daily",
+          "rows": 4704,
+          "first": "2008-02-28",
+          "last": "2026-11-06",
+          "refetch_diff_count": 0,
+          "refetch_diff_max_abs": 0.0
+        }
+      ],
+      "ok": true
+    },
+    "RB=F": {
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?period1=1104537600&period2=1794096000&interval=1d&events=div%7Csplit&includeAdjustedClose=true",
+      "fetched_at_utc": "2026-11-07T17:38:30Z",
+      "second_fetch_at_utc": "2026-11-07T17:38:30Z",
+      "sha256": "7eedfcd8f4cbc5da0ec7b1ea61cb1d198e4bc8997588b910efa8b76658eda13b",
+      "second_sha256": "7eedfcd8f4cbc5da0ec7b1ea61cb1d198e4bc8997588b910efa8b76658eda13b",
+      "identical_on_refetch": true,
+      "freq": "daily",
+      "rows": 5499,
+      "first": "2005-01-03",
+      "last": "2026-11-06",
+      "refetch_diff_count": 0,
+      "refetch_diff_max_abs": 0.0,
+      "raw_lines": 1,
+      "fetches": [
+        {
+          "fetched_at_utc": "2026-11-07T17:38:30Z",
+          "second_fetch_at_utc": "2026-11-07T17:38:30Z",
+          "sha256": "7eedfcd8f4cbc5da0ec7b1ea61cb1d198e4bc8997588b910efa8b76658eda13b",
+          "second_sha256": "7eedfcd8f4cbc5da0ec7b1ea61cb1d198e4bc8997588b910efa8b76658eda13b",
+          "identical_on_refetch": true,
+          "freq": "daily",
+          "rows": 5499,
+          "first": "2005-01-03",
+          "last": "2026-11-06",
+          "refetch_diff_count": 0,
+          "refetch_diff_max_abs": 0.0
+        }
+      ],
+      "ok": true
     }
   },
   "weekly_controls": {
@@ -287,5 +379,20 @@
       "first": "1999-01-15",
       "last": "2026-11-06"
     }
-  }
+  },
+  "daily_controls": {
+    "path": "phase0\\controls\\data\\daily_controls.csv",
+    "sha256": "9d07ba2931a4ff3df0b92168f4fd546d9e77ad016f5523ccc4072f489027156a",
+    "crude_ret": {
+      "rows": 4630,
+      "first": "2008-02-29",
+      "last": "2026-11-03"
+    },
+    "gas_ret": {
+      "rows": 4630,
+      "first": "2008-02-29",
+      "last": "2026-11-03"
+    }
+  },
+  "notes": []
 }
