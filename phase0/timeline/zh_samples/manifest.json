@@ -1,0 +1,85 @@
+{
+ "frozen_at_utc": "2026-11-08T12:50:09Z",
+ "files": {
+  "items.json": {
+   "sha256": "53b4d7314d990ba8d5a71576b6117b8f589a86987a02664410a3fe1a9fe47298",
+   "bytes": 52951,
+   "items": 80,
+   "verified_at_utc": "2026-11-08T12:53:40Z"
+  }
+ },
+ "pool_sizes": {
+  "A": 376,
+  "B": 118,
+  "C": 154,
+  "D": 51
+ },
+ "source_distribution": {
+  "A": {
+   "eastmoney": 150,
+   "google_news": 133,
+   "sina": 93
+  },
+  "B": {
+   "cninfo": 41,
+   "google_news": 77
+  },
+  "C": {
+   "google_news": 154
+  },
+  "D": {
+   "google_news": 51
+  }
+ },
+ "sample_source_distribution": {
+  "A": {
+   "eastmoney": 10,
+   "google_news": 6,
+   "sina": 4
+  },
+  "B": {
+   "cninfo": 8,
+   "google_news": 12
+  },
+  "C": {
+   "google_news": 20
+  },
+  "D": {
+   "google_news": 20
+  }
+ },
+ "fetched_at_utc": {
+  "cninfo": "2026-11-08T12:48:43Z",
+  "eastmoney": "2026-11-08T12:48:43Z",
+  "google_news": "2026-11-08T11:44:58Z",
+  "sina": "2026-11-08T12:48:43Z"
+ },
+ "note": "冻结后 items.json 不得增删改；labels_a.json 的标注对象必须与本文件逐 id 对应",
+ "derived_files": {
+  "labels_a.json": {
+   "sha256": "2d317845eb2ef947376c1a7656ad172c19837e16785b7544e94317874915de36",
+   "bytes": 22802,
+   "role": "冻结后新增；items.json 未因此改变"
+  },
+  "labels_b.json": {
+   "sha256": "8ecdd4adb19f7055c9f38ad334962552776cb3c26a95b3edbc96784fef32ea53",
+   "bytes": 9656,
+   "role": "冻结后新增；items.json 未因此改变"
+  },
+  "agreement.md": {
+   "sha256": "a88daacec0dcd1b63398c5052c1715b5e266dc1ec9903b3569431b116688c8c2",
+   "bytes": 9561,
+   "role": "冻结后新增；items.json 未因此改变"
+  },
+  "source_recon.md": {
+   "sha256": "f4d4fca847ac7e26e7648d9c15626a2ee48474e25bc972ba1a7fb43fd933decd",
+   "bytes": 2322,
+   "role": "冻结后新增；items.json 未因此改变"
+  },
+  "README.md": {
+   "sha256": "4042f31af7a62a67a7414fd9beae69535cf9a547444e552441373e47f66d4fdb",
+   "bytes": 1614,
+   "role": "冻结后新增；仅复算说明，items.json 未因此改变"
+  }
+ }
+}

@@ -1,0 +1,1002 @@
+{
+ "labeler": "A（本会话，按 phase0/timeline/event_definition_zh.md 2026-11-08 修订版）",
+ "target_sha256_items_json": "53b4d7314d990ba8d5a71576b6117b8f589a86987a02664410a3fe1a9fe47298",
+ "labeled_at_utc": "2026-11-08T12:52:22Z",
+ "allowed_values": {
+  "is_event": [
+   "是",
+   "不是",
+   "说不清"
+  ]
+ },
+ "notes": [
+  "判词三态，'说不清'是数据不是失败，未强行二选一",
+  "未给载体做文件级核验；cninfo 条目 URL 指向巨潮 PDF 但未打开正文，只算 URL 级线索",
+  "行业/地区汇总按 R3 三前置；价格按 R13 五件口径；表态按 R12 执行权"
+ ],
+ "labels": [
+  {
+   "id": "A01",
+   "category": "A",
+   "is_event": "不是",
+   "rule_ids": [
+    "R1",
+    "S"
+   ],
+   "reject_id": "zh_future_not_happened",
+   "reason": "“将与…面谈”“下周一”是未来安排，尚未发生；主体是职务+人名，非财经主体",
+   "judged_on": "title+lead"
+  },
+  {
+   "id": "A02",
+   "category": "A",
+   "is_event": "不是",
+   "rule_ids": [
+    "S",
+    "R2"
+   ],
+   "reject_id": "unparsed_subject",
+   "reason": "主句“噱头叫停…鹤岗转型”无具名承担者；“正悄然转型”是趋势叙述，非离散动作",
+   "judged_on": "title+lead"
+  },
+  {
+   "id": "A03",
+   "category": "A",
+   "is_event": "不是",
+   "rule_ids": [
+    "R6",
+    "Z9"
+   ],
+   "reject_id": "zh_market_snapshot",
+   "reason": "“盘中播报/开盘涨停”是证券二级行情，按裁决1不算",
+   "judged_on": "title"
+  },
+  {
+   "id": "A04",
+   "category": "A",
+   "is_event": "说不清",
+   "rule_ids": [
+    "R3",
+    "A2",
+    "T"
+   ],
+   "reject_id": "zh_aggregate_unverifiable",
+   "reason": "上交所可指认，但“最新数据/截至目前”无统计时点与口径，且是市值汇总",
+   "judged_on": "title+lead"
+  },
+  {
+   "id": "A05",
+   "category": "A",
+   "is_event": "是",
+   "rule_ids": [
+    "S",
+    "A",
+    "R5",
+    "T"
+   ],
+   "reject_id": "无",
+   "reason": "中广核具名+项目名+75万千瓦+11月7日全容量并网投运，主体/动作/数值/时点齐",
+   "judged_on": "title+lead"
+  },
+  {
+   "id": "A06",
+   "category": "A",
+   "is_event": "是",
+   "rule_ids": [
+    "S",
+    "A",
+    "T"
+   ],
+   "reject_id": "无",
+   "reason": "乾照光电具名，董事会审议通过聘任总裁（公告称），完成体+任职变更",
+   "judged_on": "title+lead"
+  },
+  {
+   "id": "A07",
+   "category": "A",
+   "is_event": "不是",
+   "rule_ids": [
+    "R8",
+    "R4"
+   ],
+   "reject_id": "zh_unconfirmed_rumor",
+   "reason": "“多名知情人士透露”“正私下重新评估”是未证实传闻+政治推测",
+   "judged_on": "title+lead"
+  },
+  {
+   "id": "A08",
+   "category": "A",
+   "is_event": "是",
+   "rule_ids": [
+    "S",
+    "A",
+    "T"
+   ],
+   "reject_id": "无",
+   "reason": "哥伦比亚军方声明：基地遇袭致3死8重伤，瞬时可核事件，源发布日定日",
+   "judged_on": "title+lead"
+  },
+  {
+   "id": "A09",
+   "category": "A",
+   "is_event": "是",
+   "rule_ids": [
+    "S",
+    "A",
+    "T"
+   ],
+   "reject_id": "无",
+   "reason": "中央气象台11月8日6时发布大风/寒潮预警，发布主体+发布动作+时刻齐",
+   "judged_on": "title+lead"
+  },
+  {
+   "id": "A10",
+   "category": "A",
+   "is_event": "是",
+   "rule_ids": [
+    "S",
+    "A",
+    "T"
+   ],
+   "reject_id": "无",
+   "reason": "央行决定降准0.25个百分点，瞬时决定+幅度+公开记录",
+   "judged_on": "title"
+  },
+  {
+   "id": "A11",
+   "category": "A",
+   "is_event": "是",
+   "rule_ids": [
+    "S",
+    "A",
+    "T"
+   ],
+   "reject_id": "无",
+   "reason": "拓斯达具名，达成多项合作、与凯航科技签署采购协议，完成体动作",
+   "judged_on": "title+lead"
+  },
+  {
+   "id": "A12",
+   "category": "A",
+   "is_event": "不是",
+   "rule_ids": [
+    "R6",
+    "Z9",
+    "Z10"
+   ],
+   "reject_id": "zh_market_snapshot",
+   "reason": "“涨停+103只科创板股涨超10%”是行情快照兼多标的聚合",
+   "judged_on": "title"
+  },
+  {
+   "id": "A13",
+   "category": "A",
+   "is_event": "不是",
+   "rule_ids": [
+    "R6",
+    "Z9"
+   ],
+   "reject_id": "zh_market_snapshot",
+   "reason": "“日韩股收盘各下挫约6%”是证券行情结果，按裁决1不算",
+   "judged_on": "title"
+  },
+  {
+   "id": "A14",
+   "category": "A",
+   "is_event": "不是",
+   "rule_ids": [
+    "R2",
+    "R11"
+   ],
+   "reject_id": "zh_trend_or_evaluation",
+   "reason": "“油价震荡”“直面考验”是趋势+评价；油价幅度未给发布机构与口径，不构成R13",
+   "judged_on": "title+lead"
+  },
+  {
+   "id": "A15",
+   "category": "A",
+   "is_event": "不是",
+   "rule_ids": [
+    "R6",
+    "Z9",
+    "R9"
+   ],
+   "reject_id": "zh_market_snapshot",
+   "reason": "“概念盘中走弱”是行情；“苹果称”是引述观点",
+   "judged_on": "title"
+  },
+  {
+   "id": "A16",
+   "category": "A",
+   "is_event": "不是",
+   "rule_ids": [
+    "R3",
+    "R2"
+   ],
+   "reject_id": "zh_generalized_subject",
+   "reason": "“环保组织”是集合主体；“耗能激增/工作缩短”是趋势叙述",
+   "judged_on": "title+lead"
+  },
+  {
+   "id": "A17",
+   "category": "A",
+   "is_event": "不是",
+   "rule_ids": [
+    "R6",
+    "Z9"
+   ],
+   "reject_id": "zh_market_snapshot",
+   "reason": "“美股收盘/纳指收涨/周线四连跌”是行情与评价",
+   "judged_on": "title"
+  },
+  {
+   "id": "A18",
+   "category": "A",
+   "is_event": "不是",
+   "rule_ids": [
+    "R1"
+   ],
+   "reject_id": "zh_future_not_happened",
+   "reason": "“寻求深化”“均在考虑范围内”是意向/未来，无已完成动作",
+   "judged_on": "title+lead"
+  },
+  {
+   "id": "A19",
+   "category": "A",
+   "is_event": "说不清",
+   "rule_ids": [
+    "R13",
+    "T"
+   ],
+   "reject_id": "zh_price_quote_unverifiable",
+   "reason": "伦敦现货黄金有市场与规格，但无发布机构与统计口径；“回撤超30%”是计算结果",
+   "judged_on": "title+lead"
+  },
+  {
+   "id": "A20",
+   "category": "A",
+   "is_event": "是",
+   "rule_ids": [
+    "S",
+    "A",
+    "T"
+   ],
+   "reject_id": "无",
+   "reason": "阿布扎比王储会见比亚迪执行副总裁，双方具名、会见已发生、公开记录",
+   "judged_on": "title+lead"
+  },
+  {
+   "id": "B01",
+   "category": "B",
+   "is_event": "是",
+   "rule_ids": [
+    "S",
+    "A",
+    "R5",
+    "T"
+   ],
+   "reject_id": "无",
+   "reason": "“301189”须映射到公司；再签逾18亿元算力重大合同为已完成动作+金额",
+   "judged_on": "title"
+  },
+  {
+   "id": "B02",
+   "category": "B",
+   "is_event": "是",
+   "rule_ids": [
+    "S",
+    "A",
+    "A2",
+    "T"
+   ],
+   "reject_id": "无",
+   "reason": "道恩股份拟溢价收购两家公司股权；按裁决3记“披露拟议事项”（proposed）",
+   "judged_on": "title"
+  },
+  {
+   "id": "B03",
+   "category": "B",
+   "is_event": "不是",
+   "rule_ids": [
+    "R14",
+    "Z6"
+   ],
+   "reject_id": "zh_procedural_announcement",
+   "reason": "业绩说明会预告属程序性公告，不触及控制权/账目/经营连续性",
+   "judged_on": "title"
+  },
+  {
+   "id": "B04",
+   "category": "B",
+   "is_event": "是",
+   "rule_ids": [
+    "S",
+    "A",
+    "A2",
+    "T"
+   ],
+   "reject_id": "无",
+   "reason": "云南锗业签订日常经营重大合同，完成体动作+公告载体（标题自称公告）",
+   "judged_on": "title"
+  },
+  {
+   "id": "B05",
+   "category": "B",
+   "is_event": "是",
+   "rule_ids": [
+    "S",
+    "A",
+    "A2",
+    "R12",
+    "T"
+   ],
+   "reject_id": "无",
+   "reason": "南亚新材半年度业绩预告：公司自曝指引，属有执行权的承诺/指引（commitment）",
+   "judged_on": "title"
+  },
+  {
+   "id": "B06",
+   "category": "B",
+   "is_event": "不是",
+   "rule_ids": [
+    "R10",
+    "Z10"
+   ],
+   "reject_id": "zh_multi_event_aggregate",
+   "reason": "“周末要闻汇总”含两条互不相关事件（证监会立案+特朗普加税），属聚合",
+   "judged_on": "title"
+  },
+  {
+   "id": "B07",
+   "category": "B",
+   "is_event": "是",
+   "rule_ids": [
+    "S",
+    "A",
+    "T"
+   ],
+   "reject_id": "无",
+   "reason": "容百科技被证监会立案，具名公司+立案完成（监管状态改变）",
+   "judged_on": "title"
+  },
+  {
+   "id": "B08",
+   "category": "B",
+   "is_event": "是",
+   "rule_ids": [
+    "S",
+    "A",
+    "A2",
+    "T"
+   ],
+   "reject_id": "无",
+   "reason": "岭南控股公告共同投资设立文旅基金暨关联交易，实质对外投资；载体为巨潮PDF",
+   "judged_on": "title"
+  },
+  {
+   "id": "B09",
+   "category": "B",
+   "is_event": "不是",
+   "rule_ids": [
+    "R14",
+    "Z6"
+   ],
+   "reject_id": "zh_procedural_announcement",
+   "reason": "临时股东会会议资料属会议材料，程序性",
+   "judged_on": "title"
+  },
+  {
+   "id": "B10",
+   "category": "B",
+   "is_event": "是",
+   "rule_ids": [
+    "S",
+    "A",
+    "A2",
+    "T"
+   ],
+   "reject_id": "无",
+   "reason": "智光电气公告获得客户订单，完成体动作+载体（巨潮PDF）",
+   "judged_on": "title"
+  },
+  {
+   "id": "B11",
+   "category": "B",
+   "is_event": "说不清",
+   "rule_ids": [
+    "R14"
+   ],
+   "reject_id": "insufficient_evidence",
+   "reason": "选举职工代表董事属治理变更，但“是否改变控制/账目/经营连续性”需看董事会构成，标题不足",
+   "judged_on": "title"
+  },
+  {
+   "id": "B12",
+   "category": "B",
+   "is_event": "不是",
+   "rule_ids": [
+    "R14",
+    "Z6"
+   ],
+   "reject_id": "zh_procedural_announcement",
+   "reason": "股票交易异常波动公告属澄清/程序性，无状态改变",
+   "judged_on": "title"
+  },
+  {
+   "id": "B13",
+   "category": "B",
+   "is_event": "是",
+   "rule_ids": [
+    "S",
+    "A",
+    "A2",
+    "T"
+   ],
+   "reject_id": "无",
+   "reason": "漳州发展中期票据付息，属可核资金动作；与“程序性”边界存疑（见agreement注记）",
+   "judged_on": "title"
+  },
+  {
+   "id": "B14",
+   "category": "B",
+   "is_event": "是",
+   "rule_ids": [
+    "S",
+    "A",
+    "R5",
+    "T"
+   ],
+   "reject_id": "无",
+   "reason": "牧原10月商品猪销售收入72.53亿元、同比-29.79%，具名主体+时段+数值",
+   "judged_on": "title"
+  },
+  {
+   "id": "B15",
+   "category": "B",
+   "is_event": "不是",
+   "rule_ids": [
+    "R1"
+   ],
+   "reject_id": "zh_future_not_happened",
+   "reason": "“筹划发行H股”是未来意向，提示性公告不等于已上市",
+   "judged_on": "title"
+  },
+  {
+   "id": "B16",
+   "category": "B",
+   "is_event": "是",
+   "rule_ids": [
+    "S",
+    "A",
+    "T"
+   ],
+   "reject_id": "无",
+   "reason": "证监会对容百科技立案调查（与B07同事件、不同来源），监管状态改变",
+   "judged_on": "title"
+  },
+  {
+   "id": "B17",
+   "category": "B",
+   "is_event": "是",
+   "rule_ids": [
+    "S",
+    "A",
+    "A2",
+    "T"
+   ],
+   "reject_id": "无",
+   "reason": "远程股份拟联合收购中复碳芯股权；裁决3：记披露拟议事项（proposed）",
+   "judged_on": "title"
+  },
+  {
+   "id": "B18",
+   "category": "B",
+   "is_event": "是",
+   "rule_ids": [
+    "S",
+    "A",
+    "T"
+   ],
+   "reject_id": "无",
+   "reason": "容百科技及高管被罚950万元，处罚完成+金额",
+   "judged_on": "title"
+  },
+  {
+   "id": "B19",
+   "category": "B",
+   "is_event": "不是",
+   "rule_ids": [
+    "R1"
+   ],
+   "reject_id": "zh_future_not_happened",
+   "reason": "利润分配预案尚待审议，是拟议/未来，非已完成分配",
+   "judged_on": "title"
+  },
+  {
+   "id": "B20",
+   "category": "B",
+   "is_event": "不是",
+   "rule_ids": [
+    "R14",
+    "Z6"
+   ],
+   "reject_id": "zh_procedural_announcement",
+   "reason": "公司章程修订属程序性文本变更，未改变控制/账目/经营判断",
+   "judged_on": "title"
+  },
+  {
+   "id": "C01",
+   "category": "C",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z8"
+   ],
+   "reject_id": "zh_explainer_format",
+   "reason": "“深度盘点+秘籍指南”是盘点/指南体",
+   "judged_on": "title"
+  },
+  {
+   "id": "C02",
+   "category": "C",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z8",
+    "R3"
+   ],
+   "reject_id": "zh_explainer_format",
+   "reason": "“深度盘点/推荐哪家”是评测盘点+集合主体",
+   "judged_on": "title"
+  },
+  {
+   "id": "C03",
+   "category": "C",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z8",
+    "R4"
+   ],
+   "reject_id": "zh_explainer_format",
+   "reason": "“一文读懂+谁最扎实”是解读体+问句",
+   "judged_on": "title"
+  },
+  {
+   "id": "C04",
+   "category": "C",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z7",
+    "Z8"
+   ],
+   "reject_id": "zh_research_opinion",
+   "reason": "“多家机构研报解读”是研报观点汇编",
+   "judged_on": "title"
+  },
+  {
+   "id": "C05",
+   "category": "C",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z8",
+    "R4"
+   ],
+   "reject_id": "zh_explainer_format",
+   "reason": "“一文看懂”解读体，主句是法律争议分析",
+   "judged_on": "title"
+  },
+  {
+   "id": "C06",
+   "category": "C",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z8"
+   ],
+   "reject_id": "zh_explainer_format",
+   "reason": "“一文读懂上海量子城市行动”是政策解读",
+   "judged_on": "title"
+  },
+  {
+   "id": "C07",
+   "category": "C",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z8",
+    "R11"
+   ],
+   "reject_id": "zh_explainer_format",
+   "reason": "“一文看懂2026中国车市”是年度盘点+评价",
+   "judged_on": "title"
+  },
+  {
+   "id": "C08",
+   "category": "C",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z8"
+   ],
+   "reject_id": "zh_explainer_format",
+   "reason": "“一文读懂丨美伊交火迷局”是局势解读",
+   "judged_on": "title"
+  },
+  {
+   "id": "C09",
+   "category": "C",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z8",
+    "R4"
+   ],
+   "reject_id": "zh_explainer_format",
+   "reason": "“一文读懂+将如何影响”是解读+未来推测",
+   "judged_on": "title"
+  },
+  {
+   "id": "C10",
+   "category": "C",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z8",
+    "R11"
+   ],
+   "reject_id": "zh_explainer_format",
+   "reason": "“全球领先！一文读懂”是解读+评价",
+   "judged_on": "title"
+  },
+  {
+   "id": "C11",
+   "category": "C",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z8"
+   ],
+   "reject_id": "zh_explainer_format",
+   "reason": "“举办师德师风专题报告会”是活动报道/会议体，无状态改变",
+   "judged_on": "title"
+  },
+  {
+   "id": "C12",
+   "category": "C",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z7",
+    "R1"
+   ],
+   "reject_id": "zh_research_opinion",
+   "reason": "“大摩研报解读…重估在即”是研报转述+未来态",
+   "judged_on": "title"
+  },
+  {
+   "id": "C13",
+   "category": "C",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z7"
+   ],
+   "reject_id": "zh_research_opinion",
+   "reason": "券商给予买入评级，是观点发布",
+   "judged_on": "title"
+  },
+  {
+   "id": "C14",
+   "category": "C",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z8"
+   ],
+   "reject_id": "zh_explainer_format",
+   "reason": "“举办专题报告会”是校内活动报道",
+   "judged_on": "title"
+  },
+  {
+   "id": "C15",
+   "category": "C",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z7",
+    "R4"
+   ],
+   "reject_id": "zh_research_opinion",
+   "reason": "“研报解读…会绽放么”是研报观点+问句",
+   "judged_on": "title"
+  },
+  {
+   "id": "C16",
+   "category": "C",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z8"
+   ],
+   "reject_id": "zh_explainer_format",
+   "reason": "“投资生涯深度盘点 第三集”是系列盘点",
+   "judged_on": "title"
+  },
+  {
+   "id": "C17",
+   "category": "C",
+   "is_event": "是",
+   "rule_ids": [
+    "S",
+    "A",
+    "T"
+   ],
+   "reject_id": "无",
+   "reason": "康义（国家统计局）在中央党校作专题报告：具名主体+完成动作+源发布日；相关性不在判据范围",
+   "judged_on": "title"
+  },
+  {
+   "id": "C18",
+   "category": "C",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z7"
+   ],
+   "reject_id": "zh_research_opinion",
+   "reason": "开源证券给予深信服买入评级，是观点",
+   "judged_on": "title"
+  },
+  {
+   "id": "C19",
+   "category": "C",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z7"
+   ],
+   "reject_id": "zh_research_opinion",
+   "reason": "开源证券给予行动教育买入评级，是观点",
+   "judged_on": "title"
+  },
+  {
+   "id": "C20",
+   "category": "C",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z8",
+    "R4"
+   ],
+   "reject_id": "zh_explainer_format",
+   "reason": "“论坛为何受关注？一文读懂”是解读+问句",
+   "judged_on": "title"
+  },
+  {
+   "id": "D01",
+   "category": "D",
+   "is_event": "不是",
+   "rule_ids": [
+    "R10",
+    "Z10"
+   ],
+   "reject_id": "zh_multi_event_aggregate",
+   "reason": "外交部发言人答问汇总，多问答聚合",
+   "judged_on": "title"
+  },
+  {
+   "id": "D02",
+   "category": "D",
+   "is_event": "不是",
+   "rule_ids": [
+    "R6",
+    "Z9"
+   ],
+   "reject_id": "zh_market_snapshot",
+   "reason": "午评：创业板指跌0.95%等指数行情，按裁决1不算",
+   "judged_on": "title"
+  },
+  {
+   "id": "D03",
+   "category": "D",
+   "is_event": "不是",
+   "rule_ids": [
+    "R6",
+    "Z9",
+    "R4"
+   ],
+   "reject_id": "zh_market_snapshot",
+   "reason": "收评+“后市何去何从”问句，行情+推测",
+   "judged_on": "title"
+  },
+  {
+   "id": "D04",
+   "category": "D",
+   "is_event": "不是",
+   "rule_ids": [
+    "R10",
+    "Z10"
+   ],
+   "reject_id": "zh_multi_event_aggregate",
+   "reason": "13省挂网规则汇总，跨省规则聚合",
+   "judged_on": "title"
+  },
+  {
+   "id": "D05",
+   "category": "D",
+   "is_event": "不是",
+   "rule_ids": [
+    "R6",
+    "Z9"
+   ],
+   "reject_id": "zh_market_snapshot",
+   "reason": "A股午评：指数收涨、创业板点位，行情快照",
+   "judged_on": "title"
+  },
+  {
+   "id": "D06",
+   "category": "D",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z8",
+    "R4"
+   ],
+   "reject_id": "zh_explainer_format",
+   "reason": "QMT量化软件教程（第9篇），教程体+问句",
+   "judged_on": "title"
+  },
+  {
+   "id": "D07",
+   "category": "D",
+   "is_event": "不是",
+   "rule_ids": [
+    "R6",
+    "Z9"
+   ],
+   "reject_id": "zh_market_snapshot",
+   "reason": "德语“每日HYPE价格跳涨监测报告”，行情监测",
+   "judged_on": "title"
+  },
+  {
+   "id": "D08",
+   "category": "D",
+   "is_event": "不是",
+   "rule_ids": [
+    "R6",
+    "Z9"
+   ],
+   "reject_id": "zh_market_snapshot",
+   "reason": "“[行情快照: AVGO.US 博通]”字面即行情快照",
+   "judged_on": "title"
+  },
+  {
+   "id": "D09",
+   "category": "D",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z7",
+    "Z8"
+   ],
+   "reject_id": "zh_research_opinion",
+   "reason": "国君金工因子研究系列，研报体",
+   "judged_on": "title"
+  },
+  {
+   "id": "D10",
+   "category": "D",
+   "is_event": "不是",
+   "rule_ids": [
+    "R6",
+    "Z9",
+    "Z10"
+   ],
+   "reject_id": "zh_market_snapshot",
+   "reason": "“龙头20CM涨停+受益上市公司一览”行情+名单聚合",
+   "judged_on": "title"
+  },
+  {
+   "id": "D11",
+   "category": "D",
+   "is_event": "不是",
+   "rule_ids": [
+    "R6",
+    "Z9"
+   ],
+   "reject_id": "zh_market_snapshot",
+   "reason": "“劲旅环境11月4日打开跌停”证券行情",
+   "judged_on": "title"
+  },
+  {
+   "id": "D12",
+   "category": "D",
+   "is_event": "不是",
+   "rule_ids": [
+    "R6",
+    "Z9"
+   ],
+   "reject_id": "zh_market_snapshot",
+   "reason": "午评：指数跌幅收窄、超2900股下跌，行情",
+   "judged_on": "title"
+  },
+  {
+   "id": "D13",
+   "category": "D",
+   "is_event": "不是",
+   "rule_ids": [
+    "R10",
+    "Z10"
+   ],
+   "reject_id": "zh_multi_event_aggregate",
+   "reason": "各省区市查处问题汇总（表），跨地区聚合；标题无发布机构",
+   "judged_on": "title"
+  },
+  {
+   "id": "D14",
+   "category": "D",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z10",
+    "J1"
+   ],
+   "reject_id": "zh_multi_event_aggregate",
+   "reason": "页面导航栏文字（栏目名堆叠），非单条事件",
+   "judged_on": "title"
+  },
+  {
+   "id": "D15",
+   "category": "D",
+   "is_event": "不是",
+   "rule_ids": [
+    "R6",
+    "Z9"
+   ],
+   "reject_id": "zh_market_snapshot",
+   "reason": "“泰禾股份10月9日盘中涨幅达5%”行情",
+   "judged_on": "title"
+  },
+  {
+   "id": "D16",
+   "category": "D",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z10",
+    "R9"
+   ],
+   "reject_id": "zh_multi_event_aggregate",
+   "reason": "海外媒体评论汇总，多来源观点聚合",
+   "judged_on": "title"
+  },
+  {
+   "id": "D17",
+   "category": "D",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z10",
+    "Z8"
+   ],
+   "reject_id": "zh_multi_event_aggregate",
+   "reason": "高考真题汇总（三角函数专题），资料聚合",
+   "judged_on": "title"
+  },
+  {
+   "id": "D18",
+   "category": "D",
+   "is_event": "不是",
+   "rule_ids": [
+    "Z10"
+   ],
+   "reject_id": "zh_multi_event_aggregate",
+   "reason": "“汇总转办…2022年两会”是工作总结/汇总",
+   "judged_on": "title"
+  },
+  {
+   "id": "D19",
+   "category": "D",
+   "is_event": "不是",
+   "rule_ids": [
+    "R6",
+    "Z9"
+   ],
+   "reject_id": "zh_market_snapshot",
+   "reason": "“雅运股份11月2日快速反弹”行情",
+   "judged_on": "title"
+  },
+  {
+   "id": "D20",
+   "category": "D",
+   "is_event": "不是",
+   "rule_ids": [
+    "R6",
+    "Z9",
+    "Z10"
+   ],
+   "reject_id": "zh_market_snapshot",
+   "reason": "“龙头20CM涨停+本周并购重组名单一览”行情+名单聚合",
+   "judged_on": "title"
+  }
+ ]
+}
