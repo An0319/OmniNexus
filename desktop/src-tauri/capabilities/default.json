@@ -1,7 +1,13 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "默认能力：只放开核心默认权限与事件订阅；自定义命令不需要额外能力声明。",
+  "description": "默认能力：放开核心默认权限、事件订阅，以及外部链接（opener 只允许 http/https，交给系统默认浏览器）。",
   "windows": ["main"],
-  "permissions": ["core:default"]
+  "permissions": [
+    "core:default",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [{ "url": "https://*" }, { "url": "http://*" }]
+    }
+  ]
 }

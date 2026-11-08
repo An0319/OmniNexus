@@ -274,6 +274,8 @@ fn run_timeline_blocking(app: AppHandle, request: TimelineRequest) -> Result<Out
     args.push(out_dir.to_string_lossy().to_string());
 
     let mut child = base_command(&python)
+        // `-u`：不让 Python 把 stdout 攒到进程结束，否则逐行进度要等抓完才出现。
+        .arg("-u")
         .arg(root.join("phase0/timeline/timeline.py"))
         .args(&args)
         .current_dir(&root)
@@ -499,6 +501,8 @@ async fn registry_reconcile(request: LedgerRequest) -> Result<Outcome, String> {
 
 fn main() {
     tauri::Builder::default()
+        // 外部链接交给系统默认浏览器：人工复核的最后一环，不能在应用内开空窗口。
+        .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             run_timeline,
             registry_register,
