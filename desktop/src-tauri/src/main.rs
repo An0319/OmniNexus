@@ -195,8 +195,14 @@ fn join_lines(lines: &[String]) -> String {
 }
 
 /// 一次性执行的命令（注册 / 核验 / 列表 / 链校验 / 对账）。
-fn run_once(python: &str, root: &Path, args: &[String]) -> Result<Outcome, String> {
+/// script 是相对仓库根的脚本路径，必须作为第一个参数传给 Python。
+fn run_once(python: &str, root: &Path, script: &str, args: &[String]) -> Result<Outcome, String> {
+    let script_path = root.join(script);
+    if !script_path.is_file() {
+        return Err(format!("脚本不存在：{}", script_path.to_string_lossy()));
+    }
     let output = base_command(python)
+        .arg(&script_path)
         .args(args)
         .current_dir(root)
         .output()
@@ -268,6 +274,7 @@ fn run_timeline_blocking(app: AppHandle, request: TimelineRequest) -> Result<Out
     args.push(out_dir.to_string_lossy().to_string());
 
     let mut child = base_command(&python)
+        .arg(root.join("phase0/timeline/timeline.py"))
         .args(&args)
         .current_dir(&root)
         .stdout(Stdio::piped())
@@ -341,14 +348,25 @@ fn run_timeline_blocking(app: AppHandle, request: TimelineRequest) -> Result<Out
     let events_json = out_dir.join("events.json");
     let events_md = out_dir.join("events.md");
     let raw_items_json = out_dir.join("raw_items.json");
-    let data = serde_json::json!({
-        "outDir": out_dir.to_string_lossy(),
-        "eventsJson": events_json.to_string_lossy(),
-        "eventsMd": events_md.to_string_lossy(),
-        "rawItemsJson": raw_items_json.to_string_lossy(),
-        "eventsJsonExists": events_json.is_file(),
-        "rawItemsJsonExists": raw_items_json.is_file(),
-    });
+    let data = {
+        let mut data = serde_json::json!({
+            "outDir": out_dir.to_string_lossy(),
+            "eventsJson": events_json.to_string_lossy(),
+            "eventsMd": events_md.to_string_lossy(),
+            "rawItemsJson": raw_items_json.to_string_lossy(),
+            "eventsJsonExists": events_json.is_file(),
+            "rawItemsJsonExists": raw_items_json.is_file(),
+        });
+        // 界面要渲染必须拿到文档本身；路径照旧回传，桥不改写产物内容。
+        if events_json.is_file() {
+            if let Ok(text) = std::fs::read_to_string(&events_json) {
+                if let Ok(doc) = serde_json::from_str::<serde_json::Value>(&text) {
+                    data["eventsDoc"] = doc;
+                }
+            }
+        }
+        data
+    };
 
     Ok(Outcome {
         exit_code,
@@ -391,7 +409,7 @@ async fn registry_register(request: RegisterRequest) -> Result<Outcome, String> 
             "--at".into(),
             request.at.trim().to_string(),
         ];
-        run_once(&python, &root, &args)
+        run_once(&python, &root, "phase0/registry/cli.py", &args)
     })
     .await
     .map_err(|e| format!("registry_register 线程异常：{e}"))?
@@ -418,7 +436,7 @@ async fn registry_verify(request: VerifyRequest) -> Result<Outcome, String> {
             args.push("--id".into());
             args.push(id.to_string());
         }
-        run_once(&python, &root, &args)
+        run_once(&python, &root, "phase0/registry/cli.py", &args)
     })
     .await
     .map_err(|e| format!("registry_verify 线程异常：{e}"))?
@@ -436,7 +454,7 @@ async fn registry_list(request: LedgerRequest) -> Result<Outcome, String> {
             ledger.to_string_lossy().to_string(),
             "list".into(),
         ];
-        run_once(&python, &root, &args)
+        run_once(&python, &root, "phase0/registry/cli.py", &args)
     })
     .await
     .map_err(|e| format!("registry_list 线程异常：{e}"))?
@@ -454,7 +472,7 @@ async fn registry_chain_check(request: LedgerRequest) -> Result<Outcome, String>
             ledger.to_string_lossy().to_string(),
             "chain-check".into(),
         ];
-        run_once(&python, &root, &args)
+        run_once(&python, &root, "phase0/registry/cli.py", &args)
     })
     .await
     .map_err(|e| format!("registry_chain_check 线程异常：{e}"))?
@@ -473,7 +491,7 @@ async fn registry_reconcile(request: LedgerRequest) -> Result<Outcome, String> {
             "reconcile".into(),
             "--json".into(),
         ];
-        run_once(&python, &root, &args)
+        run_once(&python, &root, "phase0/registry/cli.py", &args)
     })
     .await
     .map_err(|e| format!("registry_reconcile 线程异常：{e}"))?

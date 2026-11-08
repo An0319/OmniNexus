@@ -73,6 +73,17 @@
       '</div>';
   }
 
+  function cliFailedHtml(outcome) {
+    var tail = String(outcome.stderr || '').trim().slice(0, 600);
+    return '<div class="banner banner--warn">' +
+      '<div class="banner__row">' + chip('已执行', 'warn') +
+      monoChip('退出码 ' + (outcome.exitCode === null ? '未知' : outcome.exitCode), 'warn') + '</div>' +
+      '<div class="banner__title">命令执行了，但没有产出可读结果</div>' +
+      '<p class="banner__rule">下面是 Python 的原样输出；壳不改写，也不把它当结果。</p>' +
+      (tail ? '<pre class="log" style="margin-top: 8px;">' + esc(tail) + '</pre>' : '') +
+      '</div>';
+  }
+
   // ── 导航 ──────────────────────────────────────────────────────
   function initTabs() {
     var buttons = Array.prototype.slice.call(document.querySelectorAll('[data-tab]'));
@@ -304,15 +315,45 @@
       $('tl-log').textContent = '';
 
       BR.runTimeline(request).then(function (outcome) {
+        var doc = outcome && outcome.ok && outcome.data ? outcome.data.eventsDoc : null;
+        if (doc) {
+          $('tl-stub').innerHTML = '';
+          renderTimeline(doc, { label: '本次运行 · 退出码 ' + (outcome.exitCode === null ? '未知' : outcome.exitCode) });
+          setProgress('done', '已结束 · 退出码 ' + (outcome.exitCode === null ? '未知' : outcome.exitCode));
+          return;
+        }
+        if (outcome.available && outcome.exitCode !== null && outcome.exitCode !== 0) {
+          $('tl-stub').innerHTML = cliFailedHtml(outcome);
+          setProgress('done', '已结束 · 退出码 ' + outcome.exitCode);
+          return;
+        }
         $('tl-stub').innerHTML = stubBox(outcome);
         if (outcome.available) {
-          setProgress('done', '已结束');
+          setProgress('done', '已结束 · 未拿到产物');
         } else {
           setProgress('idle', '未接入');
           $('tl-log').textContent = '进程桥未接入：本轮只定形，不产生任何结果。';
         }
       });
     });
+
+    // 桥逐行转发 timeline.py 的 stdout：长任务要能看到在跑，而不是像卡死。
+    if (typeof BR.onTimelineProgress === 'function') {
+      BR.onTimelineProgress(function (payload) {
+        if (!payload || !payload.kind) return;
+        if (payload.kind === 'line') {
+          var log = $('tl-log');
+          if (log) {
+            log.textContent += (log.textContent ? '\n' : '') + payload.line;
+            log.scrollTop = log.scrollHeight;
+          }
+          setProgress('running', '正在跑 · 第 ' + (payload.seq || 0) + ' 行输出');
+        } else if (payload.kind === 'exit') {
+          var code = payload.exitCode;
+          setProgress('done', '已结束 · 退出码 ' + (code === null || code === undefined ? '未知' : code));
+        }
+      });
+    }
 
     renderDemoButtons();
   }
@@ -511,11 +552,13 @@
       $('ver-result').innerHTML = '';
       return;
     }
-    var tone = outcome.exitCode === 0 ? 'ok' : 'warn';
+    var okExit = outcome.exitCode === 0;
+    var tone = okExit ? 'ok' : 'warn';
     box.innerHTML = '<div class="banner banner--' + tone + '">' +
       '<div class="banner__row">' + chip('已执行', tone) + monoChip('退出码 ' + outcome.exitCode, tone) + '</div>' +
-      '<div class="banner__title">核验完成</div>' +
-      '<p class="banner__rule">判定已写入账本；undetermined 必须同时展示 reason_code，壳不在这里做二次判定。</p>' +
+      '<div class="banner__title">' + (okExit ? '核验完成（判定已写入账本）' : '核验未完成（退出码 ' + outcome.exitCode + '）') + '</div>' +
+      '<p class="banner__rule">undetermined 必须同时展示 reason_code，壳不在这里做二次判定。</p>' +
+      (outcome.stderr ? '<pre class="log" style="margin-top: 8px;">' + esc(outcome.stderr) + '</pre>' : '') +
       (outcome.stdout ? '<pre class="log" style="margin-top: 8px;">' + esc(outcome.stdout) + '</pre>' : '') +
       '</div>';
   }

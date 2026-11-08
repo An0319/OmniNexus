@@ -2,6 +2,8 @@
 target/
 dist/
 node_modules/
+# Tauri 构建期自动生成的 ACL / schema，可重建
+src-tauri/gen/schemas/
 
 # 本地真实产物回放数据：由 tools/build_dev_data.py 生成，不入库
 ui/dev-data.js
