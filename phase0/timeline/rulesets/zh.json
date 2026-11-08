@@ -1,0 +1,137 @@
+{
+  "_comment": "中文规则集：按 phase0/timeline/event_definition_zh.md 的判据写成数据（动词表、门槛、拒绝码、正反例）。引擎不认语言，只认本文件。v1 只覆盖 A 类快讯 + B 类公告；C 类深度稿暂不接（规则在 C 类一致率 90%，低于『全判不是』基准 95%，负贡献）。",
+  "lang": "zh",
+  "version": "rules_v2-zh.1",
+  "extract_method": "rules_v2-zh",
+  "default_sources": {
+    "topic": ["eastmoney_news", "sina_roll", "wallstreetcn", "kr36", "google_news", "cninfo"],
+    "entity": ["eastmoney_news", "wallstreetcn", "google_news", "cninfo"]
+  },
+  "source_params": {
+    "google_news": {
+      "hl": "zh-CN",
+      "gl": "CN",
+      "ceid": "CN:zh-Hans",
+      "source_id": "google_news_zh"
+    }
+  },
+  "actions": [
+    "trial_start",
+    "trial_result",
+    "approval",
+    "rejection",
+    "halt",
+    "designation",
+    "deal",
+    "partnership",
+    "funding",
+    "policy",
+    "registration",
+    "publication",
+    "personnel",
+    "other"
+  ],
+  "action_patterns": [
+    ["halt", ["暂停", "终止", "中止", "停产", "停摆", "叫停", "关停", "退出", "撤离", "撤回", "取消"]],
+    ["rejection", ["驳回", "否决", "不予核准", "不予批准", "未获批准", "拒绝"]],
+    ["approval", ["获批", "批准", "核准", "许可", "备案通过", "获证", "获注册", "审议通过"]],
+    ["designation", ["认定", "入选", "纳入", "指定", "优先审评", "绿色通道", "专精特新", "试点"]],
+    ["trial_result", ["结果", "达标", "未达标", "达到终点", "有效率", "阳性", "阴性", "临床数据", "疗效", "销量"]],
+    ["trial_start", ["启动", "开展", "开工", "动工", "投产", "开建", "入组", "招募", "首例", "破土"]],
+    ["deal", ["收购", "并购", "重组", "出售", "转让", "竞得", "中标", "签署合同", "签订合同", "重大合同", "摘牌", "买入"]],
+    ["partnership", ["战略合作", "合作", "签约", "协议", "合资", "联手", "携手"]],
+    ["funding", ["融资", "募资", "增资", "定增", "配股", "发行", "注资", "获投", "募得"]],
+    ["policy", ["降准", "降息", "加息", "印发", "出台", "落地", "施行", "实施", "征求意见", "调控", "下调", "上调"]],
+    ["registration", ["登记", "备案", "注册", "申报", "受理"]],
+    ["publication", ["发布", "披露", "公告", "公示", "通报", "发表", "刊发", "刊登", "公布"]],
+    ["personnel", ["任命", "聘任", "辞职", "辞任", "离职", "免职", "当选", "换届", "选任"]],
+    ["other", ["涨价", "降价", "调涨", "调降", "提价", "处罚", "罚款", "起诉", "诉讼", "裁定", "判决", "立案", "留置", "召回", "整改", "约谈", "问询"]]
+  ],
+  "value_patterns": [
+    {"kind": "money", "pattern": "([\\d][\\d,\\.]*)\\s?([亿万]元|亿元|万元|亿|万|元)", "number_group": 1, "unit_group": 2, "unit": "money"},
+    {"kind": "percent", "pattern": "([\\d][\\d\\.]*)\\s?%", "number_group": 1, "unit": "percent"},
+    {"kind": "phase", "pattern": "(一期|二期|三期|四期|I期|II期|III期|IV期|临床前)", "number_group": 1, "unit": "phase"},
+    {"kind": "count", "pattern": "([\\d][\\d,]*)\\s?(家|只|名|人|户|吨|辆|台|万千瓦|亿千瓦|个百分点|项|笔)", "number_group": 1, "unit_group": 2, "unit": "lower"}
+  ],
+  "filters": [
+    {"key": "zh_explainer_format", "stage": "title", "where": "title_prefix", "pattern": "^(一文读懂|一文看懂|一文了解|一文理清|什么是|如何|怎么|为何|图解|科普|实测|横评|评测|选购|攻略|指南|排行)"},
+    {"key": "zh_research_opinion", "stage": "title", "where": "contains", "pattern": "(研报|评级|目标价|首次覆盖|机构观点|券商观点)"},
+    {"key": "zh_market_snapshot", "stage": "title", "where": "contains", "pattern": "(午评|收评|早盘|盘中|尾盘|行情快照|涨幅达|跌幅达|打开跌停|涨停|跌停|主力资金|换手率|龙虎榜)"},
+    {"key": "zh_multi_event_aggregate", "stage": "title", "where": "contains", "pattern": "(一览|汇总|名单|本周披露|超[0-9]+家|多股|答问|周报|要闻)"},
+    {"key": "zh_speculation_question", "stage": "title", "where": "title_suffix", "pattern": "[？?]\\s*$", "unless_patterns": ["(宣布|发布|完成|获批|签署|中标|辞职|召回|收购)"]},
+    {"key": "zh_future_not_happened", "stage": "title", "where": "contains", "pattern": "(将|拟|有望|或将|计划|预计|在即|酝酿|剑指|谋求)", "unless_patterns": ["(公告|披露|决议|审议通过|董事会|股东大会|印发)"]},
+    {"key": "zh_unconfirmed_rumor", "stage": "title", "where": "contains", "pattern": "(突传|网传|据传|传闻|被曝|曝出|曝：|消息称|知情人士)", "unless_patterns": ["(公告|回应|确认|证实)"]},
+    {"key": "zh_trend_or_evaluation", "stage": "title", "where": "contains", "pattern": "(爆发|承压|遇冷|火爆|领涨|领跌|强势|疲软|腰斩|超预期|遇阻|亮眼|暴涨|暴跌)", "unless_patterns": ["[0-9]+(\\.[0-9]+)?%", "[0-9]+亿", "[0-9]+万"]},
+    {"key": "zh_third_party_commentary", "stage": "text", "where": "contains", "pattern": "(分析师|专家|券商|机构)(认为|称|表示|预计|指出|解读|评)"},
+    {"key": "zh_generalized_subject", "stage": "subject", "where": "contains", "pattern": "^(我国|全国|行业|业内|全市场|A股|多家|多股|机构|专家|分析师|巨头|龙头|这些|有关部门|某|存储芯片|芯片|半导体|新能源|光伏|锂电|白酒|医药|地产|汽车)", "unless_patterns": ["(统计局|协会|交易所|委员会|研究院|公司|集团|银行|证券)"]},
+    {"key": "zh_topic_nominalization", "stage": "subject", "where": "contains", "pattern": "(涨价潮|降价潮|内卷|扩产潮|量产潮)"}
+  ],
+  "subject": {
+    "anchor_prefix": true,
+    "leading_clause": "",
+    "split": "[：:，,；;、|｜]",
+    "cut": "",
+    "trailing_strip": "",
+    "article_strip": "",
+    "strip_chars": " \u3000“”\\\"'（）()《》"
+  },
+  "gates": {
+    "excerpt_min": 0,
+    "excerpt_kind_min": 0,
+    "subject_min_len": 2,
+    "subject_max_len": 30,
+    "subject_first_char": "[A-Za-z\\u4e00-\\u9fff]",
+    "subject_min_class_chars": 2,
+    "require_subject_in_text": true,
+    "require_action_anchor": true
+  },
+  "tokenize": {
+    "pattern": "[\\u4e00-\\u9fff]",
+    "min_len": 1,
+    "stopwords": []
+  },
+  "dedupe": {
+    "merge_sources": ["google_news_zh", "eastmoney_news", "sina_roll", "wallstreetcn", "kr36"],
+    "day_tolerance": 3,
+    "jaccard_min": 0.6
+  },
+  "reject_codes": {
+    "missing_time": "missing_time",
+    "out_of_window": "out_of_window",
+    "missing_url": "missing_url",
+    "missing_excerpt": "insufficient_evidence",
+    "subject_not_in_text": "subject_not_in_text",
+    "unparsed_action": "insufficient_evidence",
+    "unparsed_subject": "zh_generalized_subject",
+    "not_an_event": "not_an_event",
+    "zh_explainer_format": "zh_explainer_format",
+    "zh_research_opinion": "zh_research_opinion",
+    "zh_market_snapshot": "zh_market_snapshot",
+    "zh_multi_event_aggregate": "zh_multi_event_aggregate",
+    "zh_speculation_question": "zh_speculation_question",
+    "zh_future_not_happened": "zh_future_not_happened",
+    "zh_unconfirmed_rumor": "zh_unconfirmed_rumor",
+    "zh_trend_or_evaluation": "zh_trend_or_evaluation",
+    "zh_third_party_commentary": "zh_third_party_commentary",
+    "zh_generalized_subject": "zh_generalized_subject",
+    "zh_topic_nominalization": "zh_topic_nominalization"
+  },
+  "samples": {
+    "positive": [
+      {"text": "央行宣布降准降息", "ref": "event_definition_zh.md §4（8 字仍算，R5 不设字数）", "expect": {"is_event": true, "action": "policy"}},
+      {"text": "云南省统计局：光伏装机突破8000万千瓦", "ref": "event_definition_zh.md §2.3 R3 例外", "expect": {"is_event": true, "subject": "云南省统计局"}},
+      {"text": "牧原股份：10月销售生猪收入同比降29.79%", "ref": "event_definition_zh.md §2.3 R11 反例", "expect": {"is_event": true}},
+      {"text": "天孚通信发布关于收购资产的公告", "ref": "event_definition_zh.md §2.2 A2", "expect": {"is_event": true, "action": "publication"}},
+      {"text": "金发科技重大合同告吹", "ref": "event_definition_zh.md §2.2 A", "expect": {"is_event": true}}
+    ],
+    "negative": [
+      {"text": "一文读懂央行降准意味着什么", "ref": "event_definition_zh.md §4.11", "expect": {"is_event": false, "code": "zh_explainer_format"}},
+      {"text": "存储芯片集体涨价，这些股票受益", "ref": "event_definition_zh.md §2.3 R3", "expect": {"is_event": false, "code": "zh_generalized_subject"}},
+      {"text": "谁将成为AI最大赢家？", "ref": "event_definition_zh.md §2.3 R4", "expect": {"is_event": false, "code": "zh_speculation_question"}},
+      {"text": "突传iPhone 18将涨价", "ref": "event_definition_zh.md §2.3 R8", "expect": {"is_event": false, "code": "zh_unconfirmed_rumor"}},
+      {"text": "中金评降准：利好银行板块", "ref": "event_definition_zh.md §2.3 R9", "expect": {"is_event": false, "code": "zh_third_party_commentary"}},
+      {"text": "A股午评：超3700只个股上涨", "ref": "event_definition_zh.md §2.3 R6/R10", "expect": {"is_event": false, "code": "zh_market_snapshot"}},
+      {"text": "白酒板块集体走弱", "ref": "event_definition_zh.md §2.3 R2/R11", "expect": {"is_event": false}}
+    ]
+  }
+}

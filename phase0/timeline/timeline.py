@@ -31,74 +31,70 @@ import requests
 
 UA = "OmniNexus-timeline/0.1 (+https://github.com/an0319/OmniNexus)"
 TIMEOUT = 30
-EXTRACT_METHOD = "rules_v2"
+RULESET_DIR = Path(__file__).resolve().parent / "rulesets"
+DEFAULT_LANG = "zh"
 
-ACTIONS = {
-    "trial_start",
-    "trial_result",
-    "approval",
-    "rejection",
-    "halt",
-    "designation",
-    "deal",
-    "partnership",
-    "funding",
-    "policy",
-    "registration",
-    "publication",
-    "personnel",
-    "other",
-}
 
-# (action, [正则])：命中位置取最早，平手按此表顺序
-ACTION_PATTERNS: list[tuple[str, list[str]]] = [
-    ("halt", [r"\bhalt(s|ed|ing)?\b", r"\bsuspend(s|ed|ing)?\b", r"\bpause[sd]?\b", r"\bterminat(e|es|ed)\b",
-              r"\bstop(s|ped)?\b", r"\bdiscontinu(e|ed|ation)\b", r"\bshut(s|ting)? down\b",
-              r"\bwind(s|ing)? down\b", r"\bceas(e|es|ed)\b"]),
-    ("rejection", [r"\breject(s|ed|ion)?\b", r"\bdeclin(e|es|ed)\b", r"\bden(y|ies|ied)\b",
-                   r"\bcomplete response letter\b", r"\bCRL\b"]),
-    ("approval", [r"\bapprov(e|es|ed|al)\b", r"\bauthoriz(e|es|ed|ation)\b", r"\bclear(s|ed)?\b",
-                  r"\bclearance\b", r"\bgreen[- ]light(s|ed)?\b"]),
-    ("designation", [r"\borphan\b", r"\bbreakthrough therapy\b", r"\bfast[- ]track\b", r"\bpriority review\b",
-                     r"\bdesignat(e|es|ed|ion)\b"]),
-    ("trial_result", [r"\bresults?\b", r"\btopline\b", r"\bread[- ]?out\b", r"\bmet (its|the) primary endpoint\b",
-                      r"\bmiss(es|ed)? (its|the) primary endpoint\b", r"\bfail(s|ed|ure)?\b",
-                      r"\bdemonstrat(e|es|ed)\b", r"\bshow(s|ed|n)? (promising|positive|efficacy|promise)\b",
-                      r"\bremission\b", r"\bresponse rate\b", r"\bsurvival\b", r"\bendpoint\b",
-                      r"\bclinical progress\b", r"\bweight loss\b", r"\bhelped (people|patients)\b"]),
-    ("trial_start", [r"\binitiat(e|es|ed|ion)\b", r"\blaunch(es|ed|ing)?\b", r"\bstart(s|ed|ing)?\b",
-                     r"\bbegin(s|ning)?\b", r"\benroll(s|ed|ing|ment)?\b", r"\badvanc(e|es|ed|ing)\b",
-                     r"\bfirst patient (dosed|enrolled|treated|receiv)", r"\bopen(s|ed)? (a |the )?(phase|trial|study)\b",
-                     r"\bjoin(s|ed)?\b", r"\bparticipat(e|es|ed|ing)\b", r"\bnow in (clinical )?trials?\b",
-                     r"\benters? (a |the )?(clinical |phase)?trial\b"]),
-    ("deal", [r"\bacquir(e|es|ed|ing|sition)\b", r"\bmerger\b", r"\bmerg(e|es|ed)\b", r"\btakeover\b",
-              r"\bbuy(s|ing)?\b", r"\bsell(s|ing)?\b", r"\blicens(e|es|ed|ing)\b"]),
-    ("partnership", [r"\bpartner(s|ed|ship)?\b", r"\bcollaborat(e|es|ed|ion)\b", r"\bteam(s|ed)? up\b",
-                     r"\bjoint venture\b"]),
-    ("funding", [r"\brais(e|es|ed|ing)\b", r"\bfund(s|ed|ing)?\b", r"\binvest(s|ed|ing|ment)?\b",
-                 r"\bround\b", r"\bfinanc(e|es|ed|ing)\b"]),
-    ("policy", [r"\bfinal rule\b", r"\bproposed rule\b", r"\brulemaking\b", r"\bnotice of\b",
-                r"\bguidance\b", r"\brequest for information\b", r"\bcomment period\b"]),
-    ("registration", [r"\bregist(er|ered|ration|ry)\b", r"\bposted\b", r"\bnew trial\b"]),
-    ("publication", [r"\bpreprint\b", r"\bstudy published\b", r"\bpublished in\b", r"\bresearchers? (find|show|report)\b",
-                     r"\bstud(y|ies) (finds?|shows?|suggests?|reports?)\b",
-                     r"\bpaper\b", r"\brandomi[sz]ed (controlled |clinical )?trial\b"]),
-    ("personnel", [r"\bappoint(s|ed|ment)?\b", r"\bname[sd]?\b", r"\bresign(s|ed|ation)?\b",
-                   r"\bsteps? down\b", r"\bhir(e|es|ed)\b", r"\bCEO\b"]),
-]
-COMPILED = [(a, [re.compile(p, re.I) for p in pats]) for a, pats in ACTION_PATTERNS]
+class Ruleset:
+    """一份语言规则集：只装数据，不含任何分支逻辑。
 
-VALUE_PATTERNS = [
-    ("money", re.compile(r"\$\s?([\d][\d,\.]*)\s?(billion|million|bn|m|b)\b", re.I)),
-    ("percent", re.compile(r"([\d][\d\.]*)\s?%", re.I)),
-    ("phase", re.compile(r"\bphase\s?(1|2|3|4|i{1,3}|iv)\b", re.I)),
-    ("count", re.compile(r"\b([\d][\d,]*)\s+(patients|participants|subjects|sites|countries)\b", re.I)),
-]
+    判据与引擎解耦（AGENTS.md R24）：引擎按规则集参数判，语言差异全部落在
+    rulesets/<lang>.json 的四样东西——动作动词表、门槛、拒绝码、正反例。
+    """
 
-STOPWORDS = {
-    "the", "a", "an", "of", "to", "in", "on", "for", "and", "or", "with", "by", "at", "from", "as",
-    "is", "are", "was", "were", "be", "been", "its", "it", "this", "that", "new",
-}
+    def __init__(self, data: dict):
+        self.lang = data["lang"]
+        self.version = data.get("version", "unknown")
+        self.extract_method = data.get("extract_method", f"rules_{self.lang}")
+        self.source_params = data.get("source_params", {})
+        self.default_sources = data.get("default_sources", {"topic": [], "entity": []})
+        self.actions = set(data["actions"])
+        self.action_patterns = [
+            (action, [re.compile(p, re.I) for p in pats]) for action, pats in data["action_patterns"]
+        ]
+        self.value_patterns = [
+            (p["kind"], re.compile(p["pattern"], re.I), p) for p in data["value_patterns"]
+        ]
+        self.filters = [
+            {
+                "key": f["key"],
+                "stage": f.get("stage", "title"),
+                "where": f.get("where", "contains"),
+                "pattern": re.compile(f["pattern"], re.I),
+                "unless": [re.compile(p, re.I) for p in f.get("unless_patterns") or []],
+            }
+            for f in data.get("filters", [])
+        ]
+        s = data["subject"]
+        self.subject = {
+            "anchor_prefix": bool(s.get("anchor_prefix", False)),
+            "strip_chars": s.get("strip_chars", " .\"'()"),
+            "split_re": re.compile(s["split"]) if s.get("split") else None,
+            "cut_re": re.compile(s["cut"], re.I) if s.get("cut") else None,
+            "leading_re": re.compile(s["leading_clause"], re.I) if s.get("leading_clause") else None,
+            "trailing_re": re.compile(s["trailing_strip"], re.I) if s.get("trailing_strip") else None,
+            "article_re": re.compile(s["article_strip"], re.I) if s.get("article_strip") else None,
+        }
+        self.gates = data["gates"]
+        self.tokenize = data["tokenize"]
+        self.dedupe = data["dedupe"]
+        self.reject_codes = data["reject_codes"]
+        self.samples = data.get("samples", {})
+
+    def code(self, key: str) -> str:
+        return self.reject_codes[key]
+
+    def params(self, source_id: str) -> dict:
+        return self.source_params.get(source_id, {})
+
+
+def load_ruleset(lang: str) -> Ruleset:
+    path = RULESET_DIR / f"{lang}.json"
+    return Ruleset(json.loads(path.read_text(encoding="utf-8")))
+
+
+DEFAULT_RULESET = load_ruleset(DEFAULT_LANG)
+
 TAG_RE = re.compile(r"<[^>]+>")
 SPACE_RE = re.compile(r"\s+")
 
@@ -112,6 +108,13 @@ def parse_date(value: str) -> dt.datetime | None:
         return None
     v = str(value).strip()
     parsed = None
+    if v.isdigit() and len(v) in (10, 13):
+        # 中文源多回 epoch：快讯 sort/showtime 可能是秒，巨潮 announcementTime、36 氪 publishTime 是毫秒
+        try:
+            ts = int(v) / (1000 if len(v) == 13 else 1)
+            return dt.datetime.fromtimestamp(ts, dt.timezone.utc)
+        except (ValueError, OSError, OverflowError):
+            return None
     try:
         parsed = dt.datetime.fromisoformat(v.replace("Z", "+00:00"))
     except ValueError:
@@ -131,25 +134,6 @@ def clean(text: str) -> str:
     import html
 
     return SPACE_RE.sub(" ", TAG_RE.sub(" ", html.unescape(text or ""))).strip()
-
-
-NOT_EVENT_RE = re.compile(
-    r"^(why|how|what|you\b|here'?s what|opinion|analysis|commentary|guest commentary|explainer|podcast|video|newsletter|the case for)\b",
-    re.I,
-)
-
-LEADING_CLAUSE_RE = re.compile(
-    r"^(after|before|following|ahead of|in|as|amid|on|during|with|at|since|once)\b", re.I
-)
-
-SUBJECT_CUT_RE = re.compile(
-    r"[:\u2014\u2013]|,\s+|\s+(?:to|will|plans?|is|are|was|were|has|have|had|said|says|after|as|amid|"
-    r"following|on|in|for|with|by|and|sinks|jumps|surges|slides|rises|falls|plunges|soars|announces|"
-    r"reports|launches|starts|begins|wins|loses|teams|files|gets|seeks|faces|bags|achieves|draws?|"
-    r"sees?|needs?|aims?|joins?|buys?|sells?|partners?|raises?|sues?|warns?|expects?|targets?|unveils?|"
-    r"presents?|publishes?|finds?|shows?|signs?|adds?|names?|calls?|urges?|asks?|makes?|takes?|gives?)\b",
-    re.I,
-)
 
 
 def rss_items(text: str) -> list[dict]:
@@ -181,15 +165,24 @@ def rss_items(text: str) -> list[dict]:
 # ---------------------------------------------------------------- 源适配器
 
 
-def fetch_google_news(query: str, start: dt.date, end: dt.date, limit: int) -> list[dict]:
-    """近期窗口用 when:Nd；历史窗口用 after:/before: 运算符（已实测可用，2026-11-08）。"""
+def fetch_google_news(
+    query: str, start: dt.date, end: dt.date, limit: int, cfg: dict | None = None
+) -> list[dict]:
+    """近期窗口用 when:Nd；历史窗口用 after:/before: 运算符（已实测可用，2026-11-08）。
+
+    语言区参数由规则集的 source_params 提供，引擎不写死任何 hl/gl/ceid。
+    """
+    cfg = cfg or {}
     today = dt.datetime.now(dt.timezone.utc).date()
     if (today - end).days <= 7:
         days = max(1, (end - start).days + 1)
         q = f"{quote_plus(query)}+when:{days}d"
     else:
         q = f"{quote_plus(query)}+after:{start.isoformat()}+before:{(end + dt.timedelta(days=1)).isoformat()}"
-    url = f"https://news.google.com/rss/search?q={q}&hl=en-US&gl=US&ceid=US:en"
+    url = (
+        f"https://news.google.com/rss/search?q={q}"
+        f"&hl={cfg.get('hl', 'en-US')}&gl={cfg.get('gl', 'US')}&ceid={cfg.get('ceid', 'US:en')}"
+    )
     resp = requests.get(url, headers={"User-Agent": UA}, timeout=TIMEOUT)
     resp.raise_for_status()
     out = []
@@ -204,13 +197,13 @@ def fetch_google_news(query: str, start: dt.date, end: dt.date, limit: int) -> l
                 excerpt = excerpt[: -len(name)].strip()
         out.append(
             {
-                "source_id": "google_news",
+                "source_id": cfg.get("source_id", "google_news"),
                 "title": title,
                 "link": it["link"],
                 "url_kind": "aggregator",
                 "date": it["date"],
                 "excerpt": excerpt or title,
-                "excerpt_kind": "summary" if len(excerpt) >= 20 else "headline",
+                "excerpt_kind": None,
                 "source_name": name or "Google News",
                 "fetched_at_utc": now_utc(),
                 "subject_hint": None,
@@ -221,7 +214,7 @@ def fetch_google_news(query: str, start: dt.date, end: dt.date, limit: int) -> l
     return out
 
 
-def fetch_bing_news(query: str, start: dt.date, end: dt.date, limit: int) -> list[dict]:
+def fetch_bing_news(query: str, start: dt.date, end: dt.date, limit: int, **_cfg) -> list[dict]:
     url = f"https://www.bing.com/news/search?q={quote_plus(query)}&format=RSS"
     resp = requests.get(url, headers={"User-Agent": UA}, timeout=TIMEOUT)
     resp.raise_for_status()
@@ -235,7 +228,7 @@ def fetch_bing_news(query: str, start: dt.date, end: dt.date, limit: int) -> lis
                 "url_kind": "publisher",
                 "date": it["date"],
                 "excerpt": it["excerpt"] or it["title"],
-                "excerpt_kind": "summary" if len(it["excerpt"]) >= 20 else "headline",
+                "excerpt_kind": None,
                 "source_name": it["source_name"] or "Bing News",
                 "fetched_at_utc": now_utc(),
                 "subject_hint": None,
@@ -246,7 +239,7 @@ def fetch_bing_news(query: str, start: dt.date, end: dt.date, limit: int) -> lis
     return out
 
 
-def fetch_federal_register(query: str, start: dt.date, end: dt.date, limit: int) -> list[dict]:
+def fetch_federal_register(query: str, start: dt.date, end: dt.date, limit: int, **_cfg) -> list[dict]:
     params = {
         "conditions[term]": query,
         "conditions[publication_date][gte]": start.isoformat(),
@@ -281,7 +274,7 @@ def fetch_federal_register(query: str, start: dt.date, end: dt.date, limit: int)
     return out
 
 
-def fetch_clinicaltrials(query: str, start: dt.date, end: dt.date, limit: int) -> list[dict]:
+def fetch_clinicaltrials(query: str, start: dt.date, end: dt.date, limit: int, **_cfg) -> list[dict]:
     params = {
         "query.term": query,
         "pageSize": str(min(limit, 100)),
@@ -320,7 +313,7 @@ def fetch_clinicaltrials(query: str, start: dt.date, end: dt.date, limit: int) -
     return out
 
 
-def fetch_arxiv(query: str, start: dt.date, end: dt.date, limit: int) -> list[dict]:
+def fetch_arxiv(query: str, start: dt.date, end: dt.date, limit: int, **_cfg) -> list[dict]:
     url = (
         "http://export.arxiv.org/api/query?search_query=all:%22"
         f"{quote_plus(query)}%22&start=0&max_results={min(limit, 100)}"
@@ -349,7 +342,7 @@ def fetch_arxiv(query: str, start: dt.date, end: dt.date, limit: int) -> list[di
     return out
 
 
-def fetch_yahoo(symbol: str, start: dt.date, end: dt.date, limit: int) -> list[dict]:
+def fetch_yahoo(symbol: str, start: dt.date, end: dt.date, limit: int, **_cfg) -> list[dict]:
     url = f"https://feeds.finance.yahoo.com/rss/2.0/headline?s={quote_plus(symbol)}&region=US&lang=en-US"
     resp = requests.get(url, headers={"User-Agent": UA}, timeout=TIMEOUT)
     resp.raise_for_status()
@@ -363,7 +356,7 @@ def fetch_yahoo(symbol: str, start: dt.date, end: dt.date, limit: int) -> list[d
                 "url_kind": "publisher",
                 "date": it["date"],
                 "excerpt": it["excerpt"] or it["title"],
-                "excerpt_kind": "summary" if len(it["excerpt"]) >= 20 else "headline",
+                "excerpt_kind": None,
                 "source_name": it["source_name"] or "Yahoo Finance",
                 "fetched_at_utc": now_utc(),
                 "subject_hint": symbol,
@@ -374,7 +367,7 @@ def fetch_yahoo(symbol: str, start: dt.date, end: dt.date, limit: int) -> list[d
     return out
 
 
-def fetch_cnbc(query: str, start: dt.date, end: dt.date, limit: int) -> list[dict]:
+def fetch_cnbc(query: str, start: dt.date, end: dt.date, limit: int, **_cfg) -> list[dict]:
     resp = requests.get(
         "https://www.cnbc.com/id/100003114/device/rss/rss.html", headers={"User-Agent": UA}, timeout=TIMEOUT
     )
@@ -389,12 +382,221 @@ def fetch_cnbc(query: str, start: dt.date, end: dt.date, limit: int) -> list[dic
                 "url_kind": "publisher",
                 "date": it["date"],
                 "excerpt": it["excerpt"] or it["title"],
-                "excerpt_kind": "summary" if len(it["excerpt"]) >= 20 else "headline",
+                "excerpt_kind": None,
                 "source_name": "CNBC",
                 "fetched_at_utc": now_utc(),
                 "subject_hint": None,
                 "action_hint": None,
                 "object": None,
+            }
+        )
+    return out
+
+
+def _epoch(ts, unit: str = "s") -> str:
+    try:
+        val = float(ts)
+    except (TypeError, ValueError):
+        return ""
+    if unit == "ms":
+        val = val / 1000.0
+    return dt.datetime.fromtimestamp(val, dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _match_query(query: str, text: str) -> bool:
+    """取数层的粗筛（不是判据）：主题词或其 ≥2 字片段命中即保留。"""
+    if not query:
+        return True
+    if query in text:
+        return True
+    return any(t and len(t) >= 2 and t in text for t in re.split(r"[\s,，、]+", query))
+
+
+def fetch_eastmoney_news(query: str, start: dt.date, end: dt.date, limit: int, **_cfg) -> list[dict]:
+    """东方财富快讯：JSONP，需剥 `var ajaxResult=` 前缀（2026-11-08 实测）。"""
+    resp = requests.get(
+        "https://newsapi.eastmoney.com/kuaixun/v1/getlist_102_ajaxResult_50_1_.html",
+        headers={"User-Agent": UA},
+        timeout=TIMEOUT,
+    )
+    resp.raise_for_status()
+    payload = json.loads(resp.text.split("=", 1)[1])
+    out = []
+    for r in (payload.get("LivesList") or [])[:limit]:
+        title = clean(r.get("title") or "")
+        excerpt = clean(r.get("digest") or "")[:400]
+        if not _match_query(query, f"{title}{excerpt}"):
+            continue
+        out.append(
+            {
+                "source_id": "eastmoney_news",
+                "title": title,
+                "link": r.get("url_unique") or "",
+                "url_kind": "publisher",
+                "date": r.get("showtime") or "",
+                "excerpt": excerpt or title,
+                "excerpt_kind": None,
+                "source_name": "东方财富",
+                "fetched_at_utc": now_utc(),
+                "subject_hint": None,
+                "action_hint": None,
+                "object": None,
+            }
+        )
+    return out
+
+
+def fetch_sina_roll(query: str, start: dt.date, end: dt.date, limit: int, **_cfg) -> list[dict]:
+    """新浪财经滚动列表：JSON（2026-11-08 实测；当天 `pdps` 可能为空，属源侧波动）。"""
+    url = f"https://feed.mix.sina.com.cn/api/roll/get?pageid=153&lid=2516&num={min(limit, 30)}"
+    resp = requests.get(url, headers={"User-Agent": UA}, timeout=TIMEOUT)
+    resp.raise_for_status()
+    out = []
+    for r in (resp.json().get("result", {}).get("pdps") or [])[:limit]:
+        title = clean(r.get("title") or "")
+        excerpt = clean(r.get("intro") or "")[:400]
+        if not _match_query(query, f"{title}{excerpt}"):
+            continue
+        out.append(
+            {
+                "source_id": "sina_roll",
+                "title": title,
+                "link": r.get("url") or "",
+                "url_kind": "publisher",
+                "date": _epoch(r.get("ctime")),
+                "excerpt": excerpt or title,
+                "excerpt_kind": None,
+                "source_name": "新浪财经",
+                "fetched_at_utc": now_utc(),
+                "subject_hint": None,
+                "action_hint": None,
+                "object": None,
+            }
+        )
+    return out
+
+
+def fetch_wallstreetcn(query: str, start: dt.date, end: dt.date, limit: int, **_cfg) -> list[dict]:
+    """华尔街见闻快讯：JSON，`display_time` 为 epoch 秒（2026-11-08 实测）。"""
+    url = f"https://api-one.wallstcn.com/apiv1/content/lives?channel=global-channel&limit={min(limit, 50)}"
+    resp = requests.get(url, headers={"User-Agent": UA}, timeout=TIMEOUT)
+    resp.raise_for_status()
+    out = []
+    for r in (resp.json().get("data", {}).get("items") or [])[:limit]:
+        title = clean(r.get("title") or (r.get("content_text") or "")[:60])
+        excerpt = clean(r.get("content_text") or "")[:400]
+        if not _match_query(query, f"{title}{excerpt}"):
+            continue
+        out.append(
+            {
+                "source_id": "wallstreetcn",
+                "title": title,
+                "link": r.get("uri") or "https://wallstreetcn.com/livenews",
+                "url_kind": "publisher",
+                "date": _epoch(r.get("display_time")),
+                "excerpt": excerpt or title,
+                "excerpt_kind": None,
+                "source_name": "华尔街见闻",
+                "fetched_at_utc": now_utc(),
+                "subject_hint": None,
+                "action_hint": None,
+                "object": None,
+            }
+        )
+    return out
+
+
+def fetch_kr36(query: str, start: dt.date, end: dt.date, limit: int, **_cfg) -> list[dict]:
+    """36 氪快讯：gateway JSON POST，无需登录（2026-11-08 实测）。
+
+    边界（zh_source_access.md §0.5）：这是公开网页自己调的接口，不是绕过技术措施；
+    随前端改版可能失效，失效时按取源失败处理，不做逆向修补。
+    """
+    body = {
+        "partner_id": "web",
+        "param": {
+            "siteId": 1,
+            "platformId": 2,
+            "pageSize": min(limit, 30),
+            "pageEvent": 0,
+            "pageCallback": "",
+            "type": 1,
+        },
+    }
+    resp = requests.post(
+        "https://gateway.36kr.com/api/mis/nav/newsflash/flow",
+        json=body,
+        headers={"User-Agent": UA},
+        timeout=TIMEOUT,
+    )
+    resp.raise_for_status()
+    out = []
+    for r in (resp.json().get("data", {}).get("itemList") or [])[:limit]:
+        mat = r.get("templateMaterial") or {}
+        title = clean(mat.get("widgetTitle") or "")
+        excerpt = clean(mat.get("widgetContent") or "")[:400]
+        if not _match_query(query, f"{title}{excerpt}"):
+            continue
+        out.append(
+            {
+                "source_id": "kr36",
+                "title": title,
+                "link": f"https://36kr.com/newsflashes/{r.get('itemId')}" if r.get("itemId") else "",
+                "url_kind": "publisher",
+                "date": _epoch(mat.get("publishTime"), "ms"),
+                "excerpt": excerpt or title,
+                "excerpt_kind": None,
+                "source_name": "36氪",
+                "fetched_at_utc": now_utc(),
+                "subject_hint": None,
+                "action_hint": None,
+                "object": None,
+            }
+        )
+    return out
+
+
+def fetch_cninfo(query: str, start: dt.date, end: dt.date, limit: int, **_cfg) -> list[dict]:
+    """巨潮资讯公告查询：JSON POST，需 Referer/Origin/X-Requested-With（2026-11-08 实测）。"""
+    headers = {
+        "User-Agent": UA,
+        "Referer": "http://www.cninfo.com.cn/new/commonUrl?url=disclosure/list/notice",
+        "Origin": "http://www.cninfo.com.cn",
+        "X-Requested-With": "XMLHttpRequest",
+    }
+    data = {
+        "pageNum": 1,
+        "pageSize": min(limit, 30),
+        "column": "szse",
+        "tabName": "fulltext",
+        "searchkey": query or "",
+        "sortName": "",
+        "sortType": "",
+        "isHLtitle": "true",
+        "seDate": f"{start.isoformat()}~{end.isoformat()}",
+    }
+    resp = requests.post(
+        "http://www.cninfo.com.cn/new/hisAnnouncement/query", data=data, headers=headers, timeout=TIMEOUT
+    )
+    resp.raise_for_status()
+    out = []
+    for a in (resp.json().get("announcements") or [])[:limit]:
+        sec = clean(a.get("secName") or "")
+        ann = clean(a.get("announcementTitle") or "")
+        out.append(
+            {
+                "source_id": "cninfo",
+                "title": f"{sec}：{ann}" if sec else ann,
+                "link": f"http://static.cninfo.com.cn/{a.get('adjunctUrl')}" if a.get("adjunctUrl") else "",
+                "url_kind": "official",
+                "date": _epoch(a.get("announcementTime"), "ms"),
+                "excerpt": ann,
+                "excerpt_kind": None,
+                "source_name": "巨潮资讯",
+                "fetched_at_utc": now_utc(),
+                "subject_hint": sec or None,
+                "action_hint": None,
+                "object": ann or None,
             }
         )
     return out
@@ -408,16 +610,37 @@ FETCHERS = {
     "arxiv": fetch_arxiv,
     "yahoo_finance": fetch_yahoo,
     "cnbc": fetch_cnbc,
+    "eastmoney_news": fetch_eastmoney_news,
+    "sina_roll": fetch_sina_roll,
+    "wallstreetcn": fetch_wallstreetcn,
+    "kr36": fetch_kr36,
+    "cninfo": fetch_cninfo,
 }
 
 
 # ---------------------------------------------------------------- 抽取
 
 
-def detect_action(text: str) -> tuple[str | None, str | None]:
-    """返回 (action, 原文锚点)。位置最早者胜；同位置按表序。"""
+def filter_hit(flt: dict, text: str) -> bool:
+    where = flt["where"]
+    m = flt["pattern"].match(text) if where == "title_prefix" else flt["pattern"].search(text)
+    if not m:
+        return False
+    return not any(u.search(text) for u in flt["unless"])
+
+
+def apply_filters(stage: str, text: str, rs: Ruleset) -> str | None:
+    """按规则集的过滤表判；命中返回拒绝码键，否则 None。"""
+    for flt in rs.filters:
+        if flt["stage"] == stage and filter_hit(flt, text):
+            return flt["key"]
+    return None
+
+
+def detect_action(text: str, rs: Ruleset) -> tuple[str | None, str | None, int | None]:
+    """返回 (action, 原文锚点, 锚点起始位)。位置最早者胜；同位置按规则集表序。"""
     best: tuple[int, int, str, str] | None = None
-    for order, (action, pats) in enumerate(COMPILED):
+    for order, (action, pats) in enumerate(rs.action_patterns):
         for pat in pats:
             m = pat.search(text)
             if not m:
@@ -426,13 +649,13 @@ def detect_action(text: str) -> tuple[str | None, str | None]:
             if best is None or key[:2] < best[:2]:
                 best = key
     if best is None:
-        return None, None
-    return best[2], best[3][:60]
+        return None, None, None
+    return best[2], best[3][:60], best[0]
 
 
-def detect_value(text: str) -> dict:
+def detect_value(text: str, rs: Ruleset) -> dict:
     best: tuple[int, int, str, str] | None = None
-    for order, (kind, pat) in enumerate(VALUE_PATTERNS):
+    for order, (kind, pat, _cfg) in enumerate(rs.value_patterns):
         m = pat.search(text)
         if not m:
             continue
@@ -444,86 +667,111 @@ def detect_value(text: str) -> dict:
     kind, raw = best[2], best[3]
     number = None
     unit = None
-    m = dict(VALUE_PATTERNS)[kind].search(text)
-    if m:
-        num = m.group(1).replace(",", "")
+    for k, pat, cfg in rs.value_patterns:
+        if k != kind:
+            continue
+        m = pat.search(text)
+        if not m:
+            break
         try:
-            number = float(num)
-        except ValueError:
+            number = float(m.group(cfg.get("number_group", 1)).replace(",", ""))
+        except (ValueError, IndexError):
             number = None
-        if kind == "money":
-            unit = m.group(2).lower()
-        elif kind == "percent":
-            unit = "percent"
-        elif kind == "phase":
-            unit = "phase"
-        elif kind == "count":
-            unit = m.group(2).lower()
+        if cfg.get("unit") == "lower":
+            unit = m.group(cfg["unit_group"]).lower()
+        else:
+            unit = cfg.get("unit")
+        break
     return {"kind": kind, "raw": raw.strip(), "number": number, "unit": unit}
 
 
-def extract_subject(prefix: str) -> str | None:
+def extract_subject(prefix: str, rs: Ruleset, action_start: int | None = None) -> str | None:
+    s = rs.subject
+    strip = s["strip_chars"]
     raw = prefix.replace("\n", " ").strip()
-    chunks = [c.strip(" .\"'()") for c in re.split(r",\s+|\s+[-\u2014\u2013]\s+", raw) if c.strip(" .\"'()")]
-    if not chunks:
+    if s["anchor_prefix"] and action_start:
+        # 中文：以动作锚点为右边界取前缀，主体名天然逐字落在原文里
+        head = raw[:action_start]
+        parts = [p.strip(strip) for p in (s["split_re"].split(head) if s["split_re"] else [head])]
+        parts = [p for p in parts if p]
+        cand = parts[-1] if parts else ""
+    else:
+        chunks = [c.strip(strip) for c in s["split_re"].split(raw) if c.strip(strip)]
+        if not chunks:
+            return None
+        # 以时间/原因状语开头的标题（"After two deaths..., Artiva is shutting down"），主体在最后一段
+        cand = chunks[-1] if s["leading_re"] and s["leading_re"].match(chunks[0]) else chunks[0]
+        if s["cut_re"]:
+            cand = s["cut_re"].split(cand, maxsplit=1)[0].strip(strip)
+        if s["trailing_re"]:
+            cand = s["trailing_re"].sub("", cand)
+        if s["article_re"]:
+            cand = s["article_re"].sub("", cand).strip(strip)
+    g = rs.gates
+    if len(cand) < g["subject_min_len"] or len(cand) > g["subject_max_len"]:
         return None
-    # 以时间/原因状语开头的标题（"After two deaths..., Artiva is shutting down"），主体在最后一段
-    cand = chunks[-1] if LEADING_CLAUSE_RE.match(chunks[0]) else chunks[0]
-    cand = SUBJECT_CUT_RE.split(cand, maxsplit=1)[0].strip(" .\"'()")
-    cand = re.sub(r"\s+(?:is|are|was|were|has|have|had|will|would|to|be|been|being)$", "", cand, flags=re.I)
-    cand = re.sub(r"^(the|a|an)\s+", "", cand, flags=re.I).strip(" .\"'()")
-    if len(cand) < 2 or len(cand) > 80:
+    # 首版把 "83% problem" 当主体，这里要求主体以字母/汉字开头且达到最少字符数
+    if not re.match(g["subject_first_char"], cand):
         return None
-    # 首版把 "83% problem" 当主体，这里要求主体以字母开头且至少含 3 个字母
-    if not re.match(r"[A-Za-z\u4e00-\u9fff]", cand):
-        return None
-    if len(re.findall(r"[A-Za-z\u4e00-\u9fff]", cand)) < 3:
+    if len(re.findall(g["subject_first_char"], cand)) < g["subject_min_class_chars"]:
         return None
     return cand
 
 
-def build_event(item: dict, start: dt.date, end: dt.date, entity: str | None = None) -> tuple[dict | None, str | None]:
+def build_event(
+    item: dict,
+    start: dt.date,
+    end: dt.date,
+    entity: str | None = None,
+    ruleset: Ruleset | None = None,
+) -> tuple[dict | None, str | None]:
+    rs = ruleset or DEFAULT_RULESET
     when = parse_date(item.get("date", ""))
     if when is None:
-        return None, "missing_time"
+        return None, rs.code("missing_time")
     day = when.date()
     if not (start <= day <= end):
-        return None, "out_of_window"
+        return None, rs.code("out_of_window")
 
     url = (item.get("link") or "").strip()
     if not url.startswith(("http://", "https://")):
-        return None, "missing_url"
+        return None, rs.code("missing_url")
 
     excerpt = SPACE_RE.sub(" ", (item.get("excerpt") or "")).strip()
-    if len(excerpt) < 20:
-        return None, "missing_excerpt"
+    if len(excerpt) < rs.gates["excerpt_min"]:
+        return None, rs.code("missing_excerpt")
 
     title = item.get("title", "") or ""
     text = f"{title}. {excerpt}"
     if entity and entity.lower() not in text.lower():
-        return None, "subject_not_in_text"
-    if NOT_EVENT_RE.match(title.strip()) or title.strip().endswith("?"):
-        return None, "not_an_event"
+        return None, rs.code("subject_not_in_text")
+    key = apply_filters("title", title.strip(), rs)
+    if key:
+        return None, rs.code(key)
+    key = apply_filters("text", text, rs)
+    if key:
+        return None, rs.code(key)
 
     action = item.get("action_hint")
     anchor = None
+    action_start = None
     if action is None:
-        action, anchor = detect_action(text)
+        action, anchor, action_start = detect_action(text, rs)
         if action is None:
-            return None, "unparsed_action"
+            return None, rs.code("unparsed_action")
     else:
         anchor = title[:60] or action
 
     subject = item.get("subject_hint")
     if not subject:
-        subject = extract_subject(title)
+        subject = extract_subject(title, rs, action_start)
         if not subject:
-            m = re.search(r"[\w ]+", text)
-            subject = None
-        if not subject:
-            return None, "unparsed_subject"
+            return None, rs.code("unparsed_subject")
+    key = apply_filters("subject", str(subject), rs)
+    if key:
+        return None, rs.code(key)
 
-    value = detect_value(text)
+    value = detect_value(text, rs)
     if item.get("phase_hint") and value["kind"] == "none":
         value = {"kind": "phase", "raw": item["phase_hint"], "number": None, "unit": "phase"}
 
@@ -543,8 +791,9 @@ def build_event(item: dict, start: dt.date, end: dt.date, entity: str | None = N
         "source_name": item.get("source_name") or "unknown",
         "fetched_at_utc": item.get("fetched_at_utc"),
         "excerpt": excerpt[:400],
-        "excerpt_kind": item.get("excerpt_kind", "summary"),
-        "extract_method": EXTRACT_METHOD,
+        "excerpt_kind": item.get("excerpt_kind")
+        or ("summary" if len(excerpt) >= rs.gates["excerpt_kind_min"] else "headline"),
+        "extract_method": rs.extract_method,
         "sources": [
             {
                 "source_url": url,
@@ -555,71 +804,73 @@ def build_event(item: dict, start: dt.date, end: dt.date, entity: str | None = N
             }
         ],
     }
-    reason = validate_event(event)
+    reason = validate_event(event, rs)
     return (None, reason) if reason else (event, None)
 
 
-def validate_event(ev: dict) -> str | None:
+def validate_event(ev: dict, ruleset: Ruleset | None = None) -> str | None:
+    rs = ruleset or DEFAULT_RULESET
+    g = rs.gates
     if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", ev.get("time", "")):
-        return "missing_time"
-    if not ev.get("subject") or len(ev["subject"]) > 80:
-        return "unparsed_subject"
-    if ev.get("action") not in ACTIONS:
-        return "unparsed_action"
+        return rs.code("missing_time")
+    if not ev.get("subject") or len(ev["subject"]) > g["subject_max_len"]:
+        return rs.code("unparsed_subject")
+    if ev.get("action") not in rs.actions:
+        return rs.code("unparsed_action")
     if not str(ev.get("source_url", "")).startswith(("http://", "https://")):
-        return "missing_url"
+        return rs.code("missing_url")
     if parse_date(ev.get("fetched_at_utc", "")) is None:
-        return "missing_time"
-    if len(SPACE_RE.sub(" ", ev.get("excerpt", "")).strip()) < 20:
-        return "missing_excerpt"
+        return rs.code("missing_time")
+    if len(SPACE_RE.sub(" ", ev.get("excerpt", "")).strip()) < g["excerpt_min"]:
+        return rs.code("missing_excerpt")
     for src in ev.get("sources") or []:
         if not str(src.get("source_url", "")).startswith(("http://", "https://")):
-            return "missing_url"
+            return rs.code("missing_url")
         if parse_date(src.get("fetched_at_utc", "")) is None:
-            return "missing_time"
-        if len(SPACE_RE.sub(" ", src.get("excerpt", "")).strip()) < 20:
-            return "missing_excerpt"
+            return rs.code("missing_time")
+        if len(SPACE_RE.sub(" ", src.get("excerpt", "")).strip()) < g["excerpt_min"]:
+            return rs.code("missing_excerpt")
     if not ev.get("sources"):
-        return "missing_excerpt"
+        return rs.code("missing_excerpt")
     return None
 
 
 # ---------------------------------------------------------------- 去重
 
 
-def norm_tokens(title: str) -> set[str]:
-    words = re.findall(r"[a-z0-9]+", title.lower())
-    return {w for w in words if w not in STOPWORDS and len(w) > 1}
+def norm_tokens(title: str, rs: Ruleset) -> set[str]:
+    words = re.findall(rs.tokenize["pattern"], title.lower())
+    stop = set(rs.tokenize.get("stopwords") or [])
+    return {w for w in words if w not in stop and len(w) >= rs.tokenize.get("min_len", 1)}
 
 
-NEWS_SOURCES = {"google_news", "bing_news", "yahoo_finance", "cnbc"}
-
-
-def same_event(a: dict, b: dict) -> bool:
-    # 官方记录（Federal Register / ClinicalTrials / arXiv）每条是独立文书，
+def same_event(a: dict, b: dict, rs: Ruleset | None = None) -> bool:
+    rs = rs or DEFAULT_RULESET
+    cfg = rs.dedupe
+    # 官方记录（Federal Register / ClinicalTrials / arXiv / 巨潮公告）每条是独立文书，
     # 标题相近不代表同一事件，所以只在新闻源之间做合并。
-    if a.get("_source_id") not in NEWS_SOURCES or b.get("_source_id") not in NEWS_SOURCES:
+    if a.get("_source_id") not in cfg["merge_sources"] or b.get("_source_id") not in cfg["merge_sources"]:
         return False
     if a["action"] != b["action"]:
         return False
     d1 = dt.date.fromisoformat(a["time"])
     d2 = dt.date.fromisoformat(b["time"])
-    if abs((d1 - d2).days) > 3:
+    if abs((d1 - d2).days) > cfg["day_tolerance"]:
         return False
-    ta, tb = norm_tokens(a["_title"]), norm_tokens(b["_title"])
+    ta, tb = norm_tokens(a["_title"], rs), norm_tokens(b["_title"], rs)
     if not ta or not tb:
         return False
     inter = len(ta & tb)
     union = len(ta | tb)
-    return union > 0 and inter / union >= 0.55
+    return union > 0 and inter / union >= cfg["jaccard_min"]
 
 
-def merge_events(events: list[dict]) -> tuple[list[dict], int]:
+def merge_events(events: list[dict], ruleset: Ruleset | None = None) -> tuple[list[dict], int]:
     merged: list[dict] = []
     dup_count = 0
     for ev in sorted(events, key=lambda e: (e["time"], e["sources"][0]["fetched_at_utc"])):
         for cur in merged:
-            if same_event(cur, ev):
+            if same_event(cur, ev, ruleset):
                 if len(cur["sources"]) < 8:
                     cur["sources"].append(ev["sources"][0])
                 dup_count += 1
@@ -680,6 +931,7 @@ def run(args: argparse.Namespace) -> int:
         print("时间窗起止反了：--start 必须 <= --end", file=sys.stderr)
         return 2
 
+    rs = load_ruleset(args.lang)
     out_dir = Path(args.out_dir)
     raw: list[dict] = []
     sources_stats: dict[str, dict] = {}
@@ -703,7 +955,7 @@ def run(args: argparse.Namespace) -> int:
             if i:
                 time.sleep(1.2)
             try:
-                items = FETCHERS[name](query, start, end, args.max_per_source)
+                items = FETCHERS[name](query, start, end, args.max_per_source, cfg=rs.params(name))
                 raw.extend(items)
                 sources_stats.setdefault(name, {"fetched": 0, "accepted": 0, "rejected": 0})
                 sources_stats[name]["fetched"] += len(items)
@@ -729,7 +981,7 @@ def run(args: argparse.Namespace) -> int:
     rejects: list[dict] = []
     events: list[dict] = []
     for item in raw:
-        ev, reason = build_event(item, start, end, entity=args.entity)
+        ev, reason = build_event(item, start, end, entity=args.entity, ruleset=rs)
         if ev is None:
             rejects.append(
                 {
@@ -747,7 +999,7 @@ def run(args: argparse.Namespace) -> int:
         ev["_source_id"] = item.get("source_id")
         events.append(ev)
 
-    merged, dup_count = merge_events(events)
+    merged, dup_count = merge_events(events, rs)
     for ev in merged:
         ev.pop("_title", None)
         source_id = ev.pop("_source_id", None)
@@ -764,7 +1016,8 @@ def run(args: argparse.Namespace) -> int:
         "window_start": start.isoformat(),
         "window_end": end.isoformat(),
         "generated_at_utc": now_utc(),
-        "extract_method": EXTRACT_METHOD,
+        "extract_method": rs.extract_method,
+        "ruleset": f"{rs.lang}/{rs.version}",
         "sources": [s.strip() for s in args.sources.split(",") if s.strip()],
         "sources_stats": sources_stats,
         "stats": {
@@ -798,17 +1051,15 @@ def main() -> int:
     ap.add_argument("--entity", help="主体词，如 XBI 或公司名")
     ap.add_argument("--start", required=True, help="YYYY-MM-DD")
     ap.add_argument("--end", required=True, help="YYYY-MM-DD")
-    ap.add_argument("--sources", default=None, help="逗号分隔的源名；默认按模式给")
+    ap.add_argument("--sources", default=None, help="逗号分隔的源名；默认按规则集的 default_sources 给")
+    ap.add_argument("--lang", default=DEFAULT_LANG, help=f"规则集语言；默认 {DEFAULT_LANG}（可用：zh / en）")
     ap.add_argument("--max-per-source", type=int, default=60)
     ap.add_argument("--out-dir", default=str(Path(__file__).resolve().parent / "out"))
     ap.add_argument("--replay", default=None, help="离线复跑：读取 raw_items.json")
     args = ap.parse_args()
     if args.sources is None:
-        args.sources = (
-            "google_news,bing_news,clinicaltrials,federal_register"
-            if args.topic
-            else "yahoo_finance,google_news,cnbc"
-        )
+        rs = load_ruleset(args.lang)
+        args.sources = ",".join(rs.default_sources["topic" if args.topic else "entity"])
     return run(args)
 
 

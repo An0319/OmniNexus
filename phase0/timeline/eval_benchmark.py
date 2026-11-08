@@ -23,7 +23,12 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from timeline import STOPWORDS, build_event, parse_date  # noqa: E402
+from timeline import build_event, load_ruleset, parse_date  # noqa: E402
+
+RULESET = load_ruleset("en")
+STOPWORDS = set(RULESET.tokenize.get("stopwords") or [])
+TOKEN_RE = RULESET.tokenize["pattern"]
+TOKEN_MIN = RULESET.tokenize.get("min_len", 1)
 
 FLOORS = {
     "lenient_recall": 0.70,
@@ -35,7 +40,7 @@ FLOORS = {
 
 
 def tokens(text: str) -> set[str]:
-    return {w for w in re.findall(r"[a-z0-9]+", (text or "").lower()) if w not in STOPWORDS and len(w) > 1}
+    return {w for w in re.findall(TOKEN_RE, (text or "").lower()) if w not in STOPWORDS and len(w) >= TOKEN_MIN}
 
 
 def subject_ok(label_subject: str, extracted: str) -> bool:
@@ -93,7 +98,7 @@ def main() -> int:
         if args.extractor == "model":
             ev, reason = extract_item(raw_item, start, end, cache)
         else:
-            ev, reason = build_event(raw_item, start, end)
+            ev, reason = build_event(raw_item, start, end, ruleset=RULESET)
         # event 三态：true=算、false=不算、null=判不了（见 event_definition.md §5）
         if lab["event"] is None:
             undecidable += 1

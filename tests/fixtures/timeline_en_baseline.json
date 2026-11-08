@@ -1,0 +1,713 @@
+{
+ "def": {
+  "items": {
+   "B01": {
+    "action": "trial_start",
+    "emitted": true,
+    "reason": null,
+    "subject": "First Gene-Edited Pig Kidney Transplant Clinical Trial",
+    "value_kind": "none"
+   },
+   "B02": {
+    "action": "trial_start",
+    "emitted": true,
+    "reason": null,
+    "subject": "First-ever cancer clinical trial launched at VCU Health Tappahannock Hospital",
+    "value_kind": "none"
+   },
+   "B03": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B04": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B05": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B06": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B07": {
+    "action": "rejection",
+    "emitted": true,
+    "reason": null,
+    "subject": "Decline",
+    "value_kind": "none"
+   },
+   "B08": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B09": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B10": {
+    "action": "trial_start",
+    "emitted": true,
+    "reason": null,
+    "subject": "Longitudinal clinical trial enrollment trends across 341 US FDA-approved drugs",
+    "value_kind": "none"
+   },
+   "B11": {
+    "action": "trial_result",
+    "emitted": true,
+    "reason": null,
+    "subject": "Lilly's triple agonist",
+    "value_kind": "none"
+   },
+   "B12": {
+    "action": null,
+    "emitted": false,
+    "reason": "not_an_event",
+    "subject": null,
+    "value_kind": null
+   },
+   "B13": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B14": {
+    "action": "partnership",
+    "emitted": true,
+    "reason": null,
+    "subject": "MRC Centre of Research Excellence",
+    "value_kind": "none"
+   },
+   "B15": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B16": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B17": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B18": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B19": {
+    "action": "partnership",
+    "emitted": true,
+    "reason": null,
+    "subject": "UAB Vascular Surgery",
+    "value_kind": "none"
+   },
+   "B20": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B21": {
+    "action": "trial_start",
+    "emitted": true,
+    "reason": null,
+    "subject": "UCLA Health",
+    "value_kind": "none"
+   },
+   "B22": {
+    "action": "personnel",
+    "emitted": true,
+    "reason": null,
+    "subject": "Four Penn studies named among nation’s top clinical research advances",
+    "value_kind": "none"
+   },
+   "B23": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   }
+  },
+  "window": [
+   "2025-11-01",
+   "2026-01-31"
+  ]
+ },
+ "dev": {
+  "items": {
+   "B01": {
+    "action": "trial_start",
+    "emitted": true,
+    "reason": null,
+    "subject": "Roswell Park",
+    "value_kind": "none"
+   },
+   "B02": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B03": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B04": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B05": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_subject",
+    "subject": null,
+    "value_kind": null
+   },
+   "B06": {
+    "action": "trial_start",
+    "emitted": true,
+    "reason": null,
+    "subject": "AstraZeneca",
+    "value_kind": "none"
+   },
+   "B07": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B08": {
+    "action": "trial_result",
+    "emitted": true,
+    "reason": null,
+    "subject": "Breakthrough PTSD treatment",
+    "value_kind": "percent"
+   },
+   "B09": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B10": {
+    "action": "partnership",
+    "emitted": true,
+    "reason": null,
+    "subject": "Boehringer",
+    "value_kind": "none"
+   },
+   "B11": {
+    "action": "halt",
+    "emitted": true,
+    "reason": null,
+    "subject": "Artiva",
+    "value_kind": "none"
+   },
+   "B12": {
+    "action": "trial_result",
+    "emitted": true,
+    "reason": null,
+    "subject": "GC Cell",
+    "value_kind": "none"
+   },
+   "B13": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B14": {
+    "action": "trial_start",
+    "emitted": true,
+    "reason": null,
+    "subject": "Two new candidate vaccines",
+    "value_kind": "none"
+   },
+   "B15": {
+    "action": "trial_result",
+    "emitted": true,
+    "reason": null,
+    "subject": "SynKIR-310’ Phase 1 clinical trial interim results slated",
+    "value_kind": "phase"
+   },
+   "B16": {
+    "action": "trial_start",
+    "emitted": true,
+    "reason": null,
+    "subject": "Two new Ebola vaccines",
+    "value_kind": "none"
+   },
+   "B17": {
+    "action": null,
+    "emitted": false,
+    "reason": "not_an_event",
+    "subject": null,
+    "value_kind": null
+   },
+   "B18": {
+    "action": "trial_start",
+    "emitted": true,
+    "reason": null,
+    "subject": "Drug From Stony Brook-Developed Anti-Cancer Compounds Now",
+    "value_kind": "none"
+   },
+   "B19": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B20": {
+    "action": "approval",
+    "emitted": true,
+    "reason": null,
+    "subject": "WHO",
+    "value_kind": "none"
+   },
+   "B21": {
+    "action": "publication",
+    "emitted": true,
+    "reason": null,
+    "subject": "Rescue treatment",
+    "value_kind": "none"
+   },
+   "B22": {
+    "action": null,
+    "emitted": false,
+    "reason": "not_an_event",
+    "subject": null,
+    "value_kind": null
+   },
+   "B23": {
+    "action": "trial_result",
+    "emitted": true,
+    "reason": null,
+    "subject": "Experimental pancreatic cancer vaccine",
+    "value_kind": "none"
+   },
+   "B24": {
+    "action": "personnel",
+    "emitted": true,
+    "reason": null,
+    "subject": "Science 37 Named 2026 “BioTechnology Innovation of the Year”",
+    "value_kind": "none"
+   },
+   "B25": {
+    "action": "trial_start",
+    "emitted": true,
+    "reason": null,
+    "subject": "Hospitals Help",
+    "value_kind": "none"
+   }
+  },
+  "window": [
+   "2026-10-01",
+   "2026-11-08"
+  ]
+ },
+ "test": {
+  "items": {
+   "B01": {
+    "action": "trial_result",
+    "emitted": true,
+    "reason": null,
+    "subject": "Retatrutide",
+    "value_kind": "percent"
+   },
+   "B02": {
+    "action": "trial_start",
+    "emitted": true,
+    "reason": null,
+    "subject": "HHS",
+    "value_kind": "none"
+   },
+   "B03": {
+    "action": "trial_start",
+    "emitted": true,
+    "reason": null,
+    "subject": "Patient enrolment",
+    "value_kind": "none"
+   },
+   "B04": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B05": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B06": {
+    "action": "trial_start",
+    "emitted": true,
+    "reason": null,
+    "subject": "Insilico Initiates Phase III Clinical Trial",
+    "value_kind": "phase"
+   },
+   "B07": {
+    "action": "trial_start",
+    "emitted": true,
+    "reason": null,
+    "subject": "Girl admitted",
+    "value_kind": "none"
+   },
+   "B08": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B09": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B10": {
+    "action": "trial_start",
+    "emitted": true,
+    "reason": null,
+    "subject": "CGTX Q1 2026 Earnings",
+    "value_kind": "none"
+   },
+   "B11": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B12": {
+    "action": "publication",
+    "emitted": true,
+    "reason": null,
+    "subject": "Study",
+    "value_kind": "none"
+   },
+   "B13": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B14": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B15": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B16": {
+    "action": "trial_start",
+    "emitted": true,
+    "reason": null,
+    "subject": "ECU Health participates",
+    "value_kind": "none"
+   },
+   "B17": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B18": {
+    "action": "trial_start",
+    "emitted": true,
+    "reason": null,
+    "subject": "Neurizon advances ALS trial",
+    "value_kind": "none"
+   },
+   "B19": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B20": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B21": {
+    "action": "trial_result",
+    "emitted": true,
+    "reason": null,
+    "subject": "Retatrutide",
+    "value_kind": "none"
+   },
+   "B22": {
+    "action": "approval",
+    "emitted": true,
+    "reason": null,
+    "subject": "BriaCell Therapeutics Stock Pops 12%",
+    "value_kind": "percent"
+   },
+   "B23": {
+    "action": null,
+    "emitted": false,
+    "reason": "not_an_event",
+    "subject": null,
+    "value_kind": null
+   },
+   "B24": {
+    "action": null,
+    "emitted": false,
+    "reason": "not_an_event",
+    "subject": null,
+    "value_kind": null
+   }
+  },
+  "window": [
+   "2026-06-01",
+   "2026-08-31"
+  ]
+ },
+ "val": {
+  "items": {
+   "B01": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B02": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B03": {
+    "action": "trial_start",
+    "emitted": true,
+    "reason": null,
+    "subject": "Should My Child",
+    "value_kind": "none"
+   },
+   "B04": {
+    "action": "halt",
+    "emitted": true,
+    "reason": null,
+    "subject": "PATHWAYS clinical trial paused",
+    "value_kind": "none"
+   },
+   "B05": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B06": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B07": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B08": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B09": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B10": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B11": {
+    "action": "policy",
+    "emitted": true,
+    "reason": null,
+    "subject": "New guidance",
+    "value_kind": "none"
+   },
+   "B12": {
+    "action": "publication",
+    "emitted": true,
+    "reason": null,
+    "subject": "Effects of daily multivitamin",
+    "value_kind": "none"
+   },
+   "B13": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B14": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B15": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B16": {
+    "action": null,
+    "emitted": false,
+    "reason": "not_an_event",
+    "subject": null,
+    "value_kind": null
+   },
+   "B17": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B18": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B19": {
+    "action": "trial_start",
+    "emitted": true,
+    "reason": null,
+    "subject": "PAHO",
+    "value_kind": "none"
+   },
+   "B20": {
+    "action": "trial_result",
+    "emitted": true,
+    "reason": null,
+    "subject": "FDA",
+    "value_kind": "none"
+   },
+   "B21": {
+    "action": "trial_start",
+    "emitted": true,
+    "reason": null,
+    "subject": "Mizzou",
+    "value_kind": "none"
+   },
+   "B22": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   },
+   "B23": {
+    "action": "trial_result",
+    "emitted": true,
+    "reason": null,
+    "subject": "Investigational Pancreatic Cancer Vaccine",
+    "value_kind": "none"
+   },
+   "B24": {
+    "action": "trial_start",
+    "emitted": true,
+    "reason": null,
+    "subject": "Launch of clinical trial reforms",
+    "value_kind": "none"
+   },
+   "B25": {
+    "action": null,
+    "emitted": false,
+    "reason": "unparsed_action",
+    "subject": null,
+    "value_kind": null
+   }
+  },
+  "window": [
+   "2026-02-01",
+   "2026-04-30"
+  ]
+ }
+}

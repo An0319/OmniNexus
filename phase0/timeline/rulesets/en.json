@@ -1,0 +1,98 @@
+{
+  "_comment": "英文规则集：原有 rules_v2 的全部词表、门槛与拒绝码原样迁出，行为不变（有 tests/fixtures/timeline_en_baseline.json 锁住）。引擎不含任何语言分支，只按本文件的参数判。",
+  "lang": "en",
+  "version": "rules_v2",
+  "extract_method": "rules_v2",
+  "default_sources": {
+    "topic": ["google_news", "bing_news", "clinicaltrials", "federal_register"],
+    "entity": ["yahoo_finance", "google_news", "cnbc"]
+  },
+  "source_params": {
+    "google_news": {
+      "hl": "en-US",
+      "gl": "US",
+      "ceid": "US:en",
+      "source_id": "google_news"
+    }
+  },
+  "actions": [
+    "trial_start",
+    "trial_result",
+    "approval",
+    "rejection",
+    "halt",
+    "designation",
+    "deal",
+    "partnership",
+    "funding",
+    "policy",
+    "registration",
+    "publication",
+    "personnel",
+    "other"
+  ],
+  "action_patterns": [
+    ["halt", ["\\bhalt(s|ed|ing)?\\b", "\\bsuspend(s|ed|ing)?\\b", "\\bpause[sd]?\\b", "\\bterminat(e|es|ed)\\b", "\\bstop(s|ped)?\\b", "\\bdiscontinu(e|ed|ation)\\b", "\\bshut(s|ting)? down\\b", "\\bwind(s|ing)? down\\b", "\\bceas(e|es|ed)\\b"]],
+    ["rejection", ["\\breject(s|ed|ion)?\\b", "\\bdeclin(e|es|ed)\\b", "\\bden(y|ies|ied)\\b", "\\bcomplete response letter\\b", "\\bCRL\\b"]],
+    ["approval", ["\\bapprov(e|es|ed|al)\\b", "\\bauthoriz(e|es|ed|ation)\\b", "\\bclear(s|ed)?\\b", "\\bclearance\\b", "\\bgreen[- ]light(s|ed)?\\b"]],
+    ["designation", ["\\borphan\\b", "\\bbreakthrough therapy\\b", "\\bfast[- ]track\\b", "\\bpriority review\\b", "\\bdesignat(e|es|ed|ion)\\b"]],
+    ["trial_result", ["\\bresults?\\b", "\\btopline\\b", "\\bread[- ]?out\\b", "\\bmet (its|the) primary endpoint\\b", "\\bmiss(es|ed)? (its|the) primary endpoint\\b", "\\bfail(s|ed|ure)?\\b", "\\bdemonstrat(e|es|ed)\\b", "\\bshow(s|ed|n)? (promising|positive|efficacy|promise)\\b", "\\bremission\\b", "\\bresponse rate\\b", "\\bsurvival\\b", "\\bendpoint\\b", "\\bclinical progress\\b", "\\bweight loss\\b", "\\bhelped (people|patients)\\b"]],
+    ["trial_start", ["\\binitiat(e|es|ed|ion)\\b", "\\blaunch(es|ed|ing)?\\b", "\\bstart(s|ed|ing)?\\b", "\\bbegin(s|ning)?\\b", "\\benroll(s|ed|ing|ment)?\\b", "\\badvanc(e|es|ed|ing)\\b", "\\bfirst patient (dosed|enrolled|treated|receiv)", "\\bopen(s|ed)? (a |the )?(phase|trial|study)\\b", "\\bjoin(s|ed)?\\b", "\\bparticipat(e|es|ed|ing)\\b", "\\bnow in (clinical )?trials?\\b", "\\benters? (a |the )?(clinical |phase)?trial\\b"]],
+    ["deal", ["\\bacquir(e|es|ed|ing|sition)\\b", "\\bmerger\\b", "\\bmerg(e|es|ed)\\b", "\\btakeover\\b", "\\bbuy(s|ing)?\\b", "\\bsell(s|ing)?\\b", "\\blicens(e|es|ed|ing)\\b"]],
+    ["partnership", ["\\bpartner(s|ed|ship)?\\b", "\\bcollaborat(e|es|ed|ion)\\b", "\\bteam(s|ed)? up\\b", "\\bjoint venture\\b"]],
+    ["funding", ["\\brais(e|es|ed|ing)\\b", "\\bfund(s|ed|ing)?\\b", "\\binvest(s|ed|ing|ment)?\\b", "\\bround\\b", "\\bfinanc(e|es|ed|ing)\\b"]],
+    ["policy", ["\\bfinal rule\\b", "\\bproposed rule\\b", "\\brulemaking\\b", "\\bnotice of\\b", "\\bguidance\\b", "\\brequest for information\\b", "\\bcomment period\\b"]],
+    ["registration", ["\\bregist(er|ered|ration|ry)\\b", "\\bposted\\b", "\\bnew trial\\b"]],
+    ["publication", ["\\bpreprint\\b", "\\bstudy published\\b", "\\bpublished in\\b", "\\bresearchers? (find|show|report)\\b", "\\bstud(y|ies) (finds?|shows?|suggests?|reports?)\\b", "\\bpaper\\b", "\\brandomi[sz]ed (controlled |clinical )?trial\\b"]],
+    ["personnel", ["\\bappoint(s|ed|ment)?\\b", "\\bname[sd]?\\b", "\\bresign(s|ed|ation)?\\b", "\\bsteps? down\\b", "\\bhir(e|es|ed)\\b", "\\bCEO\\b"]]
+  ],
+  "value_patterns": [
+    {"kind": "money", "pattern": "\\$\\s?([\\d][\\d,\\.]*)\\s?(billion|million|bn|m|b)\\b", "number_group": 1, "unit_group": 2, "unit": "lower"},
+    {"kind": "percent", "pattern": "([\\d][\\d\\.]*)\\s?%", "number_group": 1, "unit": "percent"},
+    {"kind": "phase", "pattern": "\\bphase\\s?(1|2|3|4|i{1,3}|iv)\\b", "number_group": 1, "unit": "phase"},
+    {"kind": "count", "pattern": "\\b([\\d][\\d,]*)\\s+(patients|participants|subjects|sites|countries)\\b", "number_group": 1, "unit_group": 2, "unit": "lower"}
+  ],
+  "filters": [
+    {"key": "not_an_event", "stage": "title", "where": "title_prefix", "pattern": "^(why|how|what|you\\b|here'?s what|opinion|analysis|commentary|guest commentary|explainer|podcast|video|newsletter|the case for)\\b"},
+    {"key": "not_an_event", "stage": "title", "where": "title_suffix", "pattern": "\\?$"}
+  ],
+  "subject": {
+    "anchor_prefix": false,
+    "leading_clause": "^(after|before|following|ahead of|in|as|amid|on|during|with|at|since|once)\\b",
+    "split": ",\\s+|\\s+[-\\u2014\\u2013]\\s+",
+    "cut": "[:\\u2014\\u2013]|,\\s+|\\s+(?:to|will|plans?|is|are|was|were|has|have|had|said|says|after|as|amid|following|on|in|for|with|by|and|sinks|jumps|surges|slides|rises|falls|plunges|soars|announces|reports|launches|starts|begins|wins|loses|teams|files|gets|seeks|faces|bags|achieves|draws?|sees?|needs?|aims?|joins?|buys?|sells?|partners?|raises?|sues?|warns?|expects?|targets?|unveils?|presents?|publishes?|finds?|shows?|signs?|adds?|names?|calls?|urges?|asks?|makes?|takes?|gives?)\\b",
+    "trailing_strip": "\\s+(?:is|are|was|were|has|have|had|will|would|to|be|been|being)$",
+    "article_strip": "^(the|a|an)\\s+",
+    "strip_chars": " .\"'()"
+  },
+  "gates": {
+    "excerpt_min": 20,
+    "excerpt_kind_min": 20,
+    "subject_min_len": 2,
+    "subject_max_len": 80,
+    "subject_first_char": "[A-Za-z\\u4e00-\\u9fff]",
+    "subject_min_class_chars": 3,
+    "require_subject_in_text": false,
+    "require_action_anchor": true
+  },
+  "tokenize": {
+    "pattern": "[a-z0-9]+",
+    "min_len": 2,
+    "stopwords": ["the", "a", "an", "of", "to", "in", "on", "for", "and", "or", "with", "by", "at", "from", "as", "is", "are", "was", "were", "be", "been", "its", "it", "this", "that", "new"]
+  },
+  "dedupe": {
+    "merge_sources": ["google_news", "bing_news", "yahoo_finance", "cnbc"],
+    "day_tolerance": 3,
+    "jaccard_min": 0.55
+  },
+  "reject_codes": {
+    "missing_time": "missing_time",
+    "out_of_window": "out_of_window",
+    "missing_url": "missing_url",
+    "missing_excerpt": "missing_excerpt",
+    "subject_not_in_text": "subject_not_in_text",
+    "unparsed_action": "unparsed_action",
+    "unparsed_subject": "unparsed_subject",
+    "not_an_event": "not_an_event"
+  }
+}
