@@ -13,6 +13,10 @@
       "gl": "US",
       "ceid": "US:en",
       "source_id": "google_news"
+    },
+    "yahoo_finance": {
+      "region": "US",
+      "lang": "en-US"
     }
   },
   "actions": [

@@ -3,9 +3,12 @@
 用法：
     python phase0/timeline/eval_zh_rules.py
 
-口径：
-- 三态回填：引擎出事件 → 是；拒绝码属「判不了」类 → 说不清；其余拒绝 → 不是。
+口径（三种并列，缺一不可；每种都带自己的基准线）：
+- 严格三态：引擎出事件 → 是；拒绝码属「判不了」类 → 说不清；其余拒绝 → 不是。
+- 二态折叠：说不清两侧都按「不是」计。【换了问题】
+- 只看判了的：分母只算引擎给出「是/不是」的条目。【换了问题】
 - 窗口放到 2020-01-01 ~ 2026-12-31，只为让「时点可解析」单独显形，不拿窗口卡样本。
+- 这 80 条来自归纳规则用的 420 条，属开发集，只作回归检查，不承当准确率。
 - 只报差异，不修改任何判定去迎合标注。
 """
 
@@ -70,10 +73,24 @@ def main() -> int:
         )
 
     n = len(rows)
-    agree = sum(r["want"] == r["got"] for r in rows)
-    print(f"n={n} agree={agree} rate={agree / n:.4f} 基准线(全判不是)={sum(r['want'] != '是' for r in rows)}/{n}")
+    agree3 = sum(r["want"] == r["got"] for r in rows)
+    base3 = sum(r["want"] != "是" for r in rows)
+
+    fold = lambda v: "不是" if v == "说不清" else v  # noqa: E731
+    agree2 = sum(fold(r["want"]) == fold(r["got"]) for r in rows)
+    base2 = sum(fold(r["want"]) != "是" for r in rows)
+
+    decided = [r for r in rows if r["got"] != "说不清"]
+    agree1 = sum(r["want"] == r["got"] for r in decided)
+    base1 = sum(r["want"] != "是" for r in decided)
+
+    print(f"[口径1 严格三态]    n={n} agree={agree3} rate={agree3 / n:.4f} 基准线(全判不是)={base3}/{n}={base3 / n:.4f}")
+    print(f"[口径2 二态折叠]    n={n} agree={agree2} rate={agree2 / n:.4f} 基准线={base2}/{n}={base2 / n:.4f}  【换了问题：说不清按不是计】")
+    print(f"[口径3 只看判了的]  n={len(decided)} agree={agree1} rate={agree1 / len(decided):.4f} 基准线={base1}/{len(decided)}={base1 / len(decided):.4f}  【换了问题：分母只算引擎给出是/不是的】")
+    if decided and base3:
+        print(f"[留出情况] 引擎判不了={n - len(decided)} 条（占 {1 - len(decided) / n:.1%}），口径3 不回答这部分")
     print("matrix", {(a, b): sum(1 for r in rows if r["want"] == a and r["got"] == b) for a in ["是", "不是", "说不清"] for b in ["是", "不是", "说不清"]})
-    print("按类别:", {c: f"{sum(r['want'] == r['got'] for r in rows if r['category'] == c)}/{sum(1 for r in rows if r['category'] == c)}" for c in sorted({r['category'] for r in rows})})
+    print("按类别（严格三态）:", {c: f"{sum(r['want'] == r['got'] for r in rows if r['category'] == c)}/{sum(1 for r in rows if r['category'] == c)}" for c in sorted({r['category'] for r in rows})})
     print("拒绝码分布:", dict(Counter(r["reason"] for r in rows if r["reason"])))
     print("\n差异逐条：")
     for r in rows:

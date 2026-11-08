@@ -68,6 +68,7 @@ class Ruleset:
         s = data["subject"]
         self.subject = {
             "anchor_prefix": bool(s.get("anchor_prefix", False)),
+            "anchor_skip_res": [re.compile(p) for p in s.get("anchor_skip") or []],
             "strip_chars": s.get("strip_chars", " .\"'()"),
             "split_re": re.compile(s["split"]) if s.get("split") else None,
             "cut_re": re.compile(s["cut"], re.I) if s.get("cut") else None,
@@ -165,24 +166,37 @@ def rss_items(text: str) -> list[dict]:
 # ---------------------------------------------------------------- 源适配器
 
 
+class RulesetConfigError(Exception):
+    """规则集缺必要参数：宁可明确失败，也不静默兜底。"""
+
+
+def _need(cfg: dict, key: str, source: str) -> str:
+    value = (cfg or {}).get(key)
+    if not value:
+        raise RulesetConfigError(
+            f"规则集 source_params.{source} 缺 {key}；语言/地区参数必须由规则集提供，引擎不设默认值"
+        )
+    return value
+
+
 def fetch_google_news(
     query: str, start: dt.date, end: dt.date, limit: int, cfg: dict | None = None
 ) -> list[dict]:
     """近期窗口用 when:Nd；历史窗口用 after:/before: 运算符（已实测可用，2026-11-08）。
 
-    语言区参数由规则集的 source_params 提供，引擎不写死任何 hl/gl/ceid。
+    语言区参数全部来自规则集；引擎不留任何语言默认值，缺参数直接报错。
     """
-    cfg = cfg or {}
+    hl = _need(cfg, "hl", "google_news")
+    gl = _need(cfg, "gl", "google_news")
+    ceid = _need(cfg, "ceid", "google_news")
+    source_id = _need(cfg, "source_id", "google_news")
     today = dt.datetime.now(dt.timezone.utc).date()
     if (today - end).days <= 7:
         days = max(1, (end - start).days + 1)
         q = f"{quote_plus(query)}+when:{days}d"
     else:
         q = f"{quote_plus(query)}+after:{start.isoformat()}+before:{(end + dt.timedelta(days=1)).isoformat()}"
-    url = (
-        f"https://news.google.com/rss/search?q={q}"
-        f"&hl={cfg.get('hl', 'en-US')}&gl={cfg.get('gl', 'US')}&ceid={cfg.get('ceid', 'US:en')}"
-    )
+    url = f"https://news.google.com/rss/search?q={q}&hl={hl}&gl={gl}&ceid={ceid}"
     resp = requests.get(url, headers={"User-Agent": UA}, timeout=TIMEOUT)
     resp.raise_for_status()
     out = []
@@ -197,7 +211,7 @@ def fetch_google_news(
                 excerpt = excerpt[: -len(name)].strip()
         out.append(
             {
-                "source_id": cfg.get("source_id", "google_news"),
+                "source_id": source_id,
                 "title": title,
                 "link": it["link"],
                 "url_kind": "aggregator",
@@ -342,8 +356,11 @@ def fetch_arxiv(query: str, start: dt.date, end: dt.date, limit: int, **_cfg) ->
     return out
 
 
-def fetch_yahoo(symbol: str, start: dt.date, end: dt.date, limit: int, **_cfg) -> list[dict]:
-    url = f"https://feeds.finance.yahoo.com/rss/2.0/headline?s={quote_plus(symbol)}&region=US&lang=en-US"
+def fetch_yahoo(symbol: str, start: dt.date, end: dt.date, limit: int, cfg: dict | None = None) -> list[dict]:
+    """region/lang 由规则集提供；引擎不留英文兜底。"""
+    region = _need(cfg, "region", "yahoo_finance")
+    lang = _need(cfg, "lang", "yahoo_finance")
+    url = f"https://feeds.finance.yahoo.com/rss/2.0/headline?s={quote_plus(symbol)}&region={region}&lang={lang}"
     resp = requests.get(url, headers={"User-Agent": UA}, timeout=TIMEOUT)
     resp.raise_for_status()
     out = []
@@ -694,6 +711,9 @@ def extract_subject(prefix: str, rs: Ruleset, action_start: int | None = None) -
         head = raw[:action_start]
         parts = [p.strip(strip) for p in (s["split_re"].split(head) if s["split_re"] else [head])]
         parts = [p for p in parts if p]
+        # 「关于…的公告」这类定语小句落在锚点左侧时会被当成主体，按规则集给的式样回退一段
+        while parts and any(r.match(parts[-1]) for r in s["anchor_skip_res"]):
+            parts.pop()
         cand = parts[-1] if parts else ""
     else:
         chunks = [c.strip(strip) for c in s["split_re"].split(raw) if c.strip(strip)]
@@ -710,11 +730,17 @@ def extract_subject(prefix: str, rs: Ruleset, action_start: int | None = None) -
     g = rs.gates
     if len(cand) < g["subject_min_len"] or len(cand) > g["subject_max_len"]:
         return None
-    # 首版把 "83% problem" 当主体，这里要求主体以字母/汉字开头且达到最少字符数
-    if not re.match(g["subject_first_char"], cand):
-        return None
-    if len(re.findall(g["subject_first_char"], cand)) < g["subject_min_class_chars"]:
-        return None
+    # 股票代码开头的标题（"301189 再签…"）主体就是那个代码：规则集给了式样才启用
+    lead = g.get("subject_lead_code")
+    code_m = re.match(lead, cand) if lead else None
+    if code_m:
+        cand = code_m.group(0)
+    else:
+        # 首版把 "83% problem" 当主体，这里要求主体以字母/汉字开头且达到最少字符数
+        if not re.match(g["subject_first_char"], cand):
+            return None
+        if len(re.findall(g["subject_first_char"], cand)) < g["subject_min_class_chars"]:
+            return None
     return cand
 
 

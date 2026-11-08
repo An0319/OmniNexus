@@ -68,6 +68,7 @@
   ],
   "subject": {
     "anchor_prefix": true,
+    "anchor_skip": ["^关于", "的$", "^[0-9]{4}年"],
     "leading_clause": "",
     "split": "[：:，,；;、|｜]",
     "cut": "",
@@ -81,6 +82,7 @@
     "subject_min_len": 2,
     "subject_max_len": 30,
     "subject_first_char": "[A-Za-z\\u4e00-\\u9fff]",
+    "subject_lead_code": "[0-9]{6}",
     "subject_min_class_chars": 2,
     "require_subject_in_text": true,
     "require_action_anchor": true
@@ -102,7 +104,7 @@
     "missing_excerpt": "insufficient_evidence",
     "subject_not_in_text": "subject_not_in_text",
     "unparsed_action": "insufficient_evidence",
-    "unparsed_subject": "zh_generalized_subject",
+    "unparsed_subject": "unparsed_subject",
     "not_an_event": "not_an_event",
     "zh_explainer_format": "zh_explainer_format",
     "zh_research_opinion": "zh_research_opinion",
