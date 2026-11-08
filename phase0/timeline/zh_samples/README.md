@@ -2,7 +2,7 @@
 python -c "import json;from collections import Counter;A={x['id']:x['is_event'] for x in json.load(open('labels_a.json',encoding='utf-8'))['labels']};B={x['id']:x['is_event'] for x in json.load(open('labels_b.json',encoding='utf-8'))};ids=sorted(set(A)&set(B));n=len(ids);agree=sum(A[i]==B[i] for i in ids);ca=Counter(A[i] for i in ids);cb=Counter(B[i] for i in ids);pe=sum(ca[v]*cb[v] for v in set(ca)|set(cb))/n**2;print('n=%d agree=%d rate=%.4f kappa=%.4f'%(n,agree,agree/n,(agree/n-pe)/(1-pe)));print('matrix',{(x,y):sum(1 for i in ids if A[i]==x and B[i]==y) for x in ['是','不是','说不清'] for y in ['是','不是','说不清']})"
 ```
 
-在 `zh_samples/` 目录执行上一行，即得 n、一致条数、一致率、κ 与三值混淆矩阵（当前输出 `n=80 agree=67 rate=0.8375 kappa=0.6602`）。这是 80 条中文新闻标题（A/B/C/D 各 20）的双侧标注：A 侧按 [event_definition_zh.md](../event_definition_zh.md)，B 侧只凭常识，用来测判据的**可复现性**，不是准确率。基准线（全判「不是」）＝ 57/80 ≈ 71%，任何一致率都要与它并排。
+在 `zh_samples/` 目录执行上一行，即得 n、一致条数、一致率、κ 与三值混淆矩阵（当前输出 `n=80 agree=67 rate=0.8375 kappa=0.6602`）。这是 80 条中文新闻标题（A/B/C/D 各 20）的双侧标注：A 侧按 [event_definition_zh.md](../event_definition_zh.md)，B 侧只凭常识，用来测判据的**可复现性**，不是准确率。基准线（全判「不是」）＝ **57/80 ≈ 71%**，算法是「**只数 A=「不是」，3 条「说不清」不计入分子**」；`eval_zh_rules.py` 的基准线是 `want != 是`，把「说不清」也计入「不是」一侧，得 60/80 ＝ 75.00%。**两者不是同一算法，不可混用**。任何一致率都要与同算法的基准线并排。
 
 > **封存（2026-11-08）**：这 80 条取自归纳规则用的那 420 条，属**开发集**。从此只作回归检查，不再承当任何「准确率」；扩动词表不得看着这 80 条的失败项往里加。要谈准确率必须另采独立样本。
 

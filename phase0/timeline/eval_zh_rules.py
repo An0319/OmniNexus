@@ -10,6 +10,7 @@
 - 窗口放到 2020-01-01 ~ 2026-12-31，只为让「时点可解析」单独显形，不拿窗口卡样本。
 - 这 80 条来自归纳规则用的 420 条，属开发集，只作回归检查，不承当准确率。
 - 只报差异，不修改任何判定去迎合标注。
+- 基准线一律按 `want != 是` 计（A 侧「说不清」并入「不是」一侧），故第一版为 60/80；`zh_samples/agreement.md` §1.2 的 57/80 只数「不是」、不含「说不清」，是另一算法，两处不可混用。
 """
 
 from __future__ import annotations
@@ -84,9 +85,9 @@ def main() -> int:
     agree1 = sum(r["want"] == r["got"] for r in decided)
     base1 = sum(r["want"] != "是" for r in decided)
 
-    print(f"[口径1 严格三态]    n={n} agree={agree3} rate={agree3 / n:.4f} 基准线(全判不是)={base3}/{n}={base3 / n:.4f}")
-    print(f"[口径2 二态折叠]    n={n} agree={agree2} rate={agree2 / n:.4f} 基准线={base2}/{n}={base2 / n:.4f}  【换了问题：说不清按不是计】")
-    print(f"[口径3 只看判了的]  n={len(decided)} agree={agree1} rate={agree1 / len(decided):.4f} 基准线={base1}/{len(decided)}={base1 / len(decided):.4f}  【换了问题：分母只算引擎给出是/不是的】")
+    print(f"[口径1 严格三态]    n={n} agree={agree3} rate={agree3 / n:.4f} 基准线(全判不是|want!=是，含说不清)={base3}/{n}={base3 / n:.4f}")
+    print(f"[口径2 二态折叠]    n={n} agree={agree2} rate={agree2 / n:.4f} 基准线(全判不是|want!=是，含说不清)={base2}/{n}={base2 / n:.4f}  【换了问题：说不清按不是计】")
+    print(f"[口径3 只看判了的]  n={len(decided)} agree={agree1} rate={agree1 / len(decided):.4f} 基准线(判了的里全判不是，同 want!=是)={base1}/{len(decided)}={base1 / len(decided):.4f}  【换了问题：分母只算引擎给出是/不是的】")
     if decided and base3:
         print(f"[留出情况] 引擎判不了={n - len(decided)} 条（占 {1 - len(decided) / n:.1%}），口径3 不回答这部分")
 
@@ -96,9 +97,9 @@ def main() -> int:
     fn_rows = [r for r in rows if r["want"] == "是" and r["got"] != "是"]
     pend_rows = [r for r in rows if r["got"] == "说不清"]
     print("\n四栏各自回答不同问题，任何一栏都不得称为「实际准确率」。")
-    print(f"[池1 误收]    {len(fp_rows)}/{n} = {len(fp_rows) / n:.4f}  基准线(全判是)={base3}/{n} = {base3 / n:.4f}  【人判不是/说不清，引擎判是】")
-    print(f"[池2 漏收]    {len(fn_rows)}/{n} = {len(fn_rows) / n:.4f}  基准线(全判不是)={want_yes}/{n} = {want_yes / n:.4f}  【人判是，引擎没判是】")
-    print(f"[池3 落待定]  {len(pend_rows)}/{n} = {len(pend_rows) / n:.4f}  基准线(全判是/全判不是)=0/{n} = 0.0000  【待定是三档设计里的位置，不是错误】")
+    print(f"[池1 误收]    {len(fp_rows)}/{n} = {len(fp_rows) / n:.4f}  基准线(全判是，数量=want!=是 的反面)={base3}/{n} = {base3 / n:.4f}  【人判不是/说不清，引擎判是】")
+    print(f"[池2 漏收]    {len(fn_rows)}/{n} = {len(fn_rows) / n:.4f}  基准线(全判不是，数量=want==是 的反面)={want_yes}/{n} = {want_yes / n:.4f}  【人判是，引擎没判是】")
+    print(f"[池3 落待定]  {len(pend_rows)}/{n} = {len(pend_rows) / n:.4f}  基准线(全判是或全判不是)=0/{n} = 0.0000  【待定是三档设计里的位置，不是错误】")
     print("判不了构成（code × A 侧）:", dict(Counter((r["reason"], r["want"]) for r in pend_rows)))
 
     # 「一致」要拆成「有据」与「侥幸」：沉默与规则命中长得一样，可信度不一样
