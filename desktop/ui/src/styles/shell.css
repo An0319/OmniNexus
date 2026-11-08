@@ -1,0 +1,707 @@
+/*
+ * 操作面样式（新增）
+ *
+ * 只允许使用 design-system/src/index.css 里的 token 与类型标尺：
+ * 颜色变量、--radius-*、--font-*、间距 4/8/12/16/24/32/48/64/80。
+ * 这里不复制、也不近似任何 DS 组件（GlassCard / SectionLabel / Badge /
+ * DegradationBanner / DisclaimerBar 均从 App.tsx 原样抽取）。
+ * 本文件只补 DS 没有的东西：新操作页的版式与折叠面板。
+ */
+
+/* ─── 主内容版式 ─────────────────────────────────────────────── */
+.mnx-main {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 80px 52px 196px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.mnx-main.is-mounted {
+  opacity: 1;
+  transform: none;
+}
+
+@media (max-width: 1080px) {
+  .mnx-main { padding: 56px 40px 180px; }
+}
+
+@media (max-width: 720px) {
+  .mnx-main { padding: 40px 20px 168px; }
+}
+
+/* ─── 页头 ───────────────────────────────────────────────────── */
+.mnx-page-head { margin-bottom: 32px; }
+
+.mnx-page-title {
+  color: var(--text-1);
+  font: 500 24px/32px var(--font-zh-display);
+  letter-spacing: 0.01em;
+  margin-bottom: 8px;
+}
+
+.mnx-page-lede {
+  max-width: 620px;
+  color: var(--text-3);
+  font: 400 12px/18px var(--font-zh-body);
+}
+
+/* ─── 首次说明 ───────────────────────────────────────────────── */
+.mnx-intro-copy {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.mnx-intro-copy p {
+  color: var(--text-2);
+  font: 400 14px/22px var(--font-zh-body);
+}
+
+.mnx-intro-copy strong {
+  color: var(--text-1);
+  font-weight: 600;
+}
+
+.mnx-intro-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.mnx-intro-foot > span {
+  color: var(--text-3);
+  font: 400 12px/18px var(--font-zh-body);
+}
+
+/* ─── 主输入 ─────────────────────────────────────────────────── */
+.mnx-ask-label {
+  display: block;
+  color: var(--text-3);
+  font: 600 10px/16px var(--font-mono);
+  letter-spacing: 0.13em;
+  margin-bottom: 10px;
+}
+
+.mnx-ask-input {
+  width: 100%;
+  padding: 18px 20px;
+  color: var(--text-1);
+  background: var(--surface-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  outline: none;
+  font: 400 18px/26px var(--font-zh-body);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.35s ease;
+}
+
+.mnx-ask-input::placeholder { color: var(--text-4); }
+
+.mnx-ask-input:focus {
+  border-color: var(--border-accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.mnx-ask-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.mnx-ask-hint {
+  color: var(--text-3);
+  font: 400 12px/18px var(--font-zh-body);
+}
+
+.mnx-examples {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.mnx-examples > span {
+  color: var(--text-4);
+  font: 600 10px/16px var(--font-mono);
+  letter-spacing: 0.1em;
+  margin-right: 4px;
+}
+
+.mnx-example {
+  padding: 5px 10px;
+  color: var(--text-2);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font: 400 12px/18px var(--font-zh-body);
+  cursor: pointer;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+.mnx-example:hover,
+.mnx-example:focus-visible {
+  color: var(--accent);
+  border-color: var(--border-accent);
+  background: var(--accent-dim);
+}
+
+/* ─── 按钮（沿用 DS 的控制件密度） ───────────────────────────── */
+.mnx-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font: 500 12px/18px var(--font-zh-body);
+  cursor: pointer;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+.mnx-btn:hover,
+.mnx-btn:focus-visible {
+  color: var(--text-1);
+  border-color: var(--border-strong);
+  background: var(--surface-3);
+}
+
+.mnx-btn:disabled {
+  color: var(--text-4);
+  cursor: not-allowed;
+}
+
+.mnx-btn.is-primary {
+  color: var(--accent);
+  background: var(--accent-dim);
+  border-color: var(--border-accent);
+  box-shadow: 0 0 16px var(--accent-dim);
+}
+
+.mnx-btn.is-primary:hover,
+.mnx-btn.is-primary:focus-visible {
+  color: var(--accent);
+  background: var(--accent-dim);
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-glow);
+}
+
+.mnx-btn.is-quiet {
+  padding: 4px 8px;
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-3);
+  font: 500 10px/16px var(--font-zh-body);
+}
+
+.mnx-btn.is-quiet:hover,
+.mnx-btn.is-quiet:focus-visible {
+  color: var(--accent);
+  border-color: transparent;
+  background: transparent;
+}
+
+/* ─── 折叠面板（默认合上） ───────────────────────────────────── */
+.mnx-disclosure {
+  margin-top: 16px;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+
+.mnx-disclosure summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-3);
+  font: 500 12px/18px var(--font-zh-body);
+  cursor: pointer;
+  list-style: none;
+}
+
+.mnx-disclosure summary::-webkit-details-marker { display: none; }
+
+.mnx-disclosure summary::before {
+  content: '+';
+  width: 14px;
+  color: var(--accent);
+  font: 500 12px/1 var(--font-mono);
+  text-align: center;
+}
+
+.mnx-disclosure[open] summary::before { content: '−'; }
+
+.mnx-disclosure summary:hover { color: var(--text-1); }
+
+.mnx-disclosure-body { margin-top: 16px; }
+
+/* ─── 表单格 ─────────────────────────────────────────────────── */
+.mnx-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.mnx-field { grid-column: span 4; min-width: 0; }
+.mnx-field.is-wide { grid-column: span 8; }
+.mnx-field.is-full { grid-column: span 12; }
+
+@media (max-width: 980px) {
+  .mnx-field, .mnx-field.is-wide { grid-column: span 6; }
+}
+
+@media (max-width: 640px) {
+  .mnx-field, .mnx-field.is-wide, .mnx-field.is-full { grid-column: span 12; }
+}
+
+.mnx-field > label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text-3);
+  font: 600 10px/16px var(--font-mono);
+  letter-spacing: 0.1em;
+}
+
+.mnx-field input,
+.mnx-field select,
+.mnx-field textarea {
+  width: 100%;
+  padding: 8px 10px;
+  color: var(--text-1);
+  background: var(--control-bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  outline: none;
+  font: 400 12px/18px var(--font-mono);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.mnx-field textarea {
+  min-height: 76px;
+  resize: vertical;
+  font: 400 12px/18px var(--font-zh-body);
+}
+
+.mnx-field input:focus,
+.mnx-field select:focus,
+.mnx-field textarea:focus {
+  border-color: var(--border-accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.mnx-field-help {
+  margin-top: 6px;
+  color: var(--text-4);
+  font: 400 10px/16px var(--font-zh-body);
+}
+
+/* ─── 结果横幅：结构沿用 DS 的 degradation banner ───────────── */
+.mnx-banner .degradation-banner-title {
+  /* DS 标本里 banner 标题是 10px；作为主操作面的主句，按 Body 14px 抬高 */
+  font: 600 14px/22px var(--font-zh-body);
+}
+
+.mnx-banner .degradation-banner-ts {
+  display: flex;
+  align-items: center;
+}
+
+.mnx-banner-action {
+  padding: 4px 10px;
+  color: currentColor;
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-xs);
+  font: 500 10px/16px var(--font-zh-body);
+  cursor: pointer;
+}
+
+.mnx-banner-action:hover,
+.mnx-banner-action:focus-visible {
+  background: var(--surface-3);
+}
+
+/* ─── 结果区 ─────────────────────────────────────────────────── */
+.mnx-result-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.mnx-result-title {
+  color: var(--text-1);
+  font: 500 16px/24px var(--font-zh-display);
+}
+
+.mnx-result-meta {
+  color: var(--text-3);
+  font: 400 10px/16px var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+.mnx-neutral-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--neu-dim);
+  border: 1px solid var(--neu-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-2);
+  font: 400 12px/18px var(--font-zh-body);
+}
+
+.mnx-neutral-note > i {
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px dashed var(--neu-border);
+  color: var(--neu);
+  font: 600 10px/1 var(--font-mono);
+  font-style: normal;
+}
+
+.mnx-events {
+  margin-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.mnx-event {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+@media (max-width: 640px) {
+  .mnx-event { grid-template-columns: 1fr; gap: 6px; }
+}
+
+.mnx-event-date {
+  color: var(--text-3);
+  font: 400 10px/16px var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  padding-top: 2px;
+}
+
+.mnx-event-title {
+  color: var(--text-1);
+  font: 500 14px/22px var(--font-zh-body);
+  margin-bottom: 4px;
+}
+
+.mnx-event-title a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid var(--border-strong);
+  transition: color 0.16s ease, border-color 0.16s ease;
+}
+
+.mnx-event-title a:hover,
+.mnx-event-title a:focus-visible {
+  color: var(--accent);
+  border-bottom-color: var(--border-accent);
+}
+
+.mnx-event-line {
+  color: var(--text-3);
+  font: 400 12px/18px var(--font-zh-body);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mnx-link-error {
+  margin-top: 6px;
+  font: 400 12px/18px var(--font-zh-body);
+  color: var(--neg);
+}
+
+.mnx-event-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.mnx-tag {
+  padding: 2px 6px;
+  color: var(--text-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  font: 500 9px/14px var(--font-mono);
+  letter-spacing: 0.03em;
+}
+
+.mnx-tag.is-value {
+  color: var(--info);
+  background: var(--info-dim);
+  border-color: var(--info-border);
+}
+
+/* ─── 进度（长任务的最后一行 + 可展开日志） ─────────────────── */
+.mnx-progress-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-2);
+  font: 400 11px/16px var(--font-mono);
+}
+
+.mnx-progress-line > i {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+  animation: mnx-blink 1.2s ease-in-out infinite;
+}
+
+.mnx-progress-line > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mnx-log {
+  max-height: 220px;
+  overflow: auto;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-3);
+  font: 400 10px/16px var(--font-mono);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+@keyframes mnx-blink {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+
+/* ─── 详情（技术面，默认合上） ───────────────────────────────── */
+.mnx-details-grid {
+  display: grid;
+  grid-template-columns: 132px 1fr;
+  gap: 8px 16px;
+  margin-top: 12px;
+}
+
+@media (max-width: 640px) {
+  .mnx-details-grid { grid-template-columns: 1fr; gap: 2px 0; }
+}
+
+.mnx-details-grid dt {
+  color: var(--text-4);
+  font: 600 10px/18px var(--font-mono);
+  letter-spacing: 0.06em;
+}
+
+.mnx-details-grid dd {
+  color: var(--text-2);
+  font: 400 11px/18px var(--font-mono);
+  word-break: break-all;
+}
+
+.mnx-details-note {
+  margin-top: 12px;
+  color: var(--text-3);
+  font: 400 12px/18px var(--font-zh-body);
+}
+
+/* ─── 我的判断 ──────────────────────────────────────────────────────────────── */
+.mnx-judgment {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 16px 20px 16px 24px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--neu);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.mnx-judgment:hover,
+.mnx-judgment:focus-visible {
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-glow), var(--shadow-float);
+  transform: translateY(-2px);
+}
+
+.mnx-judgment > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.mnx-judgment > summary::-webkit-details-marker {
+  display: none;
+}
+
+.mnx-judgment > summary:focus-visible {
+  outline: 2px solid var(--border-accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.mnx-judgment-body {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+
+.mnx-judgment.is-due { border-left-color: var(--warn); }
+.mnx-judgment.is-hit { border-left-color: var(--pos); }
+.mnx-judgment.is-miss { border-left-color: var(--neg); }
+.mnx-judgment.is-undetermined { border-left-color: var(--warn); }
+.mnx-judgment.is-pending { border-left-color: var(--neu); }
+
+.mnx-judgment-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.mnx-judgment-claim {
+  color: var(--text-1);
+  font: 500 14px/22px var(--font-zh-body);
+  margin-bottom: 6px;
+}
+
+.mnx-judgment-meta {
+  color: var(--text-3);
+  font: 400 10px/16px var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+}
+
+.mnx-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  border: 1px solid;
+  font: 600 10px/16px var(--font-zh-body);
+  white-space: nowrap;
+}
+
+.mnx-flag > i {
+  font: 600 11px/1 var(--font-mono);
+  font-style: normal;
+}
+
+.mnx-flag.is-due {
+  color: var(--warn);
+  background: var(--warn-dim);
+  border-color: var(--warn-border);
+}
+
+.mnx-flag.is-hit {
+  color: var(--pos);
+  background: var(--pos-dim);
+  border-color: var(--pos-border);
+}
+
+.mnx-flag.is-miss {
+  color: var(--neg);
+  background: var(--neg-dim);
+  border-color: var(--neg-border);
+}
+
+.mnx-flag.is-undetermined {
+  color: var(--warn);
+  background: var(--warn-dim);
+  border-color: var(--warn-border);
+}
+
+.mnx-flag.is-neutral {
+  color: var(--neu);
+  background: var(--neu-dim);
+  border-color: var(--neu-border);
+}
+
+.mnx-flag.is-info {
+  color: var(--info);
+  background: var(--info-dim);
+  border-color: var(--info-border);
+}
+
+.mnx-section-gap { margin-top: 32px; }
+.mnx-section-gap-lg { margin-top: 48px; }
+
+.mnx-group-label {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.mnx-group-label > strong {
+  color: var(--text-2);
+  font: 600 12px/18px var(--font-zh-body);
+}
+
+.mnx-group-label > span {
+  color: var(--text-4);
+  font: 400 10px/16px var(--font-mono);
+}
+
+.mnx-list {
+  display: grid;
+  gap: 10px;
+}
+
+.mnx-empty {
+  padding: 20px;
+  color: var(--text-3);
+  background: var(--surface-1);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  font: 400 12px/18px var(--font-zh-body);
+}
+
+.mnx-empty > strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text-2);
+  font: 600 14px/22px var(--font-zh-body);
+}
+
+/* ─── 减少动态 ───────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .mnx-main,
+  .mnx-progress-line > i {
+    animation: none;
+    transition: none;
+  }
+}
