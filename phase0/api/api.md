@@ -9,7 +9,7 @@
 
 | 能力 | 入口 | 能给出什么 | 一句话边界 |
 |---|---|---|---|
-| 事件时间线 | `phase0/timeline/timeline.py` | 结构化事件表（`events.json`：meta + events + rejects）+ 人读稿 | **条件性可用**：可判定条目上 recall 0.875 / precision 0.778，但 26% 判不了（详见 §2.6） |
+| 事件时间线 | `phase0/timeline/timeline.py` | 结构化事件表（`events.json`：meta + events + rejects）+ 人读稿 | **条件性可用**：只有标题输入时 recall 0.875 / precision 0.778、26.1% 判不了；补到「标题 + 正文首段」后 recall 0.833 / precision 0.833、判不了 4.3%——按输入条件两行分开看（详见 §2.6） |
 | 事件注册闭环 | `phase0/registry/cli.py` | 注册 / 到期核验 / 对账；append-only 哈希链账本 | 判据必须写成结构化字段；三种状态 `hit` / `miss` / `undetermined`，判据之外的话不参与判定 |
 
 两者都是**本机进程内调用**，不常驻、无服务端、无账号。壳（Tauri 或任何前端）只要能把 Python 子进程拉起来就能用；
@@ -72,11 +72,12 @@ rc = timeline.run(ns)     # -> int，退出码；结果写在 out_dir 的文件�
 | `out_dir` | 路径 | 否 | CLI 默认 `phase0/timeline/out`；直接调 `run()` 必须自己填 |
 | `replay` | 路径 | 否 | 读既有 `raw_items.json` 离线复跑，不联网；本次实测与联网跑**逐项计数完全一致**（145/55/87/3） |
 
-**返回结构**：`run()` 只返回退出码；真实产出是 `out_dir` 下三个文件。
+**返回结构**：`run()` 只返回退出码（`0` / `2` / `3`，`3` = 全部源失败）；真实产出是 `out_dir` 下三个文件。
 
 ```jsonc
 // events.json
 {
+  "status": "ok",                  // ok / partial / failed；判定规则见 §2.2
   "meta": {
     "query": "...", "mode": "topic|entity",
     "window_start": "YYYY-MM-DD", "window_end": "YYYY-MM-DD",
@@ -101,20 +102,22 @@ rc = timeline.run(ns)     # -> int，退出码；结果写在 out_dir 的文件�
 
 ### 2.2 三种失败态（各自对应真实产生的状态）
 
-时间线**没有单一的 error 字段**，三种失败态藏在两个不同位置。壳必须同时看 `sources_stats` 和 `rejects`，
-只看 `events.length == 0` 会把三种情况混成一种。
+失败态由**顶层 `status`**（`ok / partial / failed`）与 `sources_stats` / `rejects` 一起表达。
+只看 `events.length == 0` 会把三种情况混成一种；`--replay` 恒为 `status == "ok"`。
 
 | 失败态 | 进程表现 | 判定依据（真实字段） | 退出码 |
 |---|---|---|---|
-| **① 无数据** | 跑完了，什么都没抓到 | 所有源 `fetched == 0` 且**没有 `error` 键**；`stats.raw_items == 0` | `0` |
-| **② 数据不可达 / 抓取失败** | 源失败被吞掉，整轮继续 | `sources_stats[源名].error` 非空（`ProxyError` / `HTTPError` / `TimeoutError` 等） | **仍是 `0`**（不中断） |
+| **① 无数据** | 跑完了，什么都没抓到 | `status == "ok"` 且所有被请求源 `fetched == 0`、**没有 `error` 键**；`stats.raw_items == 0`。此时 `events` 为空才是真"没有事件" | `0` |
+| **② 数据不可达 / 部分失败** | 部分源失败，结果只覆盖成功的源 | `status == "partial"`：至少一个源有 `error`、至少一个没有 | `0` |
+| **② 数据不可达 / 全部失败** | 全部源失败，仍写出三个文件供排障 | `status == "failed"`：所有被请求源都有 `error` | **`3`** |
 | **③ 判不了** | 抓到了，但没进表 | `rejects[].reason` 属于 §2.3 的闭集 | `0` |
 
 **退出码 `2` 只用于调用方式错误**：`--start > --end`、既无 `--topic` 也无 `--entity`、`--sources` 里写了未知源名。
+**`status == "partial"` 时退出码仍是 `0`**，且结果只覆盖成功的源——这个坑没消失，只是变得可识别，壳必须读 `status`（见 §5.0-A）。
 
 ### 2.3 拒绝态闭集（真实产出对照）
 
-`schema.md §4` 声明了 9 种 + 模型路线的 2 种。逐条对照代码后：
+`schema.md §4` 现在是 **8 种**（规则抽取器）+ **2 种**（模型抽取器 `extract_model.py`）。逐条对照代码后：
 
 | reason | 出现在哪 | 本次实跑是否观察到 |
 |---|---|---|
@@ -126,9 +129,11 @@ rc = timeline.run(ns)     # -> int，退出码；结果写在 out_dir 的文件�
 | `missing_time` | 时间缺失或不可解析 | 代码可达，本轮 0 条 |
 | `missing_url` | URL 缺失或不是 http(s) | 代码可达，本轮 0 条 |
 | `subject_not_in_text` | 指定 `--entity` 但文本里没出现 | 仅 `--entity` 模式可达 |
-| `duplicate` | — | **代码从不写入 `rejects`**（只累加 `meta.stats.merged_duplicates`），见 §5-① |
 | `schema_invalid` | 仅模型路线 `extract_model.py` | 本轮未跑模型路线 |
 | `missing_excerpt`（模型版） | 片段非原文逐字子串 | 同上 |
+
+`duplicate` **不在这张表里**：合并项的内容已入表、URL 仍在 `sources[]`，只计入 `meta.stats.merged_duplicates`；
+同一条不该既算入表又算拒绝，所以 `rejects` 的语义是"抓到了但没进表"。
 
 ### 2.4 成本与延迟（实测）
 
@@ -149,8 +154,8 @@ rc = timeline.run(ns)     # -> int，退出码；结果写在 out_dir 的文件�
 |---|---|
 | `source_url` + `fetched_at_utc` + `excerpt` | 能：三条齐备才入表，缺一即拒绝 |
 | `event_id` | 能：`subject+action+time+首条url` 的 sha256 前 16 位，同输入同 id |
-| `action` | **半能**：动作准确率 0.857（def 集 6/7），机构类标题易被判成 `trial_start` |
-| `subject` | **半能**：准确率 1.000（def 集 7/7），但会把"类别"当主体误入表（B05/B16） |
+| `action` | **半能**：动作准确率 0.857（只有标题 6/7）、0.700（标题 + 正文首段 7/10）；机构类标题易被判成 `trial_start` |
+| `subject` | **半能**：准确率 1.000（只有标题 7/7）、0.900（标题 + 正文首段 9/10），但会把"类别"当主体误入表（B05/B16，两轮都在） |
 | `value.number` | 谨慎：规则路线取"最早出现的数值片段"，不保证绑定到该动作 |
 | `sources[]` | 谨慎：去重只在新闻源之间做，Jaccard 0.55 是拍的阈值（阈值合理性属未核实项） |
 
@@ -158,38 +163,62 @@ rc = timeline.run(ns)     # -> int，退出码；结果写在 out_dir 的文件�
 
 **这一节就是"条件性可用"的全部内容，壳做产品决定时必须照这段来。**
 
-在第四套样本 `def`（2025-11-01 → 2026-01-31，23 条，测前先定定义、只测一次）上：
+第四套样本 `def`（2025-11-01 → 2026-01-31，**n=23**，测前先定定义）。同一批 23 条、同一套定义、同一个模型，
+**只换输入**，两轮各自只测一次；结果文件分别是 `benchmark_def_model_result.json` 与 `benchmark_def_body_model_result.json`。
 
-| 指标 | 下限 | 主口径（判不了不计入分母） | 备查口径（判不了按不算） |
+| 输入条件 | 判不了占比 | 召回（主口径 / 备查口径） | 精确（主口径） |
 |---|---|---|---|
-| lenient recall | 0.70 | 0.875（7/8）过 | **0.500（7/14）未达标** |
-| strict recall | 0.45 | 0.750（6/8）过 | **0.429（6/14）未达标** |
-| lenient precision | 0.70 | 0.778（7/9）过 | 0.700（7/10）过（贴线） |
-| action accuracy | 0.60 | 0.857（6/7）过 | 0.857 过 |
-| subject accuracy | 0.60 | 1.000（7/7）过 | 1.000 过 |
+| 只有标题 | 26.1%（6/23） | 0.875（7/8）/ 0.500（7/14） | 0.778（7/9） |
+| 标题 + 正文首段 | 4.3%（1/23） | 0.833（10/12）/ 0.769（10/13） | 0.833（10/12） |
 
-**26% 判不了**：23 条里 6 条落"判不了"（6/23 = 26%），全部卡在"能不能算事件"这一层，而不是抽取算法。
+**两行都要留，因为输入条件是产品必须做的选择**：能拿到正文按第二行，只能拿到标题按第一行。
+只写第二行会让人以为随便抓点什么都行——第二行成立的前提是"每条都取到发布方正文首段"，这需要额外的抓取与清洗。
+
+可计条目（主口径 / 备查口径）：只有标题轮 **8 / 14**，标题 + 正文首段轮 **12 / 13**；两轮都只有 23 条样本，**不外推**。
+
+其余指标按同一口径分列（下限沿用 0.70 / 0.45 / 0.70 / 0.60 / 0.60）：
+
+| 输入条件 | strict recall（主 / 备查） | action accuracy | subject accuracy |
+|---|---|---|---|
+| 只有标题 | 0.750（6/8）/ 0.429（6/14） | 0.857（6/7） | 1.000（7/7） |
+| 标题 + 正文首段 | 0.583（7/12）/ 0.538（7/13） | 0.700（7/10） | 0.900（9/10） |
+
+**口径差异照实说**：
+
+- **只有标题轮**：主口径五项过线，但分母只剩 8 条事件；备查口径 recall 两项未达标（0.500 / 0.429）。
+- **标题 + 正文首段轮**：主口径与备查口径**五项都过线**（`benchmark.md §6.7.2`），但这一轮是重测量、不是第二次机会。
+
+**判不了的两档**：
+
+- 只有标题：23 条里 6 条落"判不了"（6/23 = 26.1%），全部卡在"能不能算事件"这一层，而不是抽取算法。
+- 标题 + 正文首段：只补了这 6 条的 `excerpt`，其中 5 条变为可判、1 条仍判不了（B10，正文里也没有可用的载体线索），降到 1/23 = 4.3%。
+
 换成一句可交付的话：
 
-> 它能把 8 条里的 7 条抓出来，但会**漏掉「机构声明」这一类**，并在**「类别被当成主体」时误入表**；
+> 只有标题时，它能把 8 条里的 7 条抓出来，但会**漏掉「机构声明」这一类**，并在**「类别被当成主体」时误入表**；
 > 对只有标题且无动作的条目，它**偏向拒绝**。
+> 能补到正文首段时，判不了降到 1/23、精确升到 0.833，但**仍会漏机构声明、仍会把类别当主体**。
 
-具体失效类型（逐条可查 `benchmark_def_model_result.json` 的 `rows`）：
+具体失效类型（逐条可查两份结果文件的 `rows`）：
 
-| 失效类型 | 具体表现 |
-|---|---|
-| 漏机构声明 | B07（`…, says ABPI`，人工标 `policy`）被判 `not_an_event` |
-| 把类别当主体 | B05（`Private equity` 是类别不是具名主体）、B16（`Alzheimer's drug developers` 未具名）误入表 |
-| 无动词标题偏向拒绝 | 论文题、声明题、指引题一律按 `not_an_event` 拒绝 |
-| 动作错判 | 机构/资源类标题的 `launch` 被判成 `trial_start`（val 集 3 条同形） |
+| 失效类型 | 只有标题 | 标题 + 正文首段 |
+|---|---|---|
+| 漏机构声明 | B07（`…, says ABPI`，人工标 `policy`）被判 `not_an_event` | B07 仍被判 `not_an_event`（漏） |
+| 把类别当主体 | B05（`Private equity` 是类别不是具名主体）、B16（`Alzheimer's drug developers` 未具名）误入表 | B05、B16 仍误入表 |
+| 无动作标题偏向拒绝 | 论文题、声明题、指引题一律按 `not_an_event` 拒绝 | B22（评选结果）仍被判 `not_an_event`；B10 仍判不了 |
+| 动作错判 | 机构/资源类标题的 `launch` 被判成 `trial_start`（val 集 3 条同形） | B13（`funding`→`partnership`）、B14、B20 三条动作错（7/10） |
 
 **规则路线也别指望**：`rules_v1` 在 test 集 0.462 / 0.154 / 0.600、`rules_v2` 在 val 集 0.615 / 0.154 / 0.889，
 两个未参与调参的窗口都不达标。**模型路线 `model_v1` 在 val 集三项未达标**（recall 0.538 / 0.308、action 0.571）。
 调优集达标只能当"能跑"，不能当"能用"——这是本项目已经踩过的坑。
 
-**根因（已定位，不在本层能修）**：瓶颈在输入只有标题。def 窗口 23/23 条 `excerpt == title`，
-Google News 历史检索不回摘要，所以 26% 的条目缺"动作/载体线索"。要提升可判定率，得先解决"每条都带摘要"，
-不是换模型、不是补词表。
+**根因（已定位，不在本层能修）**：只有标题轮的瓶颈在输入——def 窗口 23/23 条 `excerpt == title`，
+Google News 历史检索不回摘要，所以 26.1% 的条目缺"动作/载体线索"。补正文首段的第二轮证明：
+要提升可判定率，得先解决"每条都带正文首段"，不是换模型、不是补词表；但那一步的抓取覆盖与入库口径尚未产品化。
+
+**补正文那轮的已知污染（照实登记，不隐去）**：标注者同时是上一轮模型输出的读者，这层污染无法用时间戳封住；
+6 条正文段的来源页面由标注者挑选，属测量条件的人为选择。时序只能保证"标注与指纹先落盘、模型后运行"。
+正文段落按预注册条款**不入库**，仓库内可核的是逐条来源与指纹（`benchmark.md §6.7.1` 的表格与 `def_body_sources.json`）。
 
 **因此"条件性可用"的准确读法**：
 - 可依赖：**"给出带来源的事件候选表"**，用于人工复核、作为线索而非结论；
@@ -386,7 +415,7 @@ $ python phase0/timeline/timeline.py --topic "zzqxvbn nonexistent topic 9000" \
 返回的**不是空结果而已**：`sources_stats` 四个源全是 `{"fetched":0,"accepted":0,"rejected":0}` 且**没有 `error` 键**
 → 这是"源可达但确实没有匹配条目"，即 **①无数据**。
 
-**失败态 ②（数据不可达）——把出口网络掐死：**
+**失败态 ②（数据不可达 / 全部失败）——把出口网络掐死：**
 
 ```
 $ $env:HTTPS_PROXY="http://127.0.0.1:9"; python phase0/timeline/timeline.py --topic "clinical trial" \
@@ -396,7 +425,9 @@ $ $env:HTTPS_PROXY="http://127.0.0.1:9"; python phase0/timeline/timeline.py --to
 [fetch] federal_register: FAIL ProxyError: HTTPSConnectionPool(host='www.federalregister.gov', port=443): Max retries …
 
 [result] raw=0 events=0 rejects=0 merged=0 reasons={}
-# 退出码 0  ← 注意：源全挂，进程仍然成功退出
+[status] failed  sources={"google_news": {…,"error":"ProxyError: …"}, "federal_register": {…,"error":"ProxyError: …"}}
+[status] FAILED: 全部源抓取失败，本次结果无证据力（退出码 3）
+# 退出码 3  ← 全部源失败：status=failed，退出码 3
 ```
 
 ```jsonc
@@ -406,20 +437,20 @@ $ $env:HTTPS_PROXY="http://127.0.0.1:9"; python phase0/timeline/timeline.py --to
 }
 ```
 
-**同一次运行、同样的 `events: []`，两种失败态只能靠 `error` 键区分。壳若只看 `events.length` 会误报"没新闻"。**
+**同样的 `events: []`，三种情况现在由顶层 `status` 区分：`ok`（真无数据）、`partial`（部分源失败，只覆盖成功源）、`failed`（全部失败，退出码 3）。壳若只看 `events.length` 仍会误报"没新闻"。**
 
 **失败态 ③（判不了）**：见调用 1 主输出里的 `rejects=87` 与 `reject_reasons`——抓到了、但 30 条无动作词、
 50 条超窗口、4 条是评论稿、1 条取不出主体、2 条摘要太短。逐条带 `reason` 落盘，不进 `events`。
 
-**失败态 ①/② 在 `--entity` 模式下同形，且更隐蔽**（这是 §5-⑦ 那条硬伤的直接证据）：
+**失败态 ①/② 在 `--entity` 模式下同形，且更隐蔽**（这是 §5-⑤ 那条硬伤的直接证据）：
 
 ```
 $ python phase0/timeline/timeline.py --entity "NOTAREALTICKER123" --sources yahoo_finance \
-    --start 2026-10-20 --end 2026-11-08 --out-dir phase0/api/demo/out_badsrc
+    --start 2026-10-20 --end 2026-11-08 --out-dir phase0/api/demo/out_badsrc_entity
 [fetch] yahoo_finance: 0 条
 [result] raw=0 events=0 rejects=0 merged=0 reasons={}
-sources_stats= {"yahoo_finance": {"fetched": 0, "accepted": 0, "rejected": 0}}
-# 退出码 0，没有 error 键 —— 与"这个主体确实没新闻"完全无法区分
+[status] ok  sources={"yahoo_finance": {"fetched": 0, "accepted": 0, "rejected": 0}}
+# 退出码 0，status=ok、没有 error 键 —— 与"这个主体确实没新闻"仍无法区分
 ```
 
 ### 调用 2 · 注册一条机器可判的预测
@@ -572,16 +603,22 @@ $ … chain-check
 
 **这些是硬伤，不在本层修，按约定只登记。** 每条形如「现在什么样 / 为什么会误导 / 最小修法」。
 
+### 5.0 已修复缺陷的残留约束（调用方仍必须遵守）
+
+**A. 源全挂退出 0 —— 已修复（`99c84eb`）**：`events.json` 顶层新增 `status`（`ok / partial / failed`），
+全部被请求源失败时返回 `3`，三个文件照写供排障；`--replay` 恒为 `ok`。
+但 **`partial` 的退出码仍是 `0`**，且结果只覆盖成功的源——这个坑没消失，只是变得可识别了。
+**所以任何调用方仍必须看 `status`，不能只看退出码与 `events` 数量**：
+`ok` → `events` 为空才是真"没有事件"；`partial` → 标注"只覆盖部分源"；`failed` → 不得当作结果。
+
 | # | 现象（现状） | 为什么会误导下游 | 最小修法（待作者裁决） |
 |---|---|---|---|
-| ① | `schema.md §4` 把 `duplicate` 列为拒绝态，但 `timeline.py` **从不往 `rejects` 写** `duplicate`，只累加 `meta.stats.merged_duplicates` | 下游按文档统计 `rejects` 的 reason 分布会少一类；"九种拒绝态"实际只有 8 种可出现在 `rejects` | 二选一：改文档为"8 种拒绝态 + 1 个合并计数"，或在合并处补写 reject 行。**改文档更小**，但 `schema.md` 是字段 owner，需作者裁决 |
-| ② | timeline **没有库级 API**：`run(args: Namespace) -> int`，返回退出码，结果只能读文件；`args.sources` / `args.out_dir` 为 `None` 时直接崩 | 调用方必须伪造 `argparse.Namespace` 8 个字段并知道 CLI 的默认值逻辑；壳层容易被"函数返回 0 = 成功"骗到 | 加一层 `run_topic(topic, start, end, sources=None) -> (meta, events, rejects)` 薄包装，内部仍调 `run()` |
-| ③ | 源失败**不影响退出码**（仍 0），只写进 `sources_stats[name].error` | 壳若只看退出码，会把"全部源挂掉"当成成功；本次实测正是这样（两个源全 ProxyError，退出码 0） | 在 `meta` 加 `"partial": true` / `"all_sources_failed": true` 布尔位，或在 `run()` 里对"零源成功"返回 3 |
-| ④ | registry 把"无数据 / 不可达 / 判不了"**统一收敛到 `undetermined`** | 壳层必须自己维护 `reason_code` 分桶表，否则界面上三种完全不同的事会显示成同一句"无法判定" | 在 `evaluate.py` 输出里加 `reason_class: "no_data"\|"unreachable"\|"undefined"`（不新增状态，只加分类字段） |
-| ⑤ | `syntax.md §五` 写"`undetermined` 允许补跑**一次**"，但 `ops.verify_one` 只拦 `hit`/`miss`，对 `undetermined` **可无限次补跑** | 文档的"一次"是纪律承诺，代码没兑现；下游可能据此假设"最多两条记录" | 在 `verify_one` 里查 `retry_of_undetermined` 是否已存在，存在即拒；或把文档改成"可多次补跑，每次带 supersedes" |
-| ⑥ | 账本 `at` 字段**原样写入**，不归一 UTC（`2026-11-07T23:40:00+09:00` 实测可跑通并落账） | 账本上看到的时刻与判定用的 UTC 日期字面不一致；哈希链锁的是非归一字符串 | `ledger.append` 里对 `at` 做 `parse_iso_utc(at).isoformat()` 归一后再写；或在 `timeutil` 拒收非 `Z` 结尾 |
-| ⑦ | timeline 的 `--entity` 模式默认源是 `yahoo_finance,google_news,cnbc`，对不存在的标的**静默返回 0 条**（实测 `NOTAREALTICKER123` → 0 条、无 error） | 与"这个标的没新闻"无法区分；下游会误判为"该主体无事件" | 同 ③：把"查询词毫无命中"与"源正常但无匹配"分开标注 |
-| ⑧ | `sources.py` `TIMEOUT=90`、**无重试**、无退避 | 单条核验最坏要等 90 s×条数；批量 `verify_all` 在源半死时会长时间卡住 | 加 `retries=1` + 指数退避，或把 timeout 收到 15–20 s 并按条计失败 |
+| ① | timeline **没有库级 API**：`run(args: Namespace) -> int`，返回退出码，结果只能读文件；`args.sources` / `args.out_dir` 为 `None` 时直接崩 | 调用方必须伪造 `argparse.Namespace` 8 个字段并知道 CLI 的默认值逻辑；壳层容易被"函数返回 0 = 成功"骗到 | 加一层 `run_topic(topic, start, end, sources=None) -> (meta, events, rejects)` 薄包装，内部仍调 `run()` |
+| ② | registry 把"无数据 / 不可达 / 判不了"**统一收敛到 `undetermined`** | 壳层必须自己维护 `reason_code` 分桶表，否则界面上三种完全不同的事会显示成同一句"无法判定" | 在 `evaluate.py` 输出里加 `reason_class: "no_data"\|"unreachable"\|"undefined"`（不新增状态，只加分类字段） |
+| ③ | `syntax.md §五` 写"`undetermined` 允许补跑**一次**"，但 `ops.verify_one` 只拦 `hit`/`miss`，对 `undetermined` **可无限次补跑** | 文档的"一次"是纪律承诺，代码没兑现；下游可能据此假设"最多两条记录" | 在 `verify_one` 里查 `retry_of_undetermined` 是否已存在，存在即拒；或把文档改成"可多次补跑，每次带 supersedes" |
+| ④ | 账本 `at` 字段**原样写入**，不归一 UTC（`2026-11-07T23:40:00+09:00` 实测可跑通并落账） | 账本上看到的时刻与判定用的 UTC 日期字面不一致；哈希链锁的是非归一字符串 | `ledger.append` 里对 `at` 做 `parse_iso_utc(at).isoformat()` 归一后再写；或在 `timeutil` 拒收非 `Z` 结尾 |
+| ⑤ | timeline 的 `--entity` 模式默认源是 `yahoo_finance,google_news,cnbc`，对不存在的标的**静默返回 0 条**（实测 `NOTAREALTICKER123` → 0 条、无 error） | 与"这个标的没新闻"无法区分；下游会误判为"该主体无事件" | 参考 §5.0-A 的思路：把"查询词毫无命中"与"源正常但无匹配"分开标注 |
+| ⑥ | `sources.py` `TIMEOUT=90`、**无重试**、无退避 | 单条核验最坏要等 90 s×条数；批量 `verify_all` 在源半死时会长时间卡住 | 加 `retries=1` + 指数退避，或把 timeout 收到 15–20 s 并按条计失败 |
 
 **另有一条不是硬伤但必须知道**：`timeline.py` 的动作判定是"全局最早命中"，`launch` 出现在机构类标题里会被判成
 `trial_start`（val 集 3 条同形）。这是**已登记的方法层缺口**（`benchmark.md §8`），不属于接口问题，
@@ -598,7 +635,8 @@ $ … chain-check
 | 三条拒绝用的 payload | `phase0/api/demo/payload_reject_*.json` | B 级，可原样重跑 |
 | 取数耗时（FRED / Yahoo） | 本文 §3.3 | A 级，脚本可重跑（见下） |
 | 模型路线 1.2–1.8 s/条、0 元 | `phase0/timeline/benchmark.md §6.5.3` | A 级，原始结果文件在 `phase0/timeline/benchmark_*_model_result.json` |
-| 质量数字（0.875 / 0.778 / 26%） | `phase0/timeline/benchmark.md §6.6.1` 表格 + `§6.6.2` 结论 | A 级，原始结果 `benchmark_def_model_result.json` |
+| 质量数字（两轮：只有标题 0.875 / 0.778 / 26.1%；标题 + 正文首段 0.833 / 0.833 / 4.3%） | `phase0/timeline/benchmark.md §6.6.1`（只有标题）+ `§6.6.2`（结论）+ `§6.7.1`（预注册与污染登记）+ `§6.7.2`（补正文结果） | A 级，原始结果 `benchmark_def_model_result.json` / `benchmark_def_body_model_result.json`，标注 `benchmark_labels_def.json` / `benchmark_labels_def_body.json`；补正文段落本身不入库，仅有来源与指纹 |
+| 运行状态 `status` 与退出码（`failed` → 3、`ok` → 0） | `phase0/timeline/timeline.py` L716-727 / L789-791 | A 级，`failed` 与 `ok` 各一次实跑已复核；`partial → 0` 未单独实跑，为 B 级（代码原文） |
 | timeline 的 `out*/` 产物与 `raw_items.json` | 本地 `phase0/api/demo/out_*/` | **不入库、不作为对外证据**（含第三方原文片段）；只有计数进本文 |
 
 重测取数耗时的最小脚本（不改任何现有代码）：
