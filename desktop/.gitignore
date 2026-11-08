@@ -1,0 +1,9 @@
+# 桌面壳构建产物（Tauri / Vite）不入库
+target/
+dist/
+node_modules/
+
+# 本地真实产物回放数据：由 tools/build_dev_data.py 生成，不入库
+ui/dev-data.js
+.devdata/
+workspace/
