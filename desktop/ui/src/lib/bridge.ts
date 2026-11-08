@@ -6,6 +6,8 @@
  * 时间纪律：--at 必须由调用方显式传入 ISO-8601 UTC（带 Z），不交给 Python 取系统时间。
  */
 
+import { strings } from '../i18n'
+
 export interface BridgeResult<T = unknown> {
   ok: boolean
   available: boolean
@@ -115,10 +117,10 @@ export const DEFAULTS = {
 }
 
 export const SOURCE_LABELS: Record<string, string> = {
-  google_news: 'Google 新闻',
-  bing_news: 'Bing 新闻',
-  clinicaltrials: '临床试验登记',
-  federal_register: '美国联邦公报',
+  google_news: strings.bridge.sourceLabels.google_news,
+  bing_news: strings.bridge.sourceLabels.bing_news,
+  clinicaltrials: strings.bridge.sourceLabels.clinicaltrials,
+  federal_register: strings.bridge.sourceLabels.federal_register,
 }
 
 const ISO_AT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/
@@ -164,7 +166,7 @@ function invoke<T>(command: string, request: unknown): Promise<BridgeResult<T>> 
       fail(
         command,
         'BRIDGE_NOT_AVAILABLE',
-        '进程桥未接入：界面拿不到桌面壳的命令通道（可能是在浏览器里直接打开）。',
+        strings.bridge.notAvailable,
         false,
       ),
     )
@@ -196,11 +198,11 @@ function invoke<T>(command: string, request: unknown): Promise<BridgeResult<T>> 
 export async function openExternal(url: string): Promise<string | null> {
   const text = (url || '').trim()
   if (!/^(https?):\/\/\S+$/i.test(text)) {
-    return '只允许 http / https 链接'
+    return strings.bridge.openSchemeOnly
   }
   const core = tauriCore()
   if (!core) {
-    return '进程桥未接入，唤不起系统浏览器'
+    return strings.bridge.openUnavailable
   }
   try {
     await core.invoke('plugin:opener|open_url', { url: text })
@@ -213,13 +215,13 @@ export async function openExternal(url: string): Promise<string | null> {
 export function validateAt(value: string): string | null {
   const text = (value || '').trim()
   if (!ISO_AT.test(text)) {
-    return '时刻必须是 ISO-8601 UTC，例如 2026-11-08T09:00:00Z（必须带 Z）'
+    return strings.bridge.invalidAt
   }
   return null
 }
 
 export function validateDate(value: string, label: string): string | null {
-  if (!ISO_DATE.test((value || '').trim())) return `${label} 必须是 YYYY-MM-DD`
+  if (!ISO_DATE.test((value || '').trim())) return strings.bridge.invalidDate(label)
   return null
 }
 
@@ -229,19 +231,24 @@ export function runTimeline(request: TimelineRequest): Promise<BridgeResult<Time
   const query = mode === 'entity' ? request.entity : request.topic
   if (!query || !String(query).trim()) {
     return Promise.resolve(
-      fail(command, 'INVALID_REQUEST', mode === 'entity' ? '请先填写公司名或代号' : '请先填写想看的话题', true),
+      fail(
+        command,
+        'INVALID_REQUEST',
+        mode === 'entity' ? strings.bridge.needEntity : strings.bridge.needTopic,
+        true,
+      ),
     )
   }
-  const startErr = validateDate(request.start, '开始日期')
+  const startErr = validateDate(request.start, strings.common.startDate)
   if (startErr) return Promise.resolve(fail(command, 'INVALID_REQUEST', startErr, true))
-  const endErr = validateDate(request.end, '结束日期')
+  const endErr = validateDate(request.end, strings.common.endDate)
   if (endErr) return Promise.resolve(fail(command, 'INVALID_REQUEST', endErr, true))
   if (request.start > request.end) {
-    return Promise.resolve(fail(command, 'INVALID_REQUEST', '开始日期不能晚于结束日期', true))
+    return Promise.resolve(fail(command, 'INVALID_REQUEST', strings.bridge.startAfterEnd, true))
   }
   const max = request.maxPerSource === undefined ? DEFAULTS.maxPerSource : Number(request.maxPerSource)
   if (!Number.isFinite(max) || max < 1 || max > 200) {
-    return Promise.resolve(fail(command, 'INVALID_REQUEST', '每个源的上限必须是 1–200 的整数', true))
+    return Promise.resolve(fail(command, 'INVALID_REQUEST', strings.bridge.maxPerSource, true))
   }
   return invoke<TimelineData>(command, {
     mode,

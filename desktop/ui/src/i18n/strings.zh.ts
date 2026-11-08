@@ -1,0 +1,315 @@
+/*
+ * 界面文案（中文）
+ *
+ * 唯一文案落点：所有面向用户的字符串都从这里取，组件不内联中文。
+ * 带变量的句子写成函数，便于以后译成别的语言时调整语序。
+ * 状态值、reason_code、JSON 键名、文件路径、命令名、格式占位不在此列。
+ */
+
+export const strings = {
+  app: {
+    productName: '脉络 · 预注册验证工作台',
+    readExit: (code: string | number | null) => `读记录退出码 ${code}`,
+    themeToDark: '切换到暗色',
+    themeToLight: '切换到亮色',
+  },
+  nav: {
+    home: '看什么',
+    judgments: '我的判断',
+    open: '打开导航',
+    close: '关闭导航',
+    mainLabel: '主导航',
+    groupLabel: '操作面',
+  },
+  sidebar: {
+    title: '开机时补算核验',
+    meta: '关机期间不核验 · 非后台服务',
+    collapse: '收起侧边栏',
+    expand: '展开',
+    expandAria: '展开侧边栏',
+  },
+  disclaimer: {
+    text: '只筛线索，不替你下结论。关机期间不会核验，开机补算；到期项会在打开时补核一次。',
+  },
+  common: {
+    bridgeNoResult: '桌面壳没有返回结果。',
+    unknown: '未知',
+    none: '（无）',
+    emptyValue: '（空）',
+    notFilled: '（未填）',
+    notRecorded: '（未记录）',
+    stderrEmpty: '（stderr 为空）',
+    noExcerpt: '（源未提供摘要）',
+    listSeparator: '、',
+    itemCount: (n: number) => `${n} 条`,
+    actionShowDetail: '看详情',
+    startDate: '开始日期',
+    endDate: '结束日期',
+    dt: {
+      command: '命令',
+      exitCode: '退出码',
+      bridgeCode: '桥错误码',
+      reason: '原因',
+    },
+  },
+  home: {
+    sectionTitle: '看什么',
+    title: '你想看什么？',
+    lede: '输入一个话题，或一家公司 / 一只代号。系统会去公开消息源里抓事件，抽成按时间排好的线索；抓不到、抓不全、判不了，都会明说。',
+    intro: {
+      abilityTitle: '先说清楚它能干什么：',
+      abilityBody: '把公开消息源里的事件抓下来，抽成可核对的线索，按时间排给你看。',
+      offlineTitle: '关机期间不会核验，开机补算。',
+      offlineBody: '到期项会在你打开它的时候补核一次，没有后台常驻进程。',
+      scopeTitle: '只筛线索，不替你下结论。',
+      scopeBody: '判不了时会明说判不了，并说清是缺数据、源不可达，还是到期没对上。',
+      footerNote: '这两句也常驻页脚，随时能看到。',
+      dismiss: '知道了',
+    },
+    askLabel: '看什么',
+    placeholder: '一个话题，或一家公司 / 一只代号',
+    exampleLabel: '试试',
+    examples: [
+      { text: '固态电池', hint: '话题' },
+      { text: '宁德时代', hint: '公司' },
+      { text: 'XBI', hint: '代号' },
+    ],
+    exampleTitle: (hint: string) => `示例：${hint}`,
+    start: '开始找',
+    starting: '正在找…',
+    confirmAsk: '需要确认一下：这是话题，还是某家公司？',
+    willQuery: (mode: string) => `会按「${mode}」去查 · 按回车也可以`,
+    enterHint: '填好之后按回车',
+    confirmGroupLabel: '确认查询类型',
+    bothWork: (query: string) => `「${query}」两种都说得通：`,
+    isTopic: '是一个话题',
+    isEntity: '是一家公司 / 一只代号',
+    startingCrawl: '正在启动抓取进程…',
+    settings: {
+      summary: '更多设置（时间范围、消息源、每源上限）',
+      maxPerSource: '每源上限',
+      sources: '消息源',
+      sourceHelp: '至少留一个源；参数会显式传给抓取脚本，壳不替它决定默认值。',
+    },
+  },
+  result: {
+    sectionTitle: '结果',
+    actionHideDetail: '收起详情',
+    quoted: (query: string) => `「${query}」`,
+    sourceCount: (n: number) => `${n} 个消息源`,
+    detailSummary: '详情（技术信息）',
+    failedToRun: '桌面壳没有返回结果，这次什么都没拿到。',
+    blocked: (exit: string | number) =>
+      `这次的内容不当结果展示。抓取进程退出码 ${exit}；技术原因在下面的详情里，不做推测。`,
+    counts: (parts: { events: number; raw: number; merged: number; rejects: number }) =>
+      `共 ${parts.events} 条线索 · 原始 ${parts.raw} 条 · 合并重复 ${parts.merged} 条${
+        parts.rejects > 0 ? ` · 未采用 ${parts.rejects} 条` : ''
+      }`,
+    emptyTopic: '消息源都查过了，确实没有匹配的线索——不是抓取失败。',
+    emptyEntity: '消息源都查过了，但没抓到可判定的条目；这不等于「这家公司没有事件」。',
+    unjudged: (raw: number, rejects: number) =>
+      `抓到了 ${raw} 条原始条目，但没有一条能抽成线索（未采用 ${rejects} 条）；原因在详情里，不能读成「没发生」。`,
+    openSourceTitle: '在系统浏览器里打开原文',
+    openFailed: (reason: string) => `打不开原文：${reason}`,
+    banner: {
+      exit: (code: number) => `抓取没有跑完（退出码 ${code}），这份内容不能当结果读`,
+      partial: (covered: number, total: number) => `只拿到 ${covered}/${total} 个消息源，这份结果不完整`,
+      failedTag: (name: string) => `${name} · 失败`,
+      failed: (total: number) => `这次没拿到结果：${total} 个消息源全部失败`,
+      missingStatus: '这份产物缺 status 字段（旧产物），不能当结果读',
+      unjudged: '抓到了条目，但没有一条能当线索',
+      rejectsTag: (n: number) => `未采用 ${n} 条`,
+    },
+  },
+  detail: {
+    tier: '档位',
+    coverage: '覆盖',
+    artifact: '产物',
+    bridgeMessage: '桥消息',
+    noStatusField: '（产物没有 status 字段）',
+    notJudged: '（未判定）',
+    noPath: '（未回传路径）',
+    noArtifact: '（本次没有产物）',
+    sourcesNote: '逐源 fetched / accepted / rejected / error（原样展示）',
+    sourceMissing: '（产物里没有这个源的统计）',
+    notesTitle: '判定备注',
+    rejectTitle: '未采用原因（reason code 原样）',
+    progressTitle: (n: number) => `进度输出（最后 ${n} 行）`,
+  },
+  judgments: {
+    sectionTitle: '我的判断',
+    title: '我的判断',
+    lede: '你记下过的判断、到期日与核对结果。到期项排在最上面；判不了的会单列，并说清是缺数据、源不可达，还是算不出。',
+    loading: '正在读我的记录…',
+    noRecords: '还没有任何记录',
+    recordCount: (n: number) => `共 ${n} 条判断`,
+    summary: (counts: { hit: number; miss: number; undetermined: number; due: number; notDue: number }) =>
+      `兑现 ${counts.hit} · 没兑现 ${counts.miss} · 判不了 ${counts.undetermined} · 到期未核 ${counts.due} · 未到期 ${counts.notDue}`,
+    verifyRunning: '正在核对…',
+    verifyDue: (n: number) => `核对到期的 ${n} 条`,
+    verifyNothingDue: '没有到期的',
+    formClose: '收起',
+    formOpen: '记一条新判断',
+    readFailed: '读记录失败，界面不替你补一个空列表。',
+    form: {
+      claimLabel: '一句话判断',
+      claimPlaceholder: '如：10 年期美债收益率在窗口内最高读数不低于 4.0%',
+      expiresLabel: '到期日',
+      idLabel: '编号',
+      atLabel: '登记时刻（UTC）',
+      criterionLabel: '判据（JSON，注册时冻结，不合规会被拒）',
+      criterionHelp: '判据必须一次写对：注册后不许改，否则整条记录作废。',
+      loadExample: '载入仓库里的真实示例',
+      submit: '记下这条判断',
+      submitRunning: '正在写入…',
+      submitHint: '写入我的记录时，参数与判据一并冻结；被拒不会留下半条。',
+      exampleClaim: '10 年期美债收益率在 2026 年 10 月整月内出现过不低于 4.0% 的读数',
+    },
+    empty: {
+      title: '这份记录文件里还没有判断。',
+      before: '先在「看什么」找到线索，再回来把它记成一条可核对的判断；到期后这里会提醒你去核。当前记录文件是',
+      after: '。',
+    },
+    groups: {
+      due: '这个可以去核对了',
+      undetermined: '判不了',
+      miss: '没兑现',
+      hit: '兑现了',
+      notDue: '还没到期',
+      pending: '还没核对',
+    },
+    detailSummary: '详情（记录文件、技术信息）',
+    ledgerLabel: '我的记录文件',
+    ledgerHelp: (path: string) => `默认与 CLI 一致：${path}。改成别的文件只影响界面读取与写入目标。`,
+    notice: {
+      criterionParseFailed: '判据 JSON 解析失败，还没提交。',
+      missing: (fields: string) => `还缺：${fields}`,
+      missingFields: {
+        id: '编号',
+        claim: '一句话判断',
+        expires: '到期日',
+        at: '登记时刻',
+      },
+      rejected: (code: string | number | null) => `这条判断被拒了（退出码 ${code}）；我的记录零新增。`,
+      registered: (id: string) => `已记入我的记录：${id}`,
+      verifyFailed: '核对没有跑起来。',
+      verifyExit: (code: string | number) => `核对退出码 ${code}，结果不可用。`,
+      verifyAllNotDue: (n: number) => `这次核对了 ${n} 条，都还没到结算日，所以没出结论。`,
+      verifyNothingDue: '这次没有可核对的到期项。',
+      notDueTail: (n: number) => ` · 还没到结算日 ${n}`,
+      settled: (parts: { settled: number; hit: number; miss: number; tail: string }) =>
+        `这次核对了 ${parts.settled} 条：兑现 ${parts.hit} · 没兑现 ${parts.miss}${parts.tail}`,
+      settledWithUndetermined: (parts: {
+        settled: number
+        hit: number
+        miss: number
+        undetermined: number
+        tail: string
+      }) =>
+        `这次核对了 ${parts.settled} 条：兑现 ${parts.hit} · 没兑现 ${parts.miss} · 判不了 ${parts.undetermined}${parts.tail}`,
+      undeterminedTag: '判不了的条目已单列在下方，原因在各自详情里',
+    },
+    record: {
+      dueFlag: '这个可以去核对了',
+      undeterminedFlag: (bucket: string) => `判不了 · ${bucket}`,
+      expiryLine: (expires: string, registered: string) => `到期 ${expires} · 记于 ${registered}`,
+      dueTail: ' · 到期后还没核对（关机期间不核验）',
+    },
+  },
+  status: {
+    tiers: {
+      ok: { label: '正常完成', plain: '消息源都查过了，有可用线索。' },
+      empty: { label: '真无数据', plain: '消息源都查过了，确实没有匹配的线索——不是抓取失败。' },
+      entityZero: {
+        label: '实体零命中',
+        plain: '消息源都查过了，但没抓到可判定的条目；这不能读成「这家公司没有事件」。',
+      },
+      unjudged: { label: '判不了', plain: '抓到了条目，但没有一条能当线索；原因在详情里。' },
+      partial: { label: '部分覆盖', plain: '只拿到一半消息源，这份结果不完整。' },
+      failed: { label: '失败', plain: '这次没拿到结果：所有消息源都失败了。' },
+      unknown: { label: '状态未知', plain: '这份产物缺状态字段（旧产物），不能当结果读。' },
+    },
+    coverage: {
+      failed: (total: number, names: string) => `源覆盖 0/${total}；全部失败：${names}`,
+      legacy: (total: number, failed: number) => `旧产物无 status；逐源记录：${total} 源，失败 ${failed} 源`,
+      partial: (covered: number, total: number, names: string) => `源覆盖 ${covered}/${total}；失败源：${names}`,
+      complete: (covered: number, total: number) => `源覆盖 ${covered}/${total}；失败源 0`,
+    },
+    coverageNames: {
+      none: '（未记录源名）',
+      inconsistent: '（逐源记录不一致）',
+    },
+    noDocCoverage: '没有产物文档，无法确认覆盖',
+    noMetaCoverage: '产物结构不完整（缺 meta），无法确认覆盖',
+    notes: {
+      noDoc: '桌面壳没有拿到 events.json，不能当结果读。',
+      noMeta: '产物缺 meta：不能当结果读。',
+      statusOkButFailed: 'status 写的是 ok，但逐源统计里有失败源；壳按「部分覆盖」保守展示。',
+      statusPartialNoFailed: 'status 写的是 partial，但逐源统计里没有失败源；仍按部分覆盖展示，并请回仓库核对。',
+      noStatus: '产物没有 status 字段（旧产物），无法证明是 ok；事件区已拦截，仅供排障计数。',
+      entityZero: '实体模式零命中：源已覆盖但没抓到条目；不能读成「该主体没有事件」。',
+      noEvents: '源有返回，但抽出的事件为 0；拒绝原因必须展开。',
+      unknownStatus: (raw: string) => `无法识别的 status：${raw}`,
+      noRequested: '产物没有记录请求过哪些源，无法确认覆盖。',
+    },
+    reasonBuckets: {
+      noData: { label: '缺数据', meaning: '到期了，但窗口里没有可用观测；不能读成「没发生」。' },
+      unreachable: { label: '取不到', meaning: '消息源不可用，这次没法判定。' },
+      undefined: { label: '算不出', meaning: '不是源的问题，是定义本身算不出值。' },
+      unknown: { label: '未登记原因', meaning: '原因码没在壳里登记；原样展示，需回仓库核对。' },
+      missing: { label: '没给原因', meaning: '状态是判不了却没带原因码；按异常处理，不能猜。' },
+    },
+    reasonCodes: {
+      noObservationsInWindow: { label: '窗口内无观测', explain: '窗口内一条观测都没有。' },
+      sourceEmpty: { label: '清洗后为空', explain: '源有响应，但清洗后没有可用观测。' },
+      insufficientObservations: { label: '观测不足', explain: '观测条数少于判据要求的最小条数。' },
+      windowNotCovered: { label: '窗口未被覆盖', explain: '窗口末与最后一个观测的间隔超过允许的天数。' },
+      sourceUnreachable: { label: '源不可达', explain: '连接或代理失败，取不到数据。' },
+      sourceHttp: { label: '源返回 HTTP 错误', explain: '源返回的状态码不是成功响应。' },
+      sourceParse: { label: '响应解析失败', explain: '返回内容不是可解析的数据格式。' },
+      sourceFieldMissing: { label: '响应缺字段', explain: '返回结构里缺判据需要的字段。' },
+      aggregateUndefined: {
+        label: '聚合无定义',
+        explain: '数据齐全，但聚合在数学上无定义（例如首条观测为 0 时算涨跌幅）。',
+      },
+    },
+    unknownReason: '该原因码未在壳内登记；原样展示，不做解释，需回仓库核对。',
+    verdicts: {
+      hit: { label: '兑现了', note: '核验结论为 hit：命题成立。' },
+      miss: { label: '没兑现', note: '核验结论为 miss：命题不成立。' },
+      undetermined: {
+        label: '判不了',
+        note: '核验结论为 undetermined：源不可达、数据缺失、聚合无定义三类共用此值，必须看 reason_code 区分。',
+      },
+      notDue: { label: '未到期', note: '还没到结算时点。' },
+      frozen: { label: '已冻结', note: '参数与判据已冻结，不再改。' },
+    },
+    pendingVerdict: { label: '还没核对', note: '记录里还没有判定（未到期或尚未核验）。' },
+    unknownVerdict: { label: '未登记结论', note: '该判定状态未在壳内登记；原样展示。' },
+  },
+  bridge: {
+    sourceLabels: {
+      google_news: 'Google 新闻',
+      bing_news: 'Bing 新闻',
+      clinicaltrials: '临床试验登记',
+      federal_register: '美国联邦公报',
+    },
+    notAvailable: '进程桥未接入：界面拿不到桌面壳的命令通道（可能是在浏览器里直接打开）。',
+    openSchemeOnly: '只允许 http / https 链接',
+    openUnavailable: '进程桥未接入，唤不起系统浏览器',
+    invalidAt: '时刻必须是 ISO-8601 UTC，例如 2026-11-08T09:00:00Z（必须带 Z）',
+    invalidDate: (label: string) => `${label} 必须是 YYYY-MM-DD`,
+    needEntity: '请先填写公司名或代号',
+    needTopic: '请先填写想看的话题',
+    startAfterEnd: '开始日期不能晚于结束日期',
+    maxPerSource: '每个源的上限必须是 1–200 的整数',
+  },
+  mode: {
+    topic: '话题',
+    entity: '公司 / 代号',
+  },
+}
+
+/* 不加 `as const`：文案要能被另一份语言表替换，
+   若这里锁成字面量类型，`strings.en.ts` 一整份都过不了类型检查。 */
+export type Strings = typeof strings

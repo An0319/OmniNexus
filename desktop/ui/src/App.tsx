@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { DisclaimerBar, MeshBg, SystemIcon, type SystemIconName } from './components/ds'
+import { strings } from './i18n'
 import Home from './pages/Home'
 import Judgments from './pages/Judgments'
 import {
@@ -58,10 +59,10 @@ export default function App() {
     const result = await registryList({ ledger })
     if (!result.ok) {
       setRows(null)
-      setError(result.message ?? '桌面壳没有返回结果。')
+      setError(result.message ?? strings.common.bridgeNoResult)
     } else if (result.exitCode !== 0) {
       setRows(null)
-      setError(result.stderr.trim() || `读记录退出码 ${result.exitCode}`)
+      setError(result.stderr.trim() || strings.app.readExit(result.exitCode))
     } else {
       setRows(Array.isArray(result.data) ? result.data : [])
       setError(null)
@@ -107,8 +108,8 @@ export default function App() {
   }
 
   const navItems: { id: Page; label: string; meta?: string; icon: SystemIconName }[] = [
-    { id: 'home', label: '看什么', icon: 'flow' },
-    { id: 'judgments', label: '我的判断', icon: 'timer', meta: due > 0 ? `${due}` : undefined },
+    { id: 'home', label: strings.nav.home, icon: 'flow' },
+    { id: 'judgments', label: strings.nav.judgments, icon: 'timer', meta: due > 0 ? `${due}` : undefined },
   ]
 
   return (
@@ -136,7 +137,7 @@ export default function App() {
           <button
             className="mobile-nav-trigger"
             onClick={() => setMobileSidebarOpen(true)}
-            aria-label="打开导航"
+            aria-label={strings.nav.open}
           >
             ≡
           </button>
@@ -170,7 +171,7 @@ export default function App() {
               whiteSpace: 'nowrap',
             }}
           >
-            脉络 · 预注册验证工作台
+            {strings.app.productName}
           </span>
           <span className="header-divider" style={{ color: 'var(--border-strong)', fontSize: 18, lineHeight: 1 }}>
             |
@@ -207,10 +208,13 @@ export default function App() {
       </header>
 
       <div className={`app-layout${sidebarCollapsed ? ' sidebar-is-collapsed' : ' sidebar-is-expanded'}`}>
-        <aside className={`app-sidebar${mobileSidebarOpen ? ' is-mobile-open' : ''}`} aria-label="主导航">
+        <aside
+          className={`app-sidebar${mobileSidebarOpen ? ' is-mobile-open' : ''}`}
+          aria-label={strings.nav.mainLabel}
+        >
           <nav className="sidebar-nav">
             <div className="sidebar-group">
-              <div className="sidebar-group-label">操作面</div>
+              <div className="sidebar-group-label">{strings.nav.groupLabel}</div>
               {navItems.map((item) => {
                 const selected = page === item.id
                 return (
@@ -233,20 +237,22 @@ export default function App() {
           </nav>
 
           <div className="sidebar-footer">
-            <div className="sidebar-status" title={sidebarCollapsed ? '开机时补算核验' : undefined}>
+            <div className="sidebar-status" title={sidebarCollapsed ? strings.sidebar.title : undefined}>
               <span className="sidebar-status-dot is-idle" />
               <span className="sidebar-copy">
-                <span className="sidebar-status-title">开机时补算核验</span>
-                <span className="sidebar-status-meta">关机期间不核验 · 非后台服务</span>
+                <span className="sidebar-status-title">{strings.sidebar.title}</span>
+                <span className="sidebar-status-meta">{strings.sidebar.meta}</span>
               </span>
             </div>
             <button
               className="sidebar-collapse"
               onClick={() => setSidebarCollapsed((v) => !v)}
-              aria-label={sidebarCollapsed ? '展开侧边栏' : '收起侧边栏'}
+              aria-label={sidebarCollapsed ? strings.sidebar.expandAria : strings.sidebar.collapse}
             >
               <span className="sidebar-collapse-icon">{sidebarCollapsed ? '→' : '←'}</span>
-              <span className="sidebar-item-label">{sidebarCollapsed ? '展开' : '收起侧边栏'}</span>
+              <span className="sidebar-item-label">
+                {sidebarCollapsed ? strings.sidebar.expand : strings.sidebar.collapse}
+              </span>
             </button>
           </div>
         </aside>
@@ -255,7 +261,7 @@ export default function App() {
           <button
             className="mobile-sidebar-backdrop"
             onClick={() => setMobileSidebarOpen(false)}
-            aria-label="关闭导航"
+            aria-label={strings.nav.close}
           />
         )}
 
@@ -288,7 +294,7 @@ function ModeToggle({ light, onToggle }: { light: boolean; onToggle: () => void 
   return (
     <button
       onClick={onToggle}
-      aria-label={light ? '切换到暗色' : '切换到亮色'}
+      aria-label={light ? strings.app.themeToDark : strings.app.themeToLight}
       aria-pressed={light}
       style={{
         position: 'relative',

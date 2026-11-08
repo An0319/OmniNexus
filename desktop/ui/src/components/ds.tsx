@@ -6,6 +6,7 @@
  * 未改结构、未改视觉参数；只有 DisclaimerBar 与 ResultBanner 的文案换成本产品的话。
  */
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from 'react'
+import { strings } from '../i18n'
 
 export function useInView(threshold = 0.12): [RefObject<HTMLDivElement | null>, boolean] {
   const ref = useRef<HTMLDivElement>(null)
@@ -283,9 +284,7 @@ export function SystemIcon({ name, size = 18 }: { name: SystemIconName; size?: n
 export function DisclaimerBar({ collapsed }: { collapsed: boolean }) {
   return (
     <div className={`disclaimer-bar${collapsed ? ' is-sidebar-collapsed' : ''}`} role="contentinfo">
-      <span className="disclaimer-text">
-        只筛线索，不替你下结论。关机期间不会核验，开机补算；到期项会在打开时补核一次。
-      </span>
+      <span className="disclaimer-text">{strings.disclaimer.text}</span>
       <span className="disclaimer-ts">
         UPDATED · {new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC
       </span>
@@ -302,7 +301,7 @@ export function ResultBanner({
   tone,
   title,
   tags = [],
-  actionLabel = '看详情',
+  actionLabel = strings.common.actionShowDetail,
   onAction,
 }: {
   tone: 'warn' | 'neg' | 'info'

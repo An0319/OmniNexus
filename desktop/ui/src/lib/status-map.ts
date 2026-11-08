@@ -9,6 +9,7 @@
  */
 
 import type { TimelineDoc, RegistryRow } from './bridge'
+import { strings } from '../i18n'
 
 export type Tone = 'neu' | 'info' | 'warn' | 'neg'
 
@@ -26,56 +27,56 @@ export interface TierMeta {
 export const TIMELINE_TIERS: Record<string, TierMeta> = {
   ok: {
     key: 'ok',
-    label: '正常完成',
-    plain: '消息源都查过了，有可用线索。',
+    label: strings.status.tiers.ok.label,
+    plain: strings.status.tiers.ok.plain,
     tone: 'neu',
     icon: '✓',
     blocked: false,
   },
   empty: {
     key: 'empty',
-    label: '真无数据',
-    plain: '消息源都查过了，确实没有匹配的线索——不是抓取失败。',
+    label: strings.status.tiers.empty.label,
+    plain: strings.status.tiers.empty.plain,
     tone: 'neu',
     icon: '∅',
     blocked: false,
   },
   'entity-zero': {
     key: 'entity-zero',
-    label: '实体零命中',
-    plain: '消息源都查过了，但没抓到可判定的条目；这不能读成「这家公司没有事件」。',
+    label: strings.status.tiers.entityZero.label,
+    plain: strings.status.tiers.entityZero.plain,
     tone: 'neu',
     icon: '∅',
     blocked: false,
   },
   unjudged: {
     key: 'unjudged',
-    label: '判不了',
-    plain: '抓到了条目，但没有一条能当线索；原因在详情里。',
+    label: strings.status.tiers.unjudged.label,
+    plain: strings.status.tiers.unjudged.plain,
     tone: 'info',
     icon: '≈',
     blocked: false,
   },
   partial: {
     key: 'partial',
-    label: '部分覆盖',
-    plain: '只拿到一半消息源，这份结果不完整。',
+    label: strings.status.tiers.partial.label,
+    plain: strings.status.tiers.partial.plain,
     tone: 'warn',
     icon: '!',
     blocked: false,
   },
   failed: {
     key: 'failed',
-    label: '失败',
-    plain: '这次没拿到结果：所有消息源都失败了。',
+    label: strings.status.tiers.failed.label,
+    plain: strings.status.tiers.failed.plain,
     tone: 'neg',
     icon: '×',
     blocked: true,
   },
   unknown: {
     key: 'unknown',
-    label: '状态未知',
-    plain: '这份产物缺状态字段（旧产物），不能当结果读。',
+    label: strings.status.tiers.unknown.label,
+    plain: strings.status.tiers.unknown.plain,
     tone: 'neg',
     icon: '?',
     blocked: true,
@@ -141,8 +142,8 @@ export function classifyTimeline(doc: TimelineDoc | null | undefined): TimelineC
       events: [],
       rejects: [],
       rejectReasons: {},
-      coverageText: '没有产物文档，无法确认覆盖',
-      notes: ['桌面壳没有拿到 events.json，不能当结果读。'],
+      coverageText: strings.status.noDocCoverage,
+      notes: [strings.status.notes.noDoc],
     }
   }
 
@@ -170,8 +171,8 @@ export function classifyTimeline(doc: TimelineDoc | null | undefined): TimelineC
       events: [],
       rejects: [],
       rejectReasons: {},
-      coverageText: '产物结构不完整（缺 meta），无法确认覆盖',
-      notes: ['产物缺 meta：不能当结果读。'],
+      coverageText: strings.status.noMetaCoverage,
+      notes: [strings.status.notes.noMeta],
     }
   }
 
@@ -198,10 +199,10 @@ export function classifyTimeline(doc: TimelineDoc | null | undefined): TimelineC
   let effectiveStatus = statusRaw
   if (statusRaw === 'ok' && failedSources.length > 0) {
     effectiveStatus = 'partial'
-    notes.push('status 写的是 ok，但逐源统计里有失败源；壳按「部分覆盖」保守展示。')
+    notes.push(strings.status.notes.statusOkButFailed)
   }
   if (statusRaw === 'partial' && failedSources.length === 0) {
-    notes.push('status 写的是 partial，但逐源统计里没有失败源；仍按部分覆盖展示，并请回仓库核对。')
+    notes.push(strings.status.notes.statusPartialNoFailed)
   }
 
   let tier = 'unknown'
@@ -209,7 +210,7 @@ export function classifyTimeline(doc: TimelineDoc | null | undefined): TimelineC
 
   if (!hasStatus) {
     tier = 'unknown'
-    notes.push('产物没有 status 字段（旧产物），无法证明是 ok；事件区已拦截，仅供排障计数。')
+    notes.push(strings.status.notes.noStatus)
   } else if (effectiveStatus === 'failed') {
     tier = 'failed'
   } else if (effectiveStatus === 'partial') {
@@ -221,33 +222,40 @@ export function classifyTimeline(doc: TimelineDoc | null | undefined): TimelineC
       tier = 'empty'
       emptyKind = meta.mode === 'entity' ? 'entity-zero' : 'topic-empty'
       if (emptyKind === 'entity-zero') {
-        notes.push('实体模式零命中：源已覆盖但没抓到条目；不能读成「该主体没有事件」。')
+        notes.push(strings.status.notes.entityZero)
       }
     } else {
       tier = 'unjudged'
-      notes.push('源有返回，但抽出的事件为 0；拒绝原因必须展开。')
+      notes.push(strings.status.notes.noEvents)
     }
   } else {
     tier = 'unknown'
-    notes.push(`无法识别的 status：${String(statusRaw)}`)
+    notes.push(strings.status.notes.unknownStatus(String(statusRaw)))
   }
 
   if (requested.length === 0) {
     tier = 'unknown'
-    notes.push('产物没有记录请求过哪些源，无法确认覆盖。')
+    notes.push(strings.status.notes.noRequested)
   }
 
   const tierMeta = TIMELINE_TIERS[emptyKind === 'entity-zero' ? 'entity-zero' : tier] ?? TIMELINE_TIERS.unknown
 
   let coverageText: string
   if (tier === 'failed') {
-    coverageText = `源覆盖 0/${requested.length}；全部失败：${failedSources.join('、') || '（未记录源名）'}`
+    coverageText = strings.status.coverage.failed(
+      requested.length,
+      failedSources.join(strings.common.listSeparator) || strings.status.coverageNames.none,
+    )
   } else if (tier === 'unknown' && !hasStatus) {
-    coverageText = `旧产物无 status；逐源记录：${requested.length} 源，失败 ${failedSources.length} 源`
+    coverageText = strings.status.coverage.legacy(requested.length, failedSources.length)
   } else if (tier === 'partial') {
-    coverageText = `源覆盖 ${coveredCount}/${requested.length}；失败源：${failedSources.join('、') || '（逐源记录不一致）'}`
+    coverageText = strings.status.coverage.partial(
+      coveredCount,
+      requested.length,
+      failedSources.join(strings.common.listSeparator) || strings.status.coverageNames.inconsistent,
+    )
   } else {
-    coverageText = `源覆盖 ${coveredCount}/${requested.length}；失败源 0`
+    coverageText = strings.status.coverage.complete(coveredCount, requested.length)
   }
 
   return {
@@ -291,42 +299,78 @@ export interface ReasonBucket {
 
 export const REASON_BUCKETS: Record<string, ReasonBucket> = {
   no_data: {
-    label: '缺数据',
+    label: strings.status.reasonBuckets.noData.label,
     tone: 'warn',
-    meaning: '到期了，但窗口里没有可用观测；不能读成「没发生」。',
+    meaning: strings.status.reasonBuckets.noData.meaning,
   },
   unreachable: {
-    label: '取不到',
+    label: strings.status.reasonBuckets.unreachable.label,
     tone: 'neg',
-    meaning: '消息源不可用，这次没法判定。',
+    meaning: strings.status.reasonBuckets.unreachable.meaning,
   },
   undefined: {
-    label: '算不出',
+    label: strings.status.reasonBuckets.undefined.label,
     tone: 'info',
-    meaning: '不是源的问题，是定义本身算不出值。',
+    meaning: strings.status.reasonBuckets.undefined.meaning,
   },
   unknown: {
-    label: '未登记原因',
+    label: strings.status.reasonBuckets.unknown.label,
     tone: 'warn',
-    meaning: '原因码没在壳里登记；原样展示，需回仓库核对。',
+    meaning: strings.status.reasonBuckets.unknown.meaning,
   },
   missing: {
-    label: '没给原因',
+    label: strings.status.reasonBuckets.missing.label,
     tone: 'neg',
-    meaning: '状态是判不了却没带原因码；按异常处理，不能猜。',
+    meaning: strings.status.reasonBuckets.missing.meaning,
   },
 }
 
 export const REASON_CODES: Record<string, { bucket: string; label: string; explain: string }> = {
-  NO_OBSERVATIONS_IN_WINDOW: { bucket: 'no_data', label: '窗口内无观测', explain: '窗口内一条观测都没有。' },
-  SOURCE_EMPTY: { bucket: 'no_data', label: '清洗后为空', explain: '源有响应，但清洗后没有可用观测。' },
-  INSUFFICIENT_OBSERVATIONS: { bucket: 'no_data', label: '观测不足', explain: '观测条数少于判据要求的最小条数。' },
-  WINDOW_NOT_COVERED: { bucket: 'no_data', label: '窗口未被覆盖', explain: '窗口末与最后一个观测的间隔超过允许的天数。' },
-  SOURCE_UNREACHABLE: { bucket: 'unreachable', label: '源不可达', explain: '连接或代理失败，取不到数据。' },
-  SOURCE_HTTP: { bucket: 'unreachable', label: '源返回 HTTP 错误', explain: '源返回的状态码不是成功响应。' },
-  SOURCE_PARSE: { bucket: 'unreachable', label: '响应解析失败', explain: '返回内容不是可解析的数据格式。' },
-  SOURCE_FIELD_MISSING: { bucket: 'unreachable', label: '响应缺字段', explain: '返回结构里缺判据需要的字段。' },
-  AGGREGATE_UNDEFINED: { bucket: 'undefined', label: '聚合无定义', explain: '数据齐全，但聚合在数学上无定义（例如首条观测为 0 时算涨跌幅）。' },
+  NO_OBSERVATIONS_IN_WINDOW: {
+    bucket: 'no_data',
+    label: strings.status.reasonCodes.noObservationsInWindow.label,
+    explain: strings.status.reasonCodes.noObservationsInWindow.explain,
+  },
+  SOURCE_EMPTY: {
+    bucket: 'no_data',
+    label: strings.status.reasonCodes.sourceEmpty.label,
+    explain: strings.status.reasonCodes.sourceEmpty.explain,
+  },
+  INSUFFICIENT_OBSERVATIONS: {
+    bucket: 'no_data',
+    label: strings.status.reasonCodes.insufficientObservations.label,
+    explain: strings.status.reasonCodes.insufficientObservations.explain,
+  },
+  WINDOW_NOT_COVERED: {
+    bucket: 'no_data',
+    label: strings.status.reasonCodes.windowNotCovered.label,
+    explain: strings.status.reasonCodes.windowNotCovered.explain,
+  },
+  SOURCE_UNREACHABLE: {
+    bucket: 'unreachable',
+    label: strings.status.reasonCodes.sourceUnreachable.label,
+    explain: strings.status.reasonCodes.sourceUnreachable.explain,
+  },
+  SOURCE_HTTP: {
+    bucket: 'unreachable',
+    label: strings.status.reasonCodes.sourceHttp.label,
+    explain: strings.status.reasonCodes.sourceHttp.explain,
+  },
+  SOURCE_PARSE: {
+    bucket: 'unreachable',
+    label: strings.status.reasonCodes.sourceParse.label,
+    explain: strings.status.reasonCodes.sourceParse.explain,
+  },
+  SOURCE_FIELD_MISSING: {
+    bucket: 'unreachable',
+    label: strings.status.reasonCodes.sourceFieldMissing.label,
+    explain: strings.status.reasonCodes.sourceFieldMissing.explain,
+  },
+  AGGREGATE_UNDEFINED: {
+    bucket: 'undefined',
+    label: strings.status.reasonCodes.aggregateUndefined.label,
+    explain: strings.status.reasonCodes.aggregateUndefined.explain,
+  },
 }
 
 export function reasonInfo(code: string | null | undefined): {
@@ -351,7 +395,7 @@ export function reasonInfo(code: string | null | undefined): {
       bucket: 'unknown',
       bucketMeta: b,
       label: b.label,
-      explain: '该原因码未在壳内登记；原样展示，不做解释，需回仓库核对。',
+      explain: strings.status.unknownReason,
     }
   }
   const bucketMeta = REASON_BUCKETS[entry.bucket]
@@ -370,36 +414,48 @@ export interface VerdictMeta {
 }
 
 export const VERDICTS: Record<string, VerdictMeta> = {
-  hit: { key: 'hit', label: '兑现了', tone: 'neu', icon: '✓', note: '核验结论为 hit：命题成立。' },
-  miss: { key: 'miss', label: '没兑现', tone: 'neg', icon: '×', note: '核验结论为 miss：命题不成立。' },
+  hit: { key: 'hit', label: strings.status.verdicts.hit.label, tone: 'neu', icon: '✓', note: strings.status.verdicts.hit.note },
+  miss: { key: 'miss', label: strings.status.verdicts.miss.label, tone: 'neg', icon: '×', note: strings.status.verdicts.miss.note },
   undetermined: {
     key: 'undetermined',
-    label: '判不了',
+    label: strings.status.verdicts.undetermined.label,
     tone: 'warn',
     icon: '≈',
-    note: '核验结论为 undetermined：源不可达、数据缺失、聚合无定义三类共用此值，必须看 reason_code 区分。',
+    note: strings.status.verdicts.undetermined.note,
   },
-  not_due: { key: 'not_due', label: '未到期', tone: 'neu', icon: '∅', note: '还没到结算时点。' },
-  frozen: { key: 'frozen', label: '已冻结', tone: 'neu', icon: '●', note: '参数与判据已冻结，不再改。' },
+  not_due: {
+    key: 'not_due',
+    label: strings.status.verdicts.notDue.label,
+    tone: 'neu',
+    icon: '∅',
+    note: strings.status.verdicts.notDue.note,
+  },
+  frozen: {
+    key: 'frozen',
+    label: strings.status.verdicts.frozen.label,
+    tone: 'neu',
+    icon: '●',
+    note: strings.status.verdicts.frozen.note,
+  },
 }
 
 export function mapVerdict(verdict: string | null | undefined): VerdictMeta {
   if (verdict === null || verdict === undefined || verdict === '') {
     return {
       key: 'pending',
-      label: '还没核对',
+      label: strings.status.pendingVerdict.label,
       tone: 'neu',
       icon: '∅',
-      note: '记录里还没有判定（未到期或尚未核验）。',
+      note: strings.status.pendingVerdict.note,
     }
   }
   return (
     VERDICTS[String(verdict)] ?? {
       key: 'unknown',
-      label: '未登记结论',
+      label: strings.status.unknownVerdict.label,
       tone: 'warn',
       icon: '?',
-      note: '该判定状态未在壳内登记；原样展示。',
+      note: strings.status.unknownVerdict.note,
     }
   )
 }

@@ -5,6 +5,8 @@
  * 内部枚举摆到界面上让用户先学一遍。
  */
 
+import { strings } from '../i18n'
+
 export type QueryMode = 'topic' | 'entity'
 
 const ENTITY_SUFFIX =
@@ -47,5 +49,5 @@ export function detectMode(raw: string): QueryMode | null {
 }
 
 export function modeLabel(mode: QueryMode): string {
-  return mode === 'entity' ? '公司 / 代号' : '话题'
+  return mode === 'entity' ? strings.mode.entity : strings.mode.topic
 }

@@ -1,5 +1,6 @@
 import { Fragment, useState } from 'react'
 import { GlassCard, ResultBanner, SectionLabel } from '../components/ds'
+import { strings } from '../i18n'
 import {
   DEFAULTS,
   SOURCE_LABELS,
@@ -103,7 +104,7 @@ export default function Home({
     ? [
         run ? modeLabel(run.mode) : null,
         cls.windowStart && cls.windowEnd ? `${cls.windowStart} → ${cls.windowEnd}` : null,
-        cls.requested.length ? `${cls.requested.length} 个消息源` : null,
+        cls.requested.length ? strings.result.sourceCount(cls.requested.length) : null,
       ]
         .filter(Boolean)
         .join(' · ')
@@ -111,32 +112,33 @@ export default function Home({
 
   return (
     <>
-      <SectionLabel index="01" title="看什么" />
+      <SectionLabel index="01" title={strings.home.sectionTitle} />
 
       <div className="mnx-page-head">
-        <h1 className="mnx-page-title">你想看什么？</h1>
-        <p className="mnx-page-lede">
-          输入一个话题，或一家公司 / 一只代号。系统会去公开消息源里抓事件，抽成按时间排好的线索；抓不到、抓不全、判不了，都会明说。
-        </p>
+        <h1 className="mnx-page-title">{strings.home.title}</h1>
+        <p className="mnx-page-lede">{strings.home.lede}</p>
       </div>
 
       {!introSeen && (
         <GlassCard accent style={{ marginBottom: 32 }}>
           <div className="mnx-intro-copy">
             <p>
-              <strong>先说清楚它能干什么：</strong>把公开消息源里的事件抓下来，抽成可核对的线索，按时间排给你看。
+              <strong>{strings.home.intro.abilityTitle}</strong>
+              {strings.home.intro.abilityBody}
             </p>
             <p>
-              <strong>关机期间不会核验，开机补算。</strong>到期项会在你打开它的时候补核一次，没有后台常驻进程。
+              <strong>{strings.home.intro.offlineTitle}</strong>
+              {strings.home.intro.offlineBody}
             </p>
             <p>
-              <strong>只筛线索，不替你下结论。</strong>判不了时会明说判不了，并说清是缺数据、源不可达，还是到期没对上。
+              <strong>{strings.home.intro.scopeTitle}</strong>
+              {strings.home.intro.scopeBody}
             </p>
           </div>
           <div className="mnx-intro-foot">
-            <span>这两句也常驻页脚，随时能看到。</span>
+            <span>{strings.home.intro.footerNote}</span>
             <button type="button" className="mnx-btn" onClick={onDismissIntro}>
-              知道了
+              {strings.home.intro.dismiss}
             </button>
           </div>
         </GlassCard>
@@ -144,13 +146,13 @@ export default function Home({
 
       <GlassCard accent>
         <label className="mnx-ask-label" htmlFor="mnx-ask">
-          看什么
+          {strings.home.askLabel}
         </label>
         <input
           id="mnx-ask"
           className="mnx-ask-input"
           value={query}
-          placeholder="一个话题，或一家公司 / 一只代号"
+          placeholder={strings.home.placeholder}
           autoComplete="off"
           spellCheck={false}
           onChange={(e) => {
@@ -166,17 +168,13 @@ export default function Home({
         />
 
         <div className="mnx-examples">
-          <span>试试</span>
-          {[
-            { text: '固态电池', hint: '话题' },
-            { text: '宁德时代', hint: '公司' },
-            { text: 'XBI', hint: '代号' },
-          ].map((item) => (
+          <span>{strings.home.exampleLabel}</span>
+          {strings.home.examples.map((item) => (
             <button
               key={item.text}
               type="button"
               className="mnx-example"
-              title={`示例：${item.hint}`}
+              title={strings.home.exampleTitle(item.hint)}
               onClick={() => {
                 setQuery(item.text)
                 setAskMode(false)
@@ -189,25 +187,25 @@ export default function Home({
 
         <div className="mnx-ask-row">
           <button type="button" className="mnx-btn is-primary" onClick={submit} disabled={running || !query.trim()}>
-            {running ? '正在找…' : '开始找'}
+            {running ? strings.home.starting : strings.home.start}
           </button>
           <span className="mnx-ask-hint">
             {askMode
-              ? '需要确认一下：这是话题，还是某家公司？'
+              ? strings.home.confirmAsk
               : detected
-                ? `会按「${modeLabel(detected)}」去查 · 按回车也可以`
-                : '填好之后按回车'}
+                ? strings.home.willQuery(modeLabel(detected))
+                : strings.home.enterHint}
           </span>
         </div>
 
         {askMode && (
-          <div className="mnx-ask-row" role="group" aria-label="确认查询类型">
-            <span className="mnx-ask-hint">「{query.trim()}」两种都说得通：</span>
+          <div className="mnx-ask-row" role="group" aria-label={strings.home.confirmGroupLabel}>
+            <span className="mnx-ask-hint">{strings.home.bothWork(query.trim())}</span>
             <button type="button" className="mnx-btn" onClick={() => void startRun('topic')}>
-              是一个话题
+              {strings.home.isTopic}
             </button>
             <button type="button" className="mnx-btn" onClick={() => void startRun('entity')}>
-              是一家公司 / 一只代号
+              {strings.home.isEntity}
             </button>
           </div>
         )}
@@ -216,7 +214,7 @@ export default function Home({
           <div className="mnx-ask-row">
             <div className="mnx-progress-line">
               <i />
-              <span>{log.length ? log[log.length - 1].line : '正在启动抓取进程…'}</span>
+              <span>{log.length ? log[log.length - 1].line : strings.home.startingCrawl}</span>
             </div>
           </div>
         )}
@@ -226,19 +224,19 @@ export default function Home({
           open={settingsOpen}
           onToggle={(e) => setSettingsOpen((e.currentTarget as HTMLDetailsElement).open)}
         >
-          <summary>更多设置（时间范围、消息源、每源上限）</summary>
+          <summary>{strings.home.settings.summary}</summary>
           <div className="mnx-disclosure-body">
             <div className="mnx-grid">
               <div className="mnx-field">
-                <label htmlFor="mnx-start">开始日期</label>
+                <label htmlFor="mnx-start">{strings.common.startDate}</label>
                 <input id="mnx-start" value={start} onChange={(e) => setStart(e.target.value)} placeholder="YYYY-MM-DD" />
               </div>
               <div className="mnx-field">
-                <label htmlFor="mnx-end">结束日期</label>
+                <label htmlFor="mnx-end">{strings.common.endDate}</label>
                 <input id="mnx-end" value={end} onChange={(e) => setEnd(e.target.value)} placeholder="YYYY-MM-DD" />
               </div>
               <div className="mnx-field">
-                <label htmlFor="mnx-max">每源上限</label>
+                <label htmlFor="mnx-max">{strings.home.settings.maxPerSource}</label>
                 <input
                   id="mnx-max"
                   type="number"
@@ -249,7 +247,7 @@ export default function Home({
                 />
               </div>
               <div className="mnx-field is-full">
-                <label>消息源</label>
+                <label>{strings.home.settings.sources}</label>
                 <div className="mnx-examples" style={{ marginTop: 0 }}>
                   {DEFAULTS.sources.map((name) => {
                     const on = sources.includes(name)
@@ -276,7 +274,7 @@ export default function Home({
                     )
                   })}
                 </div>
-                <div className="mnx-field-help">至少留一个源；参数会显式传给抓取脚本，壳不替它决定默认值。</div>
+                <div className="mnx-field-help">{strings.home.settings.sourceHelp}</div>
               </div>
             </div>
           </div>
@@ -285,7 +283,7 @@ export default function Home({
 
       {run && (
         <div className="mnx-section-gap-lg">
-          <SectionLabel index="02" title="结果" />
+          <SectionLabel index="02" title={strings.result.sectionTitle} />
 
           {run.result.ok ? (
             <>
@@ -295,7 +293,9 @@ export default function Home({
                     tone={banner.tone}
                     title={banner.title}
                     tags={banner.tags}
-                    actionLabel={showDetail ? '收起详情' : '看详情'}
+                    actionLabel={
+                      showDetail ? strings.result.actionHideDetail : strings.common.actionShowDetail
+                    }
                     onAction={() => setShowDetail((v) => !v)}
                   />
                 </div>
@@ -303,7 +303,7 @@ export default function Home({
               <GlassCard>
                 <div className="mnx-result-head">
                   <div>
-                    <div className="mnx-result-title">「{run.query}」</div>
+                    <div className="mnx-result-title">{strings.result.quoted(run.query)}</div>
                     <div className="mnx-result-meta">{resultMeta}</div>
                   </div>
                   {cls && <div className="mnx-result-meta">{cls.coverageText}</div>}
@@ -312,7 +312,7 @@ export default function Home({
                 {cls && <ResultBody cls={cls} exitCode={exitCode} />}
 
                 <details className="mnx-disclosure" open={showDetail}>
-                  <summary>详情（技术信息）</summary>
+                  <summary>{strings.result.detailSummary}</summary>
                   <div className="mnx-disclosure-body">
                     <DetailBlock run={run} cls={cls} exitCode={exitCode} log={log} />
                   </div>
@@ -323,7 +323,7 @@ export default function Home({
             <>
               <ResultBanner
                 tone="neg"
-                title={run.result.message ?? '桌面壳没有返回结果，这次什么都没拿到。'}
+                title={run.result.message ?? strings.result.failedToRun}
                 tags={run.result.code ? [run.result.code] : []}
               />
               <GlassCard style={{ marginTop: 16 }}>
@@ -343,10 +343,7 @@ function ResultBody({ cls, exitCode }: { cls: TimelineClass; exitCode: number | 
     return (
       <div className="mnx-neutral-note">
         <i>×</i>
-        <span>
-          这次的内容不当结果展示。抓取进程退出码 {exitCode === null ? '未知' : exitCode}
-          ；技术原因在下面的详情里，不做推测。
-        </span>
+        <span>{strings.result.blocked(exitCode === null ? strings.common.unknown : exitCode)}</span>
       </div>
     )
   }
@@ -357,8 +354,12 @@ function ResultBody({ cls, exitCode }: { cls: TimelineClass; exitCode: number | 
         <div className="mnx-neutral-note">
           <i>✓</i>
           <span>
-            共 {cls.events.length} 条线索 · 原始 {cls.stats.raw} 条 · 合并重复 {cls.stats.merged} 条
-            {cls.stats.rejects > 0 ? ` · 未采用 ${cls.stats.rejects} 条` : ''}
+            {strings.result.counts({
+              events: cls.events.length,
+              raw: cls.stats.raw,
+              merged: cls.stats.merged,
+              rejects: cls.stats.rejects,
+            })}
           </span>
         </div>
         <div className="mnx-events">
@@ -374,11 +375,7 @@ function ResultBody({ cls, exitCode }: { cls: TimelineClass; exitCode: number | 
     return (
       <div className="mnx-neutral-note">
         <i>∅</i>
-        <span>
-          {cls.tier === 'entity-zero'
-            ? '消息源都查过了，但没抓到可判定的条目；这不等于「这家公司没有事件」。'
-            : '消息源都查过了，确实没有匹配的线索——不是抓取失败。'}
-        </span>
+        <span>{cls.tier === 'entity-zero' ? strings.result.emptyEntity : strings.result.emptyTopic}</span>
       </div>
     )
   }
@@ -387,9 +384,7 @@ function ResultBody({ cls, exitCode }: { cls: TimelineClass; exitCode: number | 
     return (
       <div className="mnx-neutral-note">
         <i>≈</i>
-        <span>
-          抓到了 {cls.stats.raw} 条原始条目，但没有一条能抽成线索（未采用 {cls.stats.rejects} 条）；原因在详情里，不能读成「没发生」。
-        </span>
+        <span>{strings.result.unjudged(cls.stats.raw, cls.stats.rejects)}</span>
       </div>
     )
   }
@@ -426,7 +421,7 @@ function EventRow({ event }: { event: TimelineEvent }) {
               href={event.source_url}
               onClick={openSource}
               onAuxClick={openSource}
-              title="在系统浏览器里打开原文"
+              title={strings.result.openSourceTitle}
             >
               {event.subject}
             </a>
@@ -435,14 +430,14 @@ function EventRow({ event }: { event: TimelineEvent }) {
           )}
         </div>
         <div className="mnx-event-line">
-          {event.excerpt || event.action_text || event.object || '（源未提供摘要）'}
+          {event.excerpt || event.action_text || event.object || strings.common.noExcerpt}
         </div>
         <div className="mnx-event-tags">
           {event.action_text && <span className="mnx-tag">{event.action_text}</span>}
           {valueText && <span className="mnx-tag is-value">{valueText}</span>}
           {event.source_name && <span className="mnx-tag">{event.source_name}</span>}
         </div>
-        {openError && <div className="mnx-link-error">打不开原文：{openError}</div>}
+        {openError && <div className="mnx-link-error">{strings.result.openFailed(openError)}</div>}
       </div>
     </div>
   )
@@ -464,27 +459,27 @@ function DetailBlock({
   return (
     <>
       <dl className="mnx-details-grid">
-        <dt>命令</dt>
+        <dt>{strings.common.dt.command}</dt>
         <dd>{run.result.command}</dd>
-        <dt>退出码</dt>
-        <dd>{exitCode === null ? '（无）' : exitCode}</dd>
+        <dt>{strings.common.dt.exitCode}</dt>
+        <dd>{exitCode === null ? strings.common.none : exitCode}</dd>
         <dt>status</dt>
-        <dd>{cls?.statusRaw ?? '（产物没有 status 字段）'}</dd>
-        <dt>档位</dt>
-        <dd>{cls ? `${cls.tier} · ${cls.tierMeta.label}` : '（未判定）'}</dd>
-        <dt>覆盖</dt>
+        <dd>{cls?.statusRaw ?? strings.detail.noStatusField}</dd>
+        <dt>{strings.detail.tier}</dt>
+        <dd>{cls ? `${cls.tier} · ${cls.tierMeta.label}` : strings.detail.notJudged}</dd>
+        <dt>{strings.detail.coverage}</dt>
         <dd>{cls?.coverageText ?? '—'}</dd>
-        <dt>产物</dt>
-        <dd>{run.result.ok ? run.result.data?.eventsJson ?? '（未回传路径）' : '（本次没有产物）'}</dd>
+        <dt>{strings.detail.artifact}</dt>
+        <dd>{run.result.ok ? run.result.data?.eventsJson ?? strings.detail.noPath : strings.detail.noArtifact}</dd>
         {run.result.code && (
           <>
-            <dt>桥错误码</dt>
+            <dt>{strings.common.dt.bridgeCode}</dt>
             <dd>{run.result.code}</dd>
           </>
         )}
         {run.result.message && (
           <>
-            <dt>桥消息</dt>
+            <dt>{strings.detail.bridgeMessage}</dt>
             <dd>{run.result.message}</dd>
           </>
         )}
@@ -492,14 +487,14 @@ function DetailBlock({
 
       {cls && cls.requested.length > 0 && (
         <>
-          <div className="mnx-details-note">逐源 fetched / accepted / rejected / error（原样展示）</div>
+          <div className="mnx-details-note">{strings.detail.sourcesNote}</div>
           <dl className="mnx-details-grid">
             {cls.requested.map((name) => {
               const s = cls.sourcesStats[name]
               const text = s
                 ? `fetched ${s.fetched ?? 0} · accepted ${s.accepted ?? 0} · rejected ${s.rejected ?? 0}` +
                   (s.error ? ` · error: ${s.error}` : '')
-                : '（产物里没有这个源的统计）'
+                : strings.detail.sourceMissing
               return (
                 <Fragment key={name}>
                   <dt>{name}</dt>
@@ -513,7 +508,7 @@ function DetailBlock({
 
       {cls && cls.notes.length > 0 && (
         <>
-          <div className="mnx-details-note">判定备注</div>
+          <div className="mnx-details-note">{strings.detail.notesTitle}</div>
           <dl className="mnx-details-grid">
             {cls.notes.map((note, index) => (
               <Fragment key={`${index}-${note.slice(0, 12)}`}>
@@ -527,12 +522,12 @@ function DetailBlock({
 
       {cls && Object.keys(cls.rejectReasons).length > 0 && (
         <>
-          <div className="mnx-details-note">未采用原因（reason code 原样）</div>
+          <div className="mnx-details-note">{strings.detail.rejectTitle}</div>
           <dl className="mnx-details-grid">
             {Object.entries(cls.rejectReasons).map(([code, count]) => (
               <Fragment key={code}>
                 <dt>{code}</dt>
-                <dd>{count} 条</dd>
+                <dd>{strings.common.itemCount(count)}</dd>
               </Fragment>
             ))}
           </dl>
@@ -548,7 +543,7 @@ function DetailBlock({
 
       {shownLog.length > 0 && (
         <>
-          <div className="mnx-details-note">进度输出（最后 {shownLog.length} 行）</div>
+          <div className="mnx-details-note">{strings.detail.progressTitle(shownLog.length)}</div>
           <div className="mnx-log">
             {shownLog
               .map((item) => `${item.seq !== undefined ? `#${item.seq} ` : ''}${item.line}`)
@@ -565,7 +560,7 @@ function buildBanner(cls: TimelineClass | null, exitCode: number | null): Banner
   if (exitCode !== null && exitCode !== 0 && (!cls || !cls.blocked)) {
     return {
       tone: 'neg',
-      title: `抓取没有跑完（退出码 ${exitCode}），这份内容不能当结果读`,
+      title: strings.result.banner.exit(exitCode),
       tags: cls ? [cls.coverageText] : [],
     }
   }
@@ -575,25 +570,29 @@ function buildBanner(cls: TimelineClass | null, exitCode: number | null): Banner
   if (cls.tier === 'partial') {
     return {
       tone: 'warn',
-      title: `只拿到 ${cls.coveredCount}/${cls.requested.length} 个消息源，这份结果不完整`,
-      tags: cls.failedSources.map((name) => `${SOURCE_LABELS[name] ?? name} · 失败`),
+      title: strings.result.banner.partial(cls.coveredCount, cls.requested.length),
+      tags: cls.failedSources.map((name) => strings.result.banner.failedTag(SOURCE_LABELS[name] ?? name)),
     }
   }
 
   if (cls.tier === 'failed') {
     return {
       tone: 'neg',
-      title: `这次没拿到结果：${cls.requested.length} 个消息源全部失败`,
-      tags: cls.failedSources.map((name) => `${SOURCE_LABELS[name] ?? name} · 失败`),
+      title: strings.result.banner.failed(cls.requested.length),
+      tags: cls.failedSources.map((name) => strings.result.banner.failedTag(SOURCE_LABELS[name] ?? name)),
     }
   }
 
   if (cls.tier === 'unknown') {
-    return { tone: 'neg', title: '这份产物缺 status 字段（旧产物），不能当结果读', tags: cls.notes.slice(0, 2) }
+    return { tone: 'neg', title: strings.result.banner.missingStatus, tags: cls.notes.slice(0, 2) }
   }
 
   if (cls.tier === 'unjudged') {
-    return { tone: 'info', title: '抓到了条目，但没有一条能当线索', tags: [`未采用 ${cls.stats.rejects} 条`] }
+    return {
+      tone: 'info',
+      title: strings.result.banner.unjudged,
+      tags: [strings.result.banner.rejectsTag(cls.stats.rejects)],
+    }
   }
 
   return null
