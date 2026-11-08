@@ -678,5 +678,236 @@
       }
     }
   },
-  "last_call_s": 28.8
+  "last_call_s": 6556.2,
+  "direct": {
+    "note": "固定真值 r 的直接检出率（日频，行数语义）；k0/WARM/far_min 都是交易日行数",
+    "segments": {
+      "reps_target": 200,
+      "tasks_done": 604,
+      "tasks_total": 800,
+      "complete": false,
+      "cells": {
+        "valid520|r=0.20": {
+          "tag": "valid520",
+          "r": 0.2,
+          "n_len": 520,
+          "reps_done": 200,
+          "reps_target": 200,
+          "hit_far": 174,
+          "rate_far": 0.87,
+          "ci95_far": [
+            0.8163,
+            0.9097
+          ],
+          "hit_strict": 169,
+          "rate_strict": 0.845,
+          "n_median": 505.0,
+          "peak_k_median": 3,
+          "realized_k0": 0.20176880784221984,
+          "neff_far": 72.08076259143499,
+          "tau_far": 7.449979919636298,
+          "peak_corr_median": 0.20176880784221984
+        },
+        "valid520|r=0.25": {
+          "tag": "valid520",
+          "r": 0.25,
+          "n_len": 520,
+          "reps_done": 200,
+          "reps_target": 200,
+          "hit_far": 182,
+          "rate_far": 0.91,
+          "ci95_far": [
+            0.8622,
+            0.9423
+          ],
+          "hit_strict": 181,
+          "rate_strict": 0.905,
+          "n_median": 505.0,
+          "peak_k_median": 3,
+          "realized_k0": 0.2489113564057715,
+          "neff_far": 75.06320221472288,
+          "tau_far": 7.154005410698746,
+          "peak_corr_median": 0.2489113564057715
+        },
+        "valid780|r=0.20": {
+          "tag": "valid780",
+          "r": 0.2,
+          "n_len": 780,
+          "reps_done": 200,
+          "reps_target": 200,
+          "hit_far": 176,
+          "rate_far": 0.88,
+          "ci95_far": [
+            0.8277,
+            0.918
+          ],
+          "hit_strict": 173,
+          "rate_strict": 0.865,
+          "n_median": 766.0,
+          "peak_k_median": 3,
+          "realized_k0": 0.19454330087048666,
+          "neff_far": 105.09954375364583,
+          "tau_far": 7.583287638181154,
+          "peak_corr_median": 0.19454330087048666
+        },
+        "valid780|r=0.25": {
+          "tag": "valid780",
+          "r": 0.25,
+          "n_len": 780,
+          "reps_done": 4,
+          "reps_target": 200,
+          "hit_far": 3,
+          "rate_far": 0.75,
+          "ci95_far": [
+            0.3006,
+            0.9544
+          ],
+          "hit_strict": 3,
+          "rate_strict": 0.75,
+          "n_median": 765.0,
+          "peak_k_median": 3,
+          "realized_k0": 0.2163897455562213,
+          "neff_far": 117.89254082949859,
+          "tau_far": 6.771431479203808,
+          "peak_corr_median": 0.2163897455562213
+        }
+      },
+      "thresholds": {
+        "valid520": {
+          "r80": {
+            "value": 0.2,
+            "note": "低于网格下界 0.10，网格外"
+          },
+          "r50": {
+            "value": 0.2,
+            "note": "低于网格下界 0.10，网格外"
+          },
+          "grid": [
+            0.2,
+            0.25
+          ],
+          "rates": [
+            0.87,
+            0.91
+          ]
+        }
+      }
+    }
+  },
+  "direct_train": {
+    "note": "日频训练段（1480 交易日），按剩余机时可跑的子集，仅报量级；k0/WARM/far_min 都是交易日行数",
+    "segments": {
+      "reps_target": 100,
+      "tasks_done": 100,
+      "tasks_total": 100,
+      "complete": true,
+      "cells": {
+        "valid520|r=0.20": {
+          "tag": "valid520",
+          "r": 0.2,
+          "n_len": 520,
+          "reps_done": 200,
+          "reps_target": 100,
+          "hit_far": 174,
+          "rate_far": 0.87,
+          "ci95_far": [
+            0.8163,
+            0.9097
+          ],
+          "hit_strict": 169,
+          "rate_strict": 0.845,
+          "n_median": 505.0,
+          "peak_k_median": 3,
+          "realized_k0": 0.20176880784221984,
+          "neff_far": 72.08076259143499,
+          "tau_far": 7.449979919636298,
+          "peak_corr_median": 0.20176880784221984
+        },
+        "valid520|r=0.25": {
+          "tag": "valid520",
+          "r": 0.25,
+          "n_len": 520,
+          "reps_done": 200,
+          "reps_target": 100,
+          "hit_far": 182,
+          "rate_far": 0.91,
+          "ci95_far": [
+            0.8622,
+            0.9423
+          ],
+          "hit_strict": 181,
+          "rate_strict": 0.905,
+          "n_median": 505.0,
+          "peak_k_median": 3,
+          "realized_k0": 0.2489113564057715,
+          "neff_far": 75.06320221472288,
+          "tau_far": 7.154005410698746,
+          "peak_corr_median": 0.2489113564057715
+        },
+        "valid780|r=0.20": {
+          "tag": "valid780",
+          "r": 0.2,
+          "n_len": 780,
+          "reps_done": 200,
+          "reps_target": 100,
+          "hit_far": 176,
+          "rate_far": 0.88,
+          "ci95_far": [
+            0.8277,
+            0.918
+          ],
+          "hit_strict": 173,
+          "rate_strict": 0.865,
+          "n_median": 766.0,
+          "peak_k_median": 3,
+          "realized_k0": 0.19454330087048666,
+          "neff_far": 105.09954375364583,
+          "tau_far": 7.583287638181154,
+          "peak_corr_median": 0.19454330087048666
+        },
+        "valid780|r=0.25": {
+          "tag": "valid780",
+          "r": 0.25,
+          "n_len": 780,
+          "reps_done": 4,
+          "reps_target": 100,
+          "hit_far": 3,
+          "rate_far": 0.75,
+          "ci95_far": [
+            0.3006,
+            0.9544
+          ],
+          "hit_strict": 3,
+          "rate_strict": 0.75,
+          "n_median": 765.0,
+          "peak_k_median": 3,
+          "realized_k0": 0.2163897455562213,
+          "neff_far": 117.89254082949859,
+          "tau_far": 6.771431479203808,
+          "peak_corr_median": 0.2163897455562213
+        },
+        "train1480|r=0.15": {
+          "tag": "train1480",
+          "r": 0.15,
+          "n_len": 1480,
+          "reps_done": 100,
+          "reps_target": 100,
+          "hit_far": 80,
+          "rate_far": 0.8,
+          "ci95_far": [
+            0.7112,
+            0.8666
+          ],
+          "hit_strict": 79,
+          "rate_strict": 0.79,
+          "n_median": 1466.0,
+          "peak_k_median": 3,
+          "realized_k0": 0.11622869796531665,
+          "neff_far": 195.76359925201072,
+          "tau_far": 7.646978374593997,
+          "peak_corr_median": 0.11622869796531665
+        }
+      }
+    }
+  }
 }
