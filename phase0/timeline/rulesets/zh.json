@@ -60,6 +60,7 @@
     {"key": "zh_multi_event_aggregate", "stage": "title", "where": "contains", "pattern": "(一览|汇总|名单|本周披露|超[0-9]+家|多股|答问|周报|要闻)"},
     {"key": "zh_speculation_question", "stage": "title", "where": "title_suffix", "pattern": "[？?]\\s*$", "unless_patterns": ["(宣布|发布|完成|获批|签署|中标|辞职|召回|收购)"]},
     {"key": "zh_future_not_happened", "stage": "title", "where": "contains", "pattern": "(将|拟|有望|或将|计划|预计|在即|酝酿|剑指|谋求)", "unless_patterns": ["(公告|披露|决议|审议通过|董事会|股东大会|印发)"]},
+    {"key": "zh_plan_proposal", "stage": "title", "where": "contains", "pattern": "预案", "unless_patterns": []},
     {"key": "zh_unconfirmed_rumor", "stage": "title", "where": "contains", "pattern": "(突传|网传|据传|传闻|被曝|曝出|曝：|消息称|知情人士)", "unless_patterns": ["(公告|回应|确认|证实)"]},
     {"key": "zh_trend_or_evaluation", "stage": "title", "where": "contains", "pattern": "(爆发|承压|遇冷|火爆|领涨|领跌|强势|疲软|腰斩|超预期|遇阻|亮眼|暴涨|暴跌)", "unless_patterns": ["[0-9]+(\\.[0-9]+)?%", "[0-9]+亿", "[0-9]+万"]},
     {"key": "zh_third_party_commentary", "stage": "text", "where": "contains", "pattern": "(分析师|专家|券商|机构)(认为|称|表示|预计|指出|解读|评)"},
@@ -112,11 +113,15 @@
     "zh_multi_event_aggregate": "zh_multi_event_aggregate",
     "zh_speculation_question": "zh_speculation_question",
     "zh_future_not_happened": "zh_future_not_happened",
+    "zh_plan_proposal": "zh_plan_proposal",
     "zh_unconfirmed_rumor": "zh_unconfirmed_rumor",
     "zh_trend_or_evaluation": "zh_trend_or_evaluation",
     "zh_third_party_commentary": "zh_third_party_commentary",
     "zh_generalized_subject": "zh_generalized_subject",
     "zh_topic_nominalization": "zh_topic_nominalization"
+  },
+  "vocab_provenance": {
+    "zh_plan_proposal": "预案：由 80 条样本的失败项 B19 暴露后补入，不是从判据本身推导；除本条外，词表条目均按 event_definition_zh.md 的判据写"
   },
   "samples": {
     "positive": [

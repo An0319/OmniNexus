@@ -89,6 +89,17 @@ def main() -> int:
     print(f"[口径3 只看判了的]  n={len(decided)} agree={agree1} rate={agree1 / len(decided):.4f} 基准线={base1}/{len(decided)}={base1 / len(decided):.4f}  【换了问题：分母只算引擎给出是/不是的】")
     if decided and base3:
         print(f"[留出情况] 引擎判不了={n - len(decided)} 条（占 {1 - len(decided) / n:.1%}），口径3 不回答这部分")
+
+    # 三档池的运营口径：量的是「收进哪一档」，与分桶是否一致不是同一个问题
+    want_yes = sum(r["want"] == "是" for r in rows)
+    fp_rows = [r for r in rows if r["got"] == "是" and r["want"] != "是"]
+    fn_rows = [r for r in rows if r["want"] == "是" and r["got"] != "是"]
+    pend_rows = [r for r in rows if r["got"] == "说不清"]
+    print("\n四栏各自回答不同问题，任何一栏都不得称为「实际准确率」。")
+    print(f"[池1 误收]    {len(fp_rows)}/{n} = {len(fp_rows) / n:.4f}  基准线(全判是)={base3}/{n} = {base3 / n:.4f}  【人判不是/说不清，引擎判是】")
+    print(f"[池2 漏收]    {len(fn_rows)}/{n} = {len(fn_rows) / n:.4f}  基准线(全判不是)={want_yes}/{n} = {want_yes / n:.4f}  【人判是，引擎没判是】")
+    print(f"[池3 落待定]  {len(pend_rows)}/{n} = {len(pend_rows) / n:.4f}  基准线(全判是/全判不是)=0/{n} = 0.0000  【待定是三档设计里的位置，不是错误】")
+    print("判不了构成（code × A 侧）:", dict(Counter((r["reason"], r["want"]) for r in pend_rows)))
     print("matrix", {(a, b): sum(1 for r in rows if r["want"] == a and r["got"] == b) for a in ["是", "不是", "说不清"] for b in ["是", "不是", "说不清"]})
     print("按类别（严格三态）:", {c: f"{sum(r['want'] == r['got'] for r in rows if r['category'] == c)}/{sum(1 for r in rows if r['category'] == c)}" for c in sorted({r['category'] for r in rows})})
     print("拒绝码分布:", dict(Counter(r["reason"] for r in rows if r["reason"])))

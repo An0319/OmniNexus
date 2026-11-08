@@ -4,6 +4,8 @@ python -c "import json;from collections import Counter;A={x['id']:x['is_event'] 
 
 在 `zh_samples/` 目录执行上一行，即得 n、一致条数、一致率、κ 与三值混淆矩阵（当前输出 `n=80 agree=67 rate=0.8375 kappa=0.6602`）。这是 80 条中文新闻标题（A/B/C/D 各 20）的双侧标注：A 侧按 [event_definition_zh.md](../event_definition_zh.md)，B 侧只凭常识，用来测判据的**可复现性**，不是准确率。基准线（全判「不是」）＝ 57/80 ≈ 71%，任何一致率都要与它并排。
 
+> **封存（2026-11-08）**：这 80 条取自归纳规则用的那 420 条，属**开发集**。从此只作回归检查，不再承当任何「准确率」；扩动词表不得看着这 80 条的失败项往里加。要谈准确率必须另采独立样本。
+
 | 文件 | 内容 |
 |---|---|
 | `items.json` | 80 条样本（标题、URL、类别），审计冻结，SHA-256 见 `manifest.json` |
