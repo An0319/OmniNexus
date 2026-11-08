@@ -5,7 +5,7 @@
   "current_streak": 40,
   "started_utc_date": "2026-09-30",
   "last_success_utc_date": "2026-11-08",
-  "last_run_utc": "2026-11-08T06:22:55Z",
+  "last_run_utc": "2026-11-08T18:02:29Z",
   "days": [
     {
       "utc_date": "2026-09-30",
@@ -478,7 +478,7 @@
     {
       "utc_date": "2026-11-08",
       "status": "success",
-      "runs": 1,
+      "runs": 2,
       "chains": {
         "chain01": "ok",
         "chain10": "ok",
@@ -496,12 +496,12 @@
     }
   ],
   "hash_chain": {
-    "checked_utc": "2026-11-08T06:22:55Z",
-    "head": "413458bea9e2497d8695d878f1c5696665e201cb",
-    "head_parent": "c2a7a62caf08f6712261a4a6e169fa5e6169138a",
-    "expected": "f3a1a4b79bbfd354061fbbc39095207d82184cc2",
+    "checked_utc": "2026-11-08T18:02:29Z",
+    "head": "435bbaf4302a7fd3342c1d85dab4a1a812063d17",
+    "head_parent": "f70e6e4b869819262eb32d32d2aaa1ad4095683b",
+    "expected": "413458bea9e2497d8695d878f1c5696665e201cb",
     "status": "gap",
     "note": "记录 SHA 不是 HEAD 直接父提交，但仍在历史中（人工提交夹层）"
   },
-  "last_commit_sha": "413458bea9e2497d8695d878f1c5696665e201cb"
+  "last_commit_sha": "435bbaf4302a7fd3342c1d85dab4a1a812063d17"
 }
