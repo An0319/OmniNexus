@@ -100,6 +100,21 @@ def main() -> int:
     print(f"[池2 漏收]    {len(fn_rows)}/{n} = {len(fn_rows) / n:.4f}  基准线(全判不是)={want_yes}/{n} = {want_yes / n:.4f}  【人判是，引擎没判是】")
     print(f"[池3 落待定]  {len(pend_rows)}/{n} = {len(pend_rows) / n:.4f}  基准线(全判是/全判不是)=0/{n} = 0.0000  【待定是三档设计里的位置，不是错误】")
     print("判不了构成（code × A 侧）:", dict(Counter((r["reason"], r["want"]) for r in pend_rows)))
+
+    # 「一致」要拆成「有据」与「侥幸」：沉默与规则命中长得一样，可信度不一样
+    SILENT = {"insufficient_evidence", "missing_time", "out_of_window", "zh_carrier_unverified"}
+    PARSE_DEFAULT = {"unparsed_subject", "unparsed_action"}  # 词表没覆盖/解析失败：按默认路径判「不是」
+    grounded_agree = [r for r in rows if r["want"] == r["got"] and (r["got"] == "是" or not (r["reason"] in SILENT or r["reason"] in PARSE_DEFAULT))]
+    lucky_agree = [r for r in rows if r["want"] == r["got"] and r["got"] == "不是" and r["reason"] in PARSE_DEFAULT]
+    lucky = [r for r in rows if r["want"] != "是" and r["got"] == "说不清"]
+    silent_opp = [r for r in rows if r["want"] == "是" and r["got"] == "说不清"]
+    grounded_opp = [r for r in rows if r["got"] == "是" and r["want"] != "是"]
+    print(f"\n[一致构成] 有据一致={len(grounded_agree)}  侥幸一致(48内默认路径)={len(lucky_agree)}  无据且结论相反={len(silent_opp)}  有据但结论相反(误收)={len(grounded_opp)}")
+    print(f"  另有「侥幸一致(单列栏)」={len(lucky)}：A 判不是、引擎沉默，折叠口径2里看似一致，不计入任何分子")
+    print("  48 条一致按拒绝码构成:", dict(Counter(r["reason"] for r in rows if r["want"] == r["got"])))
+    print("  「侥幸一致」（单列，不计入任何一栏的分子）：")
+    for r in lucky:
+        print(f"    {r['id']} [{r['category']}] A={r['want']} 引擎=沉默 code={r['reason']} | {r['title'][:64]}")
     print("matrix", {(a, b): sum(1 for r in rows if r["want"] == a and r["got"] == b) for a in ["是", "不是", "说不清"] for b in ["是", "不是", "说不清"]})
     print("按类别（严格三态）:", {c: f"{sum(r['want'] == r['got'] for r in rows if r['category'] == c)}/{sum(1 for r in rows if r['category'] == c)}" for c in sorted({r['category'] for r in rows})})
     print("拒绝码分布:", dict(Counter(r["reason"] for r in rows if r["reason"])))
