@@ -632,10 +632,10 @@ def merge_events(events: list[dict]) -> tuple[list[dict], int]:
 # ---------------------------------------------------------------- 输出
 
 
-def write_outputs(out_dir: Path, meta: dict, events: list[dict], rejects: list[dict], raw: list[dict]) -> None:
+def write_outputs(out_dir: Path, status: str, meta: dict, events: list[dict], rejects: list[dict], raw: list[dict]) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "events.json").write_text(
-        json.dumps({"meta": meta, "events": events, "rejects": rejects}, ensure_ascii=False, indent=2),
+        json.dumps({"status": status, "meta": meta, "events": events, "rejects": rejects}, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
     (out_dir / "raw_items.json").write_text(json.dumps(raw, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -646,11 +646,16 @@ def write_outputs(out_dir: Path, meta: dict, events: list[dict], rejects: list[d
         f"- 时间窗：{meta['window_start']} → {meta['window_end']}",
         f"- 生成时刻（UTC）：{meta['generated_at_utc']}",
         f"- 抽取器：{meta['extract_method']}",
+        f"- **本次状态：{status}**（ok=全部源抓取成功；partial=部分源失败；failed=全部源失败，此表不代表「今天没有事件」）",
         f"- 入表 {len(events)} 条，拒绝 {len(rejects)} 条，合并重复 {meta['stats']['merged_duplicates']} 条",
         f"- 源统计：{json.dumps(meta['sources_stats'], ensure_ascii=False)}",
         "",
     ]
-    if not events:
+    if status == "failed":
+        lines.append("_全部源抓取失败：本表为空是因为没抓到数据，不表示这段时间没有事件。_")
+    elif status == "partial":
+        lines.append("_部分源抓取失败：本表只覆盖成功的源，不表示全量。拒绝原因见 events.json 的 rejects 字段。_")
+    elif not events:
         lines.append("_本次没有事件通过硬校验。拒绝原因见 events.json 的 rejects 字段。_")
     current_day = None
     for ev in events:
@@ -708,6 +713,19 @@ def run(args: argparse.Namespace) -> int:
                 sources_stats[name]["error"] = f"{type(exc).__name__}: {str(exc)[:120]}"
                 print(f"[fetch] {name}: FAIL {type(exc).__name__}: {str(exc)[:120]}")
 
+    # 抓取状态：与「有没有事件」分开记。全部源失败 ≠ 今天没有事件。
+    if args.replay:
+        status = "ok"
+    else:
+        requested = [s.strip() for s in args.sources.split(",") if s.strip()]
+        failed = [n for n in requested if sources_stats.get(n, {}).get("error")]
+        if len(failed) == len(requested):
+            status = "failed"
+        elif failed:
+            status = "partial"
+        else:
+            status = "ok"
+
     rejects: list[dict] = []
     events: list[dict] = []
     for item in raw:
@@ -758,15 +776,19 @@ def run(args: argparse.Namespace) -> int:
         },
     }
 
-    write_outputs(out_dir, meta, merged, rejects, raw)
+    write_outputs(out_dir, status, meta, merged, rejects, raw)
 
     print(
         f"\n[result] raw={len(raw)} events={len(merged)} rejects={len(rejects)} "
         f"merged={dup_count} reasons={reason_counts}"
     )
+    print(f"[status] {status}  sources={json.dumps(sources_stats, ensure_ascii=False)}")
     print(f"[write] {out_dir / 'events.json'}")
     print(f"[write] {out_dir / 'events.md'}")
     print(f"[write] {out_dir / 'raw_items.json'}")
+    if status == "failed":
+        print("[status] FAILED: 全部源抓取失败，本次结果无证据力（退出码 3）", file=sys.stderr)
+        return 3
     return 0
 
 

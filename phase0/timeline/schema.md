@@ -73,7 +73,8 @@
 | `unparsed_subject` | 动作词前取不出主体短语（动词在标题开头、或主体为空） |
 | `subject_not_in_text` | 指定了 `--entity`，但文本里没出现该主体 |
 | `not_an_event` | 标题以 Why/How/Opinion/Analysis 等开头或以问号结尾，判为评论/解释稿而非事件 |
-| `duplicate` | 与已入表事件合并（并入 `sources`，不单独成行）。**只在新闻源之间合并**：Federal Register / ClinicalTrials / arXiv 每条是独立文书，标题相近不等于同一事件 |
+
+`duplicate` **不是拒绝态**（v1 修订）：重复条目不写进 `rejects`，只计合并次数。理由：`rejects` 的语义是「本次抓到、但没进表」，与已入表事件合并的条目的 URL 仍留在 `events[].sources` 里、内容进了表，把它同时算作「被拒绝」会让同一条既算入表又算拒绝；而且拒绝态要求逐条带 `reason` 与可核锚点，合并项没有这些。合并计数记在 `meta.stats.merged_duplicates`，其 URL 在 `events[].sources[]` 可逐一核到。
 
 模型抽取器（`extract_model.py`）额外产出的两个拒绝理由：
 
@@ -88,9 +89,34 @@
 
 一次运行产出三件：
 
-1. `events.json`：`{meta, events[], rejects[]}`；`meta` 含 `query/window_start/window_end/generated_at_utc/sources_stats/extract_method`。
+1. `events.json`：`{status, meta, events[], rejects[]}`；`meta` 含 `query/window_start/window_end/generated_at_utc/sources_stats/extract_method`。
 2. `events.md`：按时序排列的人读时间线，每条含日期、主体、动作、数值、原文片段、来源链接。
 3. `raw_items.json`：本次抓到的原始条目（含标题/摘要/URL/时间/来源），供离线复跑与基准标注；**第三方原文不入库**，该文件只留在 `out/` 且被 `.gitignore` 排除。
+
+### 5.1 运行状态（`status`，本次新增）
+
+`events.json` 的**顶层**字段 `status`，取值三选一。它回答「这轮抓取是否成立」，与「有没有事件」是两件事：
+
+| 值 | 判据 | 含义 |
+|---|---|---|
+| `ok` | 所有被请求的源都无 `error`（允许 `fetched == 0`） | 抓取成立；`events` 为空才是真的「这段时间没有事件」 |
+| `partial` | 至少一个源有 `error`，至少一个源无 `error` | 抓取部分成立；`events` 只覆盖成功的源，**不可当作全量** |
+| `failed` | 所有被请求的源都有 `error`（或一个源都没请求到） | 抓取不成立；`events` 为空**不代表没有事件**，本次结果无证据力 |
+
+- `--replay` 模式不抓取，`status` 恒为 `ok`。
+- 逐源失败原因在 `meta.sources_stats[源名].error`，与 `status` 不重复计数、只作明细。
+
+**与既有判据的衔接（不留两套）**：此前文档里的「无数据 = 所有源 `fetched == 0` 且无 `error`」只在 `status == "ok"` 时成立，它是 `ok` 的一个特例，不再单独作为判据。判断一律先看 `status`：`failed` / `partial` 下出现空 `events` 时，禁止解读为「无事件」。
+
+### 5.2 退出码
+
+| 退出码 | 条件 |
+|---|---|
+| `0` | `status` 为 `ok` 或 `partial`（`partial` 只在 `status` 里体现，不靠退出码） |
+| `3` | `status` 为 `failed`（全部源失败） |
+| `2` | 参数错误（argparse 既有行为，未改） |
+
+退出码只是给脚本用的快捷判据；**调用方允许只看 `status`**，两者语义一致。`status == "failed"` 时仍会写出 `events.json`（便于排障），但该文件不得被下游当作结果。
 
 ## 6. 硬校验（实现必须在写出前逐条检查）
 
