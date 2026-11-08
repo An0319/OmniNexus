@@ -1,7 +1,7 @@
 {
   "_comment": "中文规则集：按 phase0/timeline/event_definition_zh.md 的判据写成数据（动词表、门槛、拒绝码、正反例）。引擎不认语言，只认本文件。v1 只覆盖 A 类快讯 + B 类公告；C 类深度稿暂不接（规则在 C 类一致率 90%，低于『全判不是』基准 95%，负贡献）。",
   "lang": "zh",
-  "version": "rules_v2-zh.1",
+  "version": "rules_v2-zh.2",
   "extract_method": "rules_v2-zh",
   "default_sources": {
     "topic": ["eastmoney_news", "sina_roll", "wallstreetcn", "kr36", "google_news", "cninfo"],
@@ -65,7 +65,8 @@
     {"key": "zh_trend_or_evaluation", "stage": "title", "where": "contains", "pattern": "(爆发|承压|遇冷|火爆|领涨|领跌|强势|疲软|腰斩|超预期|遇阻|亮眼|暴涨|暴跌)", "unless_patterns": ["[0-9]+(\\.[0-9]+)?%", "[0-9]+亿", "[0-9]+万"]},
     {"key": "zh_third_party_commentary", "stage": "text", "where": "contains", "pattern": "(分析师|专家|券商|机构)(认为|称|表示|预计|指出|解读|评)"},
     {"key": "zh_generalized_subject", "stage": "subject", "where": "contains", "pattern": "^(我国|全国|行业|业内|全市场|A股|多家|多股|机构|专家|分析师|巨头|龙头|这些|有关部门|某|存储芯片|芯片|半导体|新能源|光伏|锂电|白酒|医药|地产|汽车)", "unless_patterns": ["(统计局|协会|交易所|委员会|研究院|公司|集团|银行|证券)"]},
-    {"key": "zh_topic_nominalization", "stage": "subject", "where": "contains", "pattern": "(涨价潮|降价潮|内卷|扩产潮|量产潮)"}
+    {"key": "zh_topic_nominalization", "stage": "subject", "where": "contains", "pattern": "(涨价潮|降价潮|内卷|扩产潮|量产潮)"},
+    {"key": "zh_activity_no_allocation", "stage": "title", "where": "contains", "pattern": "(会见|座谈|报告会|作专题报告|(举办|举行|开展)[^，。；！？]{0,12}活动)", "unless_patterns": ["(签署|签订|签约|中标|竞得|收购|并购|重组|出售|转让|获批|批准|核准|许可|备案|投产|开工|动工|并网|处罚|罚款|立案|留置|召回|整改|约谈|任命|聘任|免职|辞职|当选|换届|降准|降息|加息|印发|出台|施行|发行|募资|增资|定增|配股)"]}
   ],
   "subject": {
     "anchor_prefix": true,
@@ -118,11 +119,13 @@
     "zh_trend_or_evaluation": "zh_trend_or_evaluation",
     "zh_third_party_commentary": "zh_third_party_commentary",
     "zh_generalized_subject": "zh_generalized_subject",
-    "zh_topic_nominalization": "zh_topic_nominalization"
+    "zh_topic_nominalization": "zh_topic_nominalization",
+    "zh_activity_no_allocation": "zh_activity_no_allocation"
   },
   "vocab_provenance": {
     "zh_plan_proposal": "预案：由 80 条样本的失败项 B19 暴露后补入，不是从判据本身推导；除本条外，词表条目均按 event_definition_zh.md 的判据写",
-    "并网投运": "并网投运：由 80 条样本的漏收项 A05 暴露后补入；判据论证为「设施由在建变运行，属交易/资金与公开记录之外的项目状态改变」，归 other；会见、作专题报告经同轮论证判为活动/表态（非状态改变），不补"
+    "并网投运": "并网投运：由 80 条样本的漏收项 A05 暴露后补入；判据论证为「设施由在建变运行，属交易/资金与公开记录之外的项目状态改变」，归 other；会见、作专题报告经同轮论证判为活动/表态（非状态改变），不补",
+    "zh_activity_no_allocation": "按 event_definition_zh.md §1.3（2026-11-08 作者裁决）新增：会见/座谈/报告会/作专题报告/「举办·举行·开展…活动」属无分配改变，判不是并落 rejected；只做判据写死的族，「发布」一族（可为发公告、也可为发产品）未纳入，仍留待定"
   },
   "samples": {
     "positive": [
@@ -130,7 +133,8 @@
       {"text": "云南省统计局：光伏装机突破8000万千瓦", "ref": "event_definition_zh.md §2.3 R3 例外", "expect": {"is_event": true, "subject": "云南省统计局"}},
       {"text": "牧原股份：10月销售生猪收入同比降29.79%", "ref": "event_definition_zh.md §2.3 R11 反例", "expect": {"is_event": true}},
       {"text": "天孚通信发布关于收购资产的公告", "ref": "event_definition_zh.md §2.2 A2", "expect": {"is_event": true, "action": "publication"}},
-      {"text": "金发科技重大合同告吹", "ref": "event_definition_zh.md §2.2 A", "expect": {"is_event": true}}
+      {"text": "金发科技重大合同告吹", "ref": "event_definition_zh.md §2.2 A", "expect": {"is_event": true}},
+      {"text": "阿布扎比王储会见比亚迪执行副总裁李柯并签署合作协议", "ref": "event_definition_zh.md §1.3（会见本身不算，但同题有签约＝有分配改变）", "expect": {"is_event": true, "action": "partnership"}}
     ],
     "negative": [
       {"text": "一文读懂央行降准意味着什么", "ref": "event_definition_zh.md §4.11", "expect": {"is_event": false, "code": "zh_explainer_format"}},
@@ -139,7 +143,8 @@
       {"text": "突传iPhone 18将涨价", "ref": "event_definition_zh.md §2.3 R8", "expect": {"is_event": false, "code": "zh_unconfirmed_rumor"}},
       {"text": "中金评降准：利好银行板块", "ref": "event_definition_zh.md §2.3 R9", "expect": {"is_event": false, "code": "zh_third_party_commentary"}},
       {"text": "A股午评：超3700只个股上涨", "ref": "event_definition_zh.md §2.3 R6/R10", "expect": {"is_event": false, "code": "zh_market_snapshot"}},
-      {"text": "白酒板块集体走弱", "ref": "event_definition_zh.md §2.3 R2/R11", "expect": {"is_event": false}}
+      {"text": "白酒板块集体走弱", "ref": "event_definition_zh.md §2.3 R2/R11", "expect": {"is_event": false}},
+      {"text": "南京大学举办“榜样与传承”师德师风专题报告会", "ref": "event_definition_zh.md §1.3（无分配改变）", "expect": {"is_event": false, "code": "zh_activity_no_allocation"}}
     ]
   }
 }
