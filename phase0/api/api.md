@@ -636,7 +636,7 @@ $ … chain-check
 | 取数耗时（FRED / Yahoo） | 本文 §3.3 | A 级，脚本可重跑（见下） |
 | 模型路线 1.2–1.8 s/条、0 元 | `phase0/timeline/benchmark.md §6.5.3` | A 级，原始结果文件在 `phase0/timeline/benchmark_*_model_result.json` |
 | 质量数字（两轮：只有标题 0.875 / 0.778 / 26.1%；标题 + 正文首段 0.833 / 0.833 / 4.3%） | `phase0/timeline/benchmark.md §6.6.1`（只有标题）+ `§6.6.2`（结论）+ `§6.7.1`（预注册与污染登记）+ `§6.7.2`（补正文结果） | A 级，原始结果 `benchmark_def_model_result.json` / `benchmark_def_body_model_result.json`，标注 `benchmark_labels_def.json` / `benchmark_labels_def_body.json`；补正文段落本身不入库，仅有来源与指纹 |
-| 运行状态 `status` 与退出码（`failed` → 3、`ok` → 0） | `phase0/timeline/timeline.py` L716-727 / L789-791 | A 级，`failed` 与 `ok` 各一次实跑已复核；`partial → 0` 未单独实跑，为 B 级（代码原文） |
+| 运行状态 `status` 与退出码（`failed` → 3、`partial` → 0、`ok` → 0） | `phase0/timeline/timeline.py` L716-727 / L789-791 | A 级，三种状态各一次实跑已复核：`failed` = 全源黑洞代理（`status=failed`、`EXIT=3`）；`partial` = `--sources google_news,federal_register` 且只让 `federal_register` 走黑洞代理（`NO_PROXY=news.google.com`）→ `status=partial`、`events=24`、`EXIT=0`，逐源 `sources_stats` 里 `google_news` 无 `error`、`federal_register` 带 `ProxyError`；`ok` = 不存在的主体（`status=ok`、`EXIT=0`） |
 | timeline 的 `out*/` 产物与 `raw_items.json` | 本地 `phase0/api/demo/out_*/` | **不入库、不作为对外证据**（含第三方原文片段）；只有计数进本文 |
 
 重测取数耗时的最小脚本（不改任何现有代码）：
