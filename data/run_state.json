@@ -1,7 +1,7 @@
 {
-  "run_id": "2026-11-14T06:47:44Z",
-  "started_utc": "2026-11-14T06:47:44Z",
-  "slot": "30 0 * * *",
-  "finished_utc": "2026-11-14T06:50:43Z",
-  "status": "ok"
+  "run_id": "2026-11-14T18:26:04Z",
+  "started_utc": "2026-11-14T18:26:04Z",
+  "slot": "30 12 * * *",
+  "finished_utc": "2026-11-14T18:29:44Z",
+  "status": "failed"
 }

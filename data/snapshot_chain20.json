@@ -1,7 +1,9 @@
 {
   "chain_id": "chain20",
-  "status": "ok",
-  "failure_reasons": [],
+  "status": "failed",
+  "failure_reasons": [
+    "滞后面为空"
+  ],
   "lead": {
     "source": "us_index",
     "symbol": ".SOX",
@@ -23,23 +25,8 @@
   "lag": {
     "source": "em_sector",
     "sector": "半导体",
-    "latest": "2026-11-13",
-    "weekly_points": 8,
-    "has_amount": false,
-    "path": "路径3 指数代理",
-    "degraded": true,
-    "series": {
-      "ret": {
-        "2026-09-28": -0.066471,
-        "2026-10-05": -0.046073,
-        "2026-10-12": -0.084523,
-        "2026-10-19": 0.002398,
-        "2026-10-26": -0.138756,
-        "2026-11-02": 0.076389,
-        "2026-11-09": 0.023226
-      },
-      "amount": {}
-    }
+    "points": 0,
+    "path": null
   },
-  "run_utc": "2026-11-14T06:47:44Z"
+  "run_utc": "2026-11-14T18:26:04Z"
 }
