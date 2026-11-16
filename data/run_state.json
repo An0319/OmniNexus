@@ -1,7 +1,7 @@
 {
-  "run_id": "2026-11-16T06:53:32Z",
-  "started_utc": "2026-11-16T06:53:32Z",
-  "slot": "30 0 * * *",
-  "finished_utc": "2026-11-16T06:56:10Z",
+  "run_id": "2026-11-16T07:29:54Z",
+  "started_utc": "2026-11-16T07:29:54Z",
+  "slot": "adhoc",
+  "finished_utc": "2026-11-16T07:33:14Z",
   "status": "failed"
 }
