@@ -2,10 +2,10 @@
   "project": "omninexus",
   "target_days": 30,
   "rule": "UTC 日界；当日至少一次完整成功运行即达标；断更计时归零，不补、不豁免",
-  "current_streak": 46,
-  "started_utc_date": "2026-09-30",
+  "current_streak": 0,
+  "started_utc_date": null,
   "last_success_utc_date": "2026-11-14",
-  "last_run_utc": "2026-11-15T19:03:07Z",
+  "last_run_utc": "2026-11-16T06:53:32Z",
   "days": [
     {
       "utc_date": "2026-09-30",
@@ -570,10 +570,32 @@
       },
       "failure_reasons": [
         "滞后面为空"
+      ],
+      "closed": true
+    },
+    {
+      "utc_date": "2026-11-16",
+      "status": "failure",
+      "runs": 1,
+      "chains": {
+        "chain01": "failed",
+        "chain10": "failed",
+        "chain20": "failed"
+      },
+      "failure_reasons": [
+        "滞后面为空"
       ]
     }
   ],
-  "breaks": [],
+  "breaks": [
+    {
+      "utc_date": "2026-11-15",
+      "streak_lost": 46,
+      "reasons": [
+        "滞后面为空"
+      ]
+    }
+  ],
   "resets": [
     {
       "utc_date": "2026-09-30",
@@ -582,12 +604,11 @@
     }
   ],
   "hash_chain": {
-    "checked_utc": "2026-11-15T19:03:07Z",
-    "head": "1132113aeeac276e219c48e123cc27bd1cabe6c6",
-    "head_parent": "6c8302c1db883b4ec2b165f2eafb5c4360e10dcc",
-    "expected": "a27c2bba913d05b80daf039c454a4d6b88b6cb5f",
-    "status": "gap",
-    "note": "记录 SHA 不是 HEAD 直接父提交，但仍在历史中（人工提交夹层）"
+    "checked_utc": "2026-11-16T06:53:32Z",
+    "head": "bab654eaf5386325032117827cfac423dc207bf6",
+    "head_parent": "1132113aeeac276e219c48e123cc27bd1cabe6c6",
+    "expected": "1132113aeeac276e219c48e123cc27bd1cabe6c6",
+    "status": "ok"
   },
-  "last_commit_sha": "1132113aeeac276e219c48e123cc27bd1cabe6c6"
+  "last_commit_sha": "bab654eaf5386325032117827cfac423dc207bf6"
 }
