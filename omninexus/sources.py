@@ -333,12 +333,12 @@ def fetch_via_index_proxy(symbol: str, weeks_back: int) -> pd.DataFrame | None:
     比个股代理干净（没有个股特质噪声），但接口**只给 OHLC+volume、没有成交额**——
     这是接口限制而非主动取舍，故用本层时滞后面指标只剩周收益率（协议第9.3节）。
 
-    P0-4 云端实测：stock_zh_index_daily("sh512480") 1771 条、2019-06-12 起；
+    P0-4 云端实测：index_zh_daily_sina("sh512480") 1771 条、2019-06-12 起；
     腾讯同标的（fqkline）只有 640 条（2024-02-02 起），样本窗口不足，已排除。
     """
     try:
         import akshare as ak
-        df = ak.stock_zh_index_daily(symbol=symbol)
+        df = ak.index_zh_daily_sina(symbol=symbol)
         df["date"] = pd.to_datetime(df["date"])
         cutoff = pd.Timestamp(dt.date.today() - dt.timedelta(weeks=weeks_back))
         df = df[df["date"] >= cutoff].sort_values("date")
@@ -360,7 +360,7 @@ def fetch_via_sina_proxy(proxy_stock: tuple[str, str], weeks_back: int) -> pd.Da
         sym, name = proxy_stock
         start = (dt.date.today() - dt.timedelta(weeks=weeks_back)).strftime("%Y%m%d")
         end = dt.date.today().strftime("%Y%m%d")
-        df = ak.stock_zh_a_daily(symbol=sym, start_date=start, end_date=end)
+        df = ak.stock_zh_a_hist_sina(symbol=sym, start_date=start, end_date=end)
         df = df.rename(columns={"date": "date", "close": "close", "amount": "amount"})
         df["date"] = pd.to_datetime(df["date"])
         print(f"  [路径4] 新浪个股代理：OK（{name}，注意：个股代理含个股特质噪声）")
