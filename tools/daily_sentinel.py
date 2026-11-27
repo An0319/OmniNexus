@@ -37,6 +37,20 @@ ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 CHAINS_DIR = ROOT / "chains"
 REPORT_NAME = "sentinel_report.json"
+# data/sentinel_report.json 的字段说明（给下一轮改它的人）：
+#   degraded_days / degraded_since / degraded_last_date / last_alert_bucket
+#       —— 连续降级天数与 90 天复核期的记账位。
+#   today_chain_status      —— 每条板块链今日状态：primary / degraded / none。
+#   today_path_levels       —— 每条链今日的「路径等级」：3 主路径 > 2 路径3 指数代理
+#                              > 1 路径4 个股代理 > 0 无数据。排序出处见 PATH_LEVEL_* 注释
+#                              （phase0/数据口径-降级接受记录.md 的四级路径表）。
+#                              等级下滑会即时告警；等级上升沿用「主路径恢复」。
+#   today_degraded_paths    —— 降级链当日实际路径原文（仅展示用，不据此做判定）。
+#   path_level_alerted      —— 已报过的 (链 → 等级)，防止同一组合重复开张。
+#   heartbeat_notified_utc  —— 已汇报过的上一次心跳失败时刻（防止重复报）。
+#   last_streak_seen        —— 上次看到的连续达标天数，用于归零/倒退判断。
+#   error / last_error_utc  —— 哨兵自身崩溃时的留痕；不影响日更结论。
+# 写入方只有本脚本；读取方是本脚本下一次运行（不要从别处写，避免两份真相）。
 
 # 连续降级阈值 N 的取法：90 天，满一个 90 天报一次。
 # 原取 30（复用 streak.target_days）的理由已作废——接受降级不是月度决策，修复也不在
@@ -252,38 +266,50 @@ def check_degraded(state: dict, today: str, days: int, since: str | None,
 
 # ---------------- 检查二·补：状态变化立即告警（不受周期限制） ----------------
 def check_changes(prev_state: dict, today_status: dict[str, str],
-                  today_degraded: dict[str, str]) -> list[dict]:
-    """三条即时告警：主路径恢复 / 降级链数量变化 / 从降级变成没数据。
+                  today_degraded: dict[str, str],
+                  today_levels: dict[str, int] | None = None) -> list[dict]:
+    """三条即时告警：等级上升（主路径恢复）/ 降级链数量变化 / 从降级变成没数据。
 
     它们比周期提醒重要：周期说的是「还是老样子」，变化说的是「情况已经变了」。
     首次运行没有基线（prev 为空），此时不报，避免把「刚装上」误报成变化。
+    等级上升只发这一张（标题沿用「主路径恢复」），不再另开第二张——这是与
+    check_level_drop（下滑）互补的另一半。
     """
     prev_status = prev_state.get("today_chain_status") or {}
     if not prev_status:
         return []
     prev_degraded = set(prev_state.get("today_degraded_paths") or {})
+    prev_levels = prev_state.get("today_path_levels") or {}
     findings: list[dict] = []
 
-    recovered = sorted(c for c, s in today_status.items() if s == "primary" and c in prev_degraded)
+    if today_levels and prev_levels:
+        recovered = sorted(c for c, lv in today_levels.items()
+                           if lv > (prev_levels.get(c) or 0))
+    else:
+        recovered = sorted(c for c, s in today_status.items()
+                           if s == "primary" and c in prev_degraded)
     newly = sorted(c for c, s in today_status.items() if s == "degraded" and c not in prev_degraded)
     lost = sorted(c for c, s in today_status.items()
                   if s == "none" and prev_status.get(c) in ("degraded", "primary"))
 
     if recovered:
+        full = [c for c in recovered if today_status.get(c) == "primary"]
         findings.append({
             "key": "change_recovered", "severity": "warning",
             "title": "[哨兵·即时] 主路径恢复",
             "body": "\n".join([
-                "【哨兵·即时】有链从降级路径回到了主路径。",
+                "【哨兵·即时】有链的取数路径往上走了（回到主路径，或换到了更好的代理路径）。",
                 "",
-                "恢复的链：" + "、".join(recovered),
-                "（前一运行日仍在降级：" + "、".join(sorted(prev_degraded)) + "）",
+                *[f"- {c}：{_level_name(prev_levels.get(c, PATH_LEVEL_STOCK_PROXY))} → "
+                  f"{_level_name((today_levels or {}).get(c, PATH_LEVEL_PRIMARY))}"
+                  for c in recovered],
                 "",
-                "含义：降级计数会从今天起归零，周期提醒随之停。",
-                "请顺手确认一句：这是真的主路径通了，还是取数路径被改动过？",
+                ("含回到主路径的链：" + "、".join(full) + "，其降级计数会从今天起归零。"
+                 if full else "本次只上升了一级，仍在降级，计数继续累计。"),
+                "请顺手确认一句：这是真的路径通了，还是取数路径被改动过？",
                 "本条不需回复；确认后关掉即可。",
             ]),
-            "summary": "主路径恢复：" + "、".join(recovered),
+            "summary": "等级上升：" + "、".join(recovered),
         })
     if newly:
         findings.append({
@@ -314,6 +340,101 @@ def check_changes(prev_state: dict, today_status: dict[str, str],
             ]),
             "summary": "无数据：" + "、".join(lost),
         })
+    return findings
+
+
+# ---------------- 路径等级（判据出处见下，不许另造一套） ----------------
+# 排序**不是随手排的**，直接沿用 phase0/数据口径-降级接受记录.md 的「四级路径表」：
+#   主路径（东财/akshare 板块，路径1/路径2）> 路径3 指数代理 > 路径4 个股代理 > 完全无数据
+# 该表同时给出了为什么这样排：越往下，代理成分越多、个股特质噪声越重，离「板块口径」越远。
+# 只读快照里已有的 lag.path / lag.degraded 推导，不新增写入口径的字段，避免两份真相。
+PATH_LEVEL_PRIMARY = 3
+PATH_LEVEL_INDEX_PROXY = 2   # 路径3 新浪指数代理（ETF sh512480 等）
+PATH_LEVEL_STOCK_PROXY = 1   # 路径4 新浪个股代理（含个股特质噪声）
+PATH_LEVEL_NONE = 0          # 完全没有数据
+
+
+def path_level(degraded: bool, path: str | None, has_product: bool) -> int:
+    """把快照里的 degraded + path 翻译成等级。"""
+    if not has_product:
+        return PATH_LEVEL_NONE
+    if not degraded:
+        return PATH_LEVEL_PRIMARY
+    p = (path or "")
+    if "路径3" in p or "指数代理" in p:
+        return PATH_LEVEL_INDEX_PROXY
+    if "路径4" in p or "个股代理" in p:
+        return PATH_LEVEL_STOCK_PROXY
+    # 认不出的降级路径按最低等级处理：宁可多报一次下滑，也不把未知当主路径
+    return PATH_LEVEL_STOCK_PROXY
+
+
+def today_path_levels(data_dir: Path, sector_chains: set[str]) -> dict[str, int]:
+    out: dict[str, int] = {}
+    for cid in sorted(sector_chains):
+        lag = (_load_json(data_dir / f"snapshot_{cid}.json") or {}).get("lag") or {}
+        out[cid] = path_level(lag.get("degraded") is True, lag.get("path"),
+                              _face_points(lag) > 0)
+    return out
+
+
+def _level_name(lv: int) -> str:
+    return {PATH_LEVEL_PRIMARY: "主路径（东财/akshare 板块）",
+            PATH_LEVEL_INDEX_PROXY: "路径3 指数代理",
+            PATH_LEVEL_STOCK_PROXY: "路径4 个股代理",
+            PATH_LEVEL_NONE: "完全无数据"}.get(lv, f"未知等级 {lv}")
+
+
+# ---------------- 检查二·补 3：降级内部等级下滑 ----------------
+def check_level_drop(prev_state: dict, levels: dict[str, int],
+                     degraded: dict[str, str], state: dict) -> list[dict]:
+    """等级下滑（仍在降级，但退到了更靠下的路径）→ 即时告警。
+
+    为什么单独一条：「谁进出降级」由 check_changes 管，「在降级内部变得更差」没人管，
+    这正是原设计的第 6、8 条盲区（路径3 退到路径4 不跨链，不会触发任何已有告警）。
+    去重：同一组合（链 + 等级）只报一次，直到它再变；等级不变不报。
+    不重复开两张：进入降级由「降级链数量变化」报（prev 为主路径），等级上升由
+    「主路径恢复」报（今日等级更高），本条只吃「降级→降级且更低」这一段。
+    """
+    prev_levels = prev_state.get("today_path_levels")
+    if not prev_levels:
+        return []
+    alerted = state.get("path_level_alerted") or {}
+    findings: list[dict] = []
+    for cid in sorted(levels):
+        cur = levels[cid]
+        prev = prev_levels.get(cid)
+        if prev is None:
+            continue
+        # 只处理「降级内部下滑」：两端都还在降级（1 或 2），且今天的等级更低
+        if not (prev >= PATH_LEVEL_STOCK_PROXY and cur >= PATH_LEVEL_STOCK_PROXY
+                and cur < prev):
+            continue
+        if alerted.get(cid) == cur:      # 同一组合已经报过，等它再变
+            continue
+        findings.append({
+            "key": "level_drop", "severity": "warning",
+            "title": "[哨兵·即时] 取数路径等级下滑",
+            "body": "\n".join([
+                "【哨兵·即时】仍在降级，但退到了更靠下的路径——这不是断，是变差。",
+                "",
+                *[f"- {c}：{_level_name(prev_levels[c])} → {_level_name(levels[c])}"
+                  f"（今日实际路径：{degraded.get(c, '未记录')}）"
+                  for c in sorted(levels)
+                  if levels[c] < (prev_levels.get(c) or 0) and levels[c] >= 1],
+                "",
+                "等级排序出处：phase0/数据口径-降级接受记录.md 的四级路径表",
+                "（主路径 > 路径3 指数代理 > 路径4 个股代理 > 完全无数据）。",
+                "越往下，代理里混入的个股特质噪声越多，离板块口径越远。",
+                "",
+                "本条每个组合只报一次，等级再变才会再说；等级不变不会逐日重报。",
+            ]),
+            "summary": "等级下滑：" + "、".join(
+                f"{c} {prev_levels[c]}→{levels[c]}" for c in sorted(levels)
+                if levels[c] < (prev_levels.get(c) or 0) and levels[c] >= 1),
+        })
+        alerted[cid] = cur
+    state["path_level_alerted"] = alerted
     return findings
 
 
@@ -536,9 +657,11 @@ def run(data_dir: Path, chains_dir: Path, today: str,
     degraded = today_degraded_paths(data_dir, sector_chains)
     has_product = _today_has_product(data_dir, sector_chains)
     status = today_chain_status(data_dir, sector_chains)
+    levels = today_path_levels(data_dir, sector_chains)
 
     # 变化告警优先：它说的是「情况变了」，比「还是老样子」重要
-    findings += check_changes(state, status, degraded)
+    findings += check_changes(state, status, degraded, levels)
+    findings += check_level_drop(state, levels, degraded, state)
 
     # 首次启用（无历史状态）：从 git 历史回填，避免「刚装上所以从 0 开始」
     if "degraded_last_date" not in state and degraded:
@@ -555,6 +678,7 @@ def run(data_dir: Path, chains_dir: Path, today: str,
     findings += check_heartbeat(state, _load_json(data_dir / "heartbeat_state.json"))
     findings += check_streak(state, _load_json(data_dir / "streak.json"))
     state["today_chain_status"] = status
+    state["today_path_levels"] = levels
 
     state["last_checked_utc"] = dt.datetime.now(dt.timezone.utc).strftime(
         "%Y-%m-%dT%H:%M:%SZ")
@@ -707,11 +831,33 @@ def _self_test() -> int:
             emit(f, True, {})
             fired.add(f["key"])
 
+        # 情形 H：等级下滑（chain01 从路径3 指数代理退到路径4 个股代理）
+        prev_lv = {"today_chain_status": {"chain01": "degraded", "chain10": "degraded"},
+                   "today_path_levels": {"chain01": PATH_LEVEL_INDEX_PROXY,
+                                         "chain10": PATH_LEVEL_STOCK_PROXY},
+                   "today_degraded_paths": {"chain01": "路径3 指数代理",
+                                            "chain10": "路径4 个股代理"}}
+        for f in check_level_drop(prev_lv,
+                                  {"chain01": PATH_LEVEL_STOCK_PROXY,
+                                   "chain10": PATH_LEVEL_STOCK_PROXY},
+                                  {"chain01": "路径4 个股代理", "chain10": "路径4 个股代理"}, {}):
+            emit(f, True, {})
+            fired.add(f["key"])
+
+        # 情形 I：等级不变 → 必须不报（报了即为噪音）
+        same = check_level_drop(prev_lv,
+                                {"chain01": PATH_LEVEL_INDEX_PROXY,
+                                 "chain10": PATH_LEVEL_STOCK_PROXY},
+                                {"chain01": "路径3 指数代理", "chain10": "路径4 个股代理"}, {})
+        print(f"== 等级不变时告警条数：{len(same)}（期望 0）==", flush=True)
+        if same:
+            fired.add("level_same_wrong")
+
         need = {"empty", "degraded", "streak", "change_recovered",
-                "change_new_degraded", "change_lost", "heartbeat"}
+                "change_new_degraded", "change_lost", "heartbeat", "level_drop"}
         print(f"== 自测结果：期望 {sorted(need)}，实际 {sorted(fired)} ==", flush=True)
         if fired == need:
-            print("通过：七种报警都真的叫了。", flush=True)
+            print("通过：八种报警都真的叫了，等级不变时不叫。", flush=True)
             return 0
         print("失败：有报警没有叫，监控等于没做。", flush=True)
         return 1
