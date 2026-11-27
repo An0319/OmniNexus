@@ -1,0 +1,58 @@
+name: validate · 只验证不生产
+
+# 目的：任何代码改动都能被验证，但**绝不触碰生产数据**。
+# 与 daily-update.yml 的分工：
+#   daily-update = 生产（写 data/、commit、push、发心跳、开 issue）
+#   validate     = 验证（只读仓库，跑完即弃，产物不留）
+# 触发：push 到 main（跳过纯数据提交）+ 所有 PR + 手动。
+# 权限：contents: read —— 它不该写，也就没有写的能力。
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "data/**"          # bot 的快照提交不必再验一遍
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 与生产同一份 requirements，避免「本地能导入、CI 导不进」的假通过
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: 语法编译（全量 py_compile）
+        run: python -m compileall -q omninexus tools tests
+
+      - name: 关键模块可导入
+        run: |
+          python -c "import omninexus.core, omninexus.guard, omninexus.sources, omninexus.run_chain; print('import ok')"
+
+      # 哨兵自带 8 类报警自测，用临时目录，不写 data/
+      - name: 哨兵自测（8 类报警必须都叫）
+        run: python tools/daily_sentinel.py --self-test
+
+      # 错账检查项表第一行：枚举式清单必须有自动校验
+      - name: workflow 触发清单覆盖检查
+        run: python tests/check_workflow_paths.py
+
+      - name: 文档一致性守卫
+        run: python tests/run_docs_consistency_test.py
