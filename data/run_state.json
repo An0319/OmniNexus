@@ -1,7 +1,7 @@
 {
-  "run_id": "2026-11-27T16:01:58Z",
-  "started_utc": "2026-11-27T16:01:58Z",
-  "slot": "adhoc",
-  "finished_utc": "2026-11-27T16:02:59Z",
+  "run_id": "2026-11-27T21:34:41Z",
+  "started_utc": "2026-11-27T21:34:41Z",
+  "slot": "30 12 * * *",
+  "finished_utc": "2026-11-27T21:35:38Z",
   "status": "ok"
 }
