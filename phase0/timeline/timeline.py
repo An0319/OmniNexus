@@ -961,6 +961,8 @@ def run(args: argparse.Namespace) -> int:
     out_dir = Path(args.out_dir)
     raw: list[dict] = []
     sources_stats: dict[str, dict] = {}
+    # 源名（--sources 里的名字）↔ raw item 的 source_id（可能由规则集改写，如 google_news→google_news_zh）
+    stat_alias: dict[str, str] = {}
 
     if args.replay:
         raw = json.loads(Path(args.replay).read_text(encoding="utf-8"))
@@ -980,16 +982,20 @@ def run(args: argparse.Namespace) -> int:
                 return 2
             if i:
                 time.sleep(1.2)
+            stats = sources_stats.setdefault(name, {"fetched": 0, "accepted": 0, "rejected": 0})
+            t0 = time.perf_counter()
             try:
                 items = FETCHERS[name](query, start, end, args.max_per_source, cfg=rs.params(name))
                 raw.extend(items)
-                sources_stats.setdefault(name, {"fetched": 0, "accepted": 0, "rejected": 0})
-                sources_stats[name]["fetched"] += len(items)
-                print(f"[fetch] {name}: {len(items)} 条")
+                for it in items:
+                    stat_alias.setdefault(str(it.get("source_id")), name)
+                stats["fetched"] += len(items)
+                stats["elapsed_s"] = round(time.perf_counter() - t0, 2)
+                print(f"[fetch] {name}: {len(items)} 条 / {stats['elapsed_s']}s")
             except Exception as exc:  # noqa: BLE001 - 单源失败不影响其它源
-                sources_stats.setdefault(name, {"fetched": 0, "accepted": 0, "rejected": 0, "error": ""})
-                sources_stats[name]["error"] = f"{type(exc).__name__}: {str(exc)[:120]}"
-                print(f"[fetch] {name}: FAIL {type(exc).__name__}: {str(exc)[:120]}")
+                stats["elapsed_s"] = round(time.perf_counter() - t0, 2)
+                stats["error"] = f"{type(exc).__name__}: {str(exc)[:300]}"
+                print(f"[fetch] {name}: FAIL {stats['elapsed_s']}s {type(exc).__name__}: {str(exc)[:300]}")
 
     # 抓取状态：与「有没有事件」分开记。全部源失败 ≠ 今天没有事件。
     if args.replay:
@@ -1018,7 +1024,9 @@ def run(args: argparse.Namespace) -> int:
                     "reason": reason,
                 }
             )
-            stats = sources_stats.setdefault(item.get("source_id", "?"), {"fetched": 0, "accepted": 0, "rejected": 0})
+            sid = str(item.get("source_id", "?"))
+            stat_key = stat_alias.get(sid, sid)
+            stats = sources_stats.setdefault(stat_key, {"fetched": 0, "accepted": 0, "rejected": 0})
             stats["rejected"] = stats.get("rejected", 0) + 1
             continue
         ev["_title"] = item.get("title", "")
@@ -1028,8 +1036,8 @@ def run(args: argparse.Namespace) -> int:
     merged, dup_count = merge_events(events, rs)
     for ev in merged:
         ev.pop("_title", None)
-        source_id = ev.pop("_source_id", None)
-        stats = sources_stats.setdefault(source_id or "?", {"fetched": 0, "accepted": 0, "rejected": 0})
+        source_id = str(ev.pop("_source_id", None) or "?")
+        stats = sources_stats.setdefault(stat_alias.get(source_id, source_id), {"fetched": 0, "accepted": 0, "rejected": 0})
         stats["accepted"] = stats.get("accepted", 0) + 1
 
     reason_counts: dict[str, int] = {}
