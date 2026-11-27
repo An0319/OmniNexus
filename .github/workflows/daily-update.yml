@@ -71,9 +71,15 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data || true
-          git commit -m "日更快照 $(date -u +%Y-%m-%dT%H:%MZ)" || echo "no changes"
-          git push || echo "::warning::push 未完成"
+          git add data
+          if git diff --cached --quiet; then
+            echo "no changes"
+          else
+            git commit -m "日更快照 $(date -u +%Y-%m-%dT%H:%MZ)"
+          fi
+          # 推不上去 = 当天数据永久丢失，必须真失败：重试 3 次（5/15/45s，含变基），
+          # 全部失败则非零退出 → job 失败 → 成功心跳（if: success()）不会发。
+          python tools/git_push_retry.py
 
       - name: 失败时开 issue（响亮失败）
         if: failure()
@@ -83,8 +89,7 @@ jobs:
         run: |
           gh issue create \
             --title "T1 日更失败：$(date -u +%Y-%m-%d)" \
-            --body "本次运行失败（run ${{ github.run_id }}）。按 T1 规则（当日无完整成功即计时归零、从头开始），请把本 issue 转告助手，不要自己抢修（抢修＝人工干预）。" \
-            || true
+            --body "本次运行失败（run ${{ github.run_id }}）。按 T1 规则（当日无完整成功即计时归零、从头开始），请把本 issue 转告助手，不要自己抢修（抢修＝人工干预）。"
 
       - name: 达成 30 天里程碑时开 issue（提醒人工收尾，防静默错过）
         if: always()
@@ -100,8 +105,7 @@ jobs:
             if [ "$COUNT" -eq 0 ]; then
               gh issue create \
                 --title "T1 里程碑达成 streak-milestone：$STREAK/$TARGET 天连续无人值守运行" \
-                --body "streak.json 计数达到 $STREAK/$TARGET（截至 $(date -u +%Y-%m-%dT%H:%MZ)）。达成触发两件人工事（按 T1 规则，属人工拍板动作，非抢修）：① 回填 GitHub 主页 Current Core；② 发布「30 天无人值守运行」短复盘。本 issue 为唯一张，重复运行不会重复开（按标题标记去重）。" \
-                || true
+                --body "streak.json 计数达到 $STREAK/$TARGET（截至 $(date -u +%Y-%m-%dT%H:%MZ)）。达成触发两件人工事（按 T1 规则，属人工拍板动作，非抢修）：① 回填 GitHub 主页 Current Core；② 发布「30 天无人值守运行」短复盘。本 issue 为唯一张，重复运行不会重复开（按标题标记去重）。"
             else
               echo "里程碑 issue 已存在，跳过"
             fi
@@ -112,25 +116,30 @@ jobs:
       # E5 外部心跳（D12）：补「根本没跑」的停机盲区。
       # healthchecks.io 建 check 后，把成功/失败两条 ping URL 填入仓库 Secrets：
       #   HEALTHCHECK_PING_URL（成功）/ HEALTHCHECK_FAIL_URL（失败）
-      # 未配置时只 warning 跳过，不影响日更本身。
+      # 心跳失败不在这里喊（嗓子坏了喊不出来），而是写进 data/heartbeat_state.json，
+      # 由下一次运行的哨兵读出来开 issue。脚本恒返回 0，不影响日更结论。
       - name: 外部心跳 · 成功（E5）
         if: success()
         env:
           HC_URL: ${{ secrets.HEALTHCHECK_PING_URL }}
-        run: |
-          if [ -z "$HC_URL" ]; then
-            echo "::warning::HEALTHCHECK_PING_URL 未配置，跳过成功心跳"
-            exit 0
-          fi
-          curl -fsS --retry 3 --max-time 10 "$HC_URL" || echo "::warning::成功心跳 ping 失败"
+        run: python tools/heartbeat_ping.py --url "$HC_URL" --kind success
 
       - name: 外部心跳 · 失败（E5）
         if: failure()
         env:
           HC_URL: ${{ secrets.HEALTHCHECK_FAIL_URL }}
+        run: python tools/heartbeat_ping.py --url "$HC_URL" --kind failure
+
+      # 心跳留痕要入库才能被下一次运行读到。这一步只推一个 trace 文件，
+      # 不是产出数据，所以允许「标红但不连坐」：continue-on-error + 显式 warning。
+      - name: 提交心跳留痕（供下次运行汇报）
+        if: always()
+        continue-on-error: true
         run: |
-          if [ -z "$HC_URL" ]; then
-            echo "::warning::HEALTHCHECK_FAIL_URL 未配置，跳过失败心跳"
-            exit 0
+          git add data/heartbeat_state.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "no heartbeat state changes"
+          else
+            git commit -m "心跳留痕 $(date -u +%Y-%m-%dT%H:%MZ)"
+            python tools/git_push_retry.py || echo "::warning::心跳留痕未推上去，下次运行看不到本次心跳结果"
           fi
-          curl -fsS --retry 3 --max-time 10 "$HC_URL" || echo "::warning::失败心跳 ping 失败"

@@ -38,11 +38,12 @@ DATA_DIR = ROOT / "data"
 CHAINS_DIR = ROOT / "chains"
 REPORT_NAME = "sentinel_report.json"
 
-# 连续降级阈值 N 的取法（不拍脑袋）：项目里已有的唯一定期复核数字是
-# streak 的 target_days = 30（30 天无人值守里程碑）。哨兵复用同一个数，
-# 避免再发明一个阈值。含义：降级连续满 30 天 = 到了「还这样用吗」的复核点，
-# 不是故障。满一个 30 天为一个 bucket，每跨一个 bucket 提醒一次，不逐日刷屏。
-N_DEGRADED_DAYS = 30
+# 连续降级阈值 N 的取法：90 天，满一个 90 天报一次。
+# 原取 30（复用 streak.target_days）的理由已作废——接受降级不是月度决策，修复也不在
+# 月内发生；按月问一次，人会习惯性点「继续」，反而训练出免疫。90 天≈一个季度，
+# 与「要不要排期修」这种量级的决定相称。
+# 另：状态变化（主路径恢复 / 降级链增减 / 变成没数据）不走周期，一变就报（见 check_changes）。
+N_DEGRADED_DAYS = 90
 
 
 # ---------------- 基础 IO ----------------
@@ -222,26 +223,131 @@ def check_degraded(state: dict, today: str, days: int, since: str | None,
     state["last_alert_bucket"] = bucket
     paths = "\n".join(f"- {k}：{v}" for k, v in degraded.items()) or "-（今日未检出）"
     body = "\n".join([
-        f"【哨兵】板块口径连续降级 {days} 天（已满第 {bucket} 个 {N_DEGRADED_DAYS} 天复核期）",
+        f"【哨兵】板块口径连续降级 {days} 天，满 {bucket * N_DEGRADED_DAYS} 天复核期。",
         "",
-        f"起始日：{since or '未知'}　当前连续：{days} 天",
-        f"阈值 N={N_DEGRADED_DAYS} 的原因：项目里已有的唯一定期复核数字是 streak 的"
-        f" target_days={N_DEGRADED_DAYS}，复用同一个数，不另造阈值。",
+        "这是一次需要你做的决定，不是故障通知：",
+        "  A. 继续接受并续期 —— 下一个 90 天到期再问一次；",
+        "  B. 排期修复 —— 决定投入工时去找更稳的板块源。",
+        "",
+        "不回复的默认含义：**继续接受**。不影响任何数据、不影响日更、不需要你立刻做什么。",
+        "",
+        f"起始日：{since or '未知'}　当前连续：{days} 天（阈值 {N_DEGRADED_DAYS} 天/次）",
         "",
         "今日实际路径：",
         paths,
         "",
-        "说明：降级已被接受（见 phase0/数据口径-降级接受记录.md），本通知是"
-        "「又满一个复核期，请确认是否还这样用」的提醒，不是新故障，也不是要求立刻动手。",
-        "若决定继续接受：关掉本通知即可；下一个复核期到期会再提醒一次。",
-        "若降级结束（主路径恢复）：本通知可关，且计数会自动归零。",
+        "背景：降级已被接受（phase0/数据口径-降级接受记录.md）。本条只是把「到期了」摆到桌面上，",
+        "不是催办，也不改变任何判定。若主路径恢复或降级链发生变化，会另发「状态变化」告警，",
+        "不受这个周期约束。",
     ])
     return [{
         "key": "degraded",
         "severity": "warning",
-        "title": f"[哨兵] 板块口径连续降级满 {bucket * N_DEGRADED_DAYS} 天（复核提醒）",
+        # 标题不带数字：同一个话题长期只用这一张，靠追加评论保留时间线，不刷列表
+        "title": "[哨兵] 板块口径连续降级：需要一次决定",
         "body": body,
-        "summary": f"连续降级 {days} 天（自 {since or '未知'}）",
+        "summary": f"连续降级 {days} 天（自 {since or '未知'}），满第 {bucket} 个复核期",
+    }]
+
+
+# ---------------- 检查二·补：状态变化立即告警（不受周期限制） ----------------
+def check_changes(prev_state: dict, today_status: dict[str, str],
+                  today_degraded: dict[str, str]) -> list[dict]:
+    """三条即时告警：主路径恢复 / 降级链数量变化 / 从降级变成没数据。
+
+    它们比周期提醒重要：周期说的是「还是老样子」，变化说的是「情况已经变了」。
+    首次运行没有基线（prev 为空），此时不报，避免把「刚装上」误报成变化。
+    """
+    prev_status = prev_state.get("today_chain_status") or {}
+    if not prev_status:
+        return []
+    prev_degraded = set(prev_state.get("today_degraded_paths") or {})
+    findings: list[dict] = []
+
+    recovered = sorted(c for c, s in today_status.items() if s == "primary" and c in prev_degraded)
+    newly = sorted(c for c, s in today_status.items() if s == "degraded" and c not in prev_degraded)
+    lost = sorted(c for c, s in today_status.items()
+                  if s == "none" and prev_status.get(c) in ("degraded", "primary"))
+
+    if recovered:
+        findings.append({
+            "key": "change_recovered", "severity": "warning",
+            "title": "[哨兵·即时] 主路径恢复",
+            "body": "\n".join([
+                "【哨兵·即时】有链从降级路径回到了主路径。",
+                "",
+                "恢复的链：" + "、".join(recovered),
+                "（前一运行日仍在降级：" + "、".join(sorted(prev_degraded)) + "）",
+                "",
+                "含义：降级计数会从今天起归零，周期提醒随之停。",
+                "请顺手确认一句：这是真的主路径通了，还是取数路径被改动过？",
+                "本条不需回复；确认后关掉即可。",
+            ]),
+            "summary": "主路径恢复：" + "、".join(recovered),
+        })
+    if newly:
+        findings.append({
+            "key": "change_new_degraded", "severity": "warning",
+            "title": "[哨兵·即时] 降级链数量变化",
+            "body": "\n".join([
+                "【哨兵·即时】降级链数量发生变化（进了哪条、出了哪条见下）。",
+                "",
+                "新进入降级：" + "、".join(f"{c}（{today_degraded.get(c, '未知路径')}）" for c in newly),
+                ("离开降级：" + "、".join(recovered) if recovered else "离开降级：无"),
+                f"当前降级链合计：{len(today_degraded)} 条",
+                "",
+                "含义：降级范围在扩大或缩小。这不是故障，但值得知道是哪天变的。",
+            ]),
+            "summary": "新降级：" + "、".join(newly),
+        })
+    if lost:
+        findings.append({
+            "key": "change_lost", "severity": "error",
+            "title": "[哨兵·即时] 有链从降级变成没有数据",
+            "body": "\n".join([
+                "【哨兵·即时】这些链前一运行日还有数，今天一条都没有：",
+                "",
+                *[f"- {c}（前一日状态：{prev_status.get(c)}）" for c in lost],
+                "",
+                "这不是降级，是断。降级至少还有代理数据，断是什么都没有。",
+                "先看当日 run 日志里四路取数是否全部报错；若只是单链，看该链配置。",
+            ]),
+            "summary": "无数据：" + "、".join(lost),
+        })
+    return findings
+
+
+# ---------------- 检查二·补 2：上一次心跳发送失败 ----------------
+def check_heartbeat(state: dict, hb: dict | None) -> list[dict]:
+    """心跳失败由「下一次运行」来报，不依赖当次——当次嗓子坏了，喊不出来。
+
+    heartbeat_state.json 由 tools/heartbeat_ping.py 写、由提交步骤入库；
+    本条只负责读它并汇报，汇报过的那一次不再重复（同一张 issue 里追加）。
+    """
+    if not hb or hb.get("last_ok") is not False:
+        return []
+    attempt = str(hb.get("last_attempt_utc") or "未知时刻")
+    if state.get("heartbeat_notified_utc") == attempt:
+        return []
+    state["heartbeat_notified_utc"] = attempt
+    return [{
+        "key": "heartbeat", "severity": "error",
+        "title": "[哨兵] 上一次心跳发送失败",
+        "body": "\n".join([
+            "【哨兵】上一次运行的心跳没有发出去。",
+            "",
+            f"失败时刻：{attempt}（{hb.get('kind', '未知类型')} 心跳）",
+            f"错误：{hb.get('last_error') or '未记录'}",
+            "",
+            "为什么由这条而不是当场报：心跳挂掉时，当场那条 warning 也没人看得见",
+            "（用坏掉的嗓子喊自己哑了）。所以改由下一次正常运行的哨兵来报。",
+            "",
+            "现在能确定的：本步已经跑到，说明日更流程本身恢复了。",
+            "还不能确定的：上次那条心跳最终是否送达——请到 healthchecks 侧看一眼；",
+            "若那边也没有记录，说明问题是 URL 或出网，不是本仓库。",
+            "本条在下次心跳成功后不再重复；若仍未恢复，下一天会在这张 issue 里追加。",
+        ]),
+        "summary": f"心跳失败于 {attempt}",
     }]
 
 
@@ -296,19 +402,22 @@ def _gh(*args: str) -> str | None:
     return r.stdout.strip() if r.returncode == 0 else None
 
 
-def _open_sentinel_titles() -> set[str]:
+def _open_sentinel_issues() -> dict[str, int]:
     out = _gh("issue", "list", "--state", "open", "--search", "哨兵 in:title",
-              "--json", "title", "--limit", "50")
+              "--json", "number,title", "--limit", "50")
     if not out:
-        return set()
+        return {}
     try:
-        return {x.get("title", "") for x in json.loads(out)}
-    except ValueError:
-        return set()
+        return {x.get("title", ""): int(x.get("number") or 0) for x in json.loads(out)}
+    except (ValueError, TypeError):
+        return {}
 
 
-def emit(finding: dict, dry_run: bool, existing: set[str]) -> None:
-    """先打印（本地也能看见），CI 里再开 issue。只写不验的监控等于没有监控。"""
+def emit(finding: dict, dry_run: bool, existing: dict[str, int]) -> None:
+    """先打印（本地也能看见），CI 里再写 issue。只写不验的监控等于没有监控。
+
+    同一件事不开第二张：标题已存在就追加评论，保留时间线、不刷列表。
+    """
     print("\n" + "=" * 68, flush=True)
     print(finding["title"], flush=True)
     print("-" * 68, flush=True)
@@ -321,8 +430,10 @@ def emit(finding: dict, dry_run: bool, existing: set[str]) -> None:
 
     if dry_run or not os.environ.get("GH_TOKEN"):
         return
-    if finding["title"] in existing:
-        print("（同名哨兵通知已开着，不重复开）", flush=True)
+    num = existing.get(finding["title"])
+    if num:
+        if _gh("issue", "comment", str(num), "--body", finding["body"]):
+            print(f"（同一话题已开着 #{num}，追加评论，不新开）", flush=True)
         return
     url = _gh("issue", "create", "--title", finding["title"], "--body", finding["body"])
     if url:
@@ -398,9 +509,23 @@ def _history_degraded_days(root: Path, sector_chains: set[str],
     return days
 
 
+def today_chain_status(data_dir: Path, sector_chains: set[str]) -> dict[str, str]:
+    """今日每条板块链的状态：primary / degraded / none。"""
+    out: dict[str, str] = {}
+    for cid in sorted(sector_chains):
+        lag = (_load_json(data_dir / f"snapshot_{cid}.json") or {}).get("lag") or {}
+        if _face_points(lag) <= 0:
+            out[cid] = "none"
+        elif lag.get("degraded") is True:
+            out[cid] = "degraded"
+        else:
+            out[cid] = "primary"
+    return out
+
+
 def run(data_dir: Path, chains_dir: Path, today: str,
         dry_run: bool) -> tuple[dict, list[dict]]:
-    """跑三项检查，返回 (状态, 报警列表)。alert 去重状态就地推进后才落盘。"""
+    """跑全部检查，返回 (状态, 报警列表)。即时告警排在周期提醒之前。"""
     state_path = data_dir / REPORT_NAME
     state = _load_json(state_path) or {}
 
@@ -410,6 +535,10 @@ def run(data_dir: Path, chains_dir: Path, today: str,
     sector_chains = _sector_chains(chains_dir)
     degraded = today_degraded_paths(data_dir, sector_chains)
     has_product = _today_has_product(data_dir, sector_chains)
+    status = today_chain_status(data_dir, sector_chains)
+
+    # 变化告警优先：它说的是「情况变了」，比「还是老样子」重要
+    findings += check_changes(state, status, degraded)
 
     # 首次启用（无历史状态）：从 git 历史回填，避免「刚装上所以从 0 开始」
     if "degraded_last_date" not in state and degraded:
@@ -423,8 +552,9 @@ def run(data_dir: Path, chains_dir: Path, today: str,
 
     days, since = update_degraded_counter(state, today, degraded, has_product)
     findings += check_degraded(state, today, days, since, degraded)
-
+    findings += check_heartbeat(state, _load_json(data_dir / "heartbeat_state.json"))
     findings += check_streak(state, _load_json(data_dir / "streak.json"))
+    state["today_chain_status"] = status
 
     state["last_checked_utc"] = dt.datetime.now(dt.timezone.utc).strftime(
         "%Y-%m-%dT%H:%M:%SZ")
@@ -451,32 +581,46 @@ def main(argv: list[str] | None = None) -> int:
         return _self_test()
 
     today = _today_utc()
+    data_dir = Path(args.data_dir)
     try:
-        _state, findings = run(Path(args.data_dir), Path(args.chains_dir),
-                               today, args.dry_run)
-        existing = _open_sentinel_titles() if not args.dry_run else set()
+        _state, findings = run(data_dir, Path(args.chains_dir), today, args.dry_run)
+        existing = _open_sentinel_issues() if not args.dry_run else {}
         for f in findings:
             emit(f, args.dry_run, existing)
         if not findings:
-            print(f"[哨兵] {today} 三项检查均通过（产物有数、未长期降级、计时未倒退）",
+            print(f"[哨兵] {today} 检查均通过（产物有数、未长期降级、状态未变化、计时未倒退）",
                   flush=True)
     except Exception as e:  # 铁律 2：哨兵自己崩了，只报检查失败，不改日更结论
         msg = f"[哨兵] 检查自身失败：{e.__class__.__name__}: {str(e)[:200]}"
         print(msg, flush=True)
         if os.environ.get("GITHUB_ACTIONS"):
             print(f"::warning::{msg}", flush=True)
+        # 崩了也要留痕：写进状态文件，让下一次运行知道「那天没查成」
         if not args.dry_run:
+            try:
+                state = _load_json(data_dir / REPORT_NAME) or {}
+                state["error"] = msg
+                state["last_error_utc"] = dt.datetime.now(dt.timezone.utc).strftime(
+                    "%Y-%m-%dT%H:%M:%SZ")
+                _write_json(data_dir / REPORT_NAME, state)
+            except Exception:
+                pass
             try:
                 body = ("【哨兵】检查自身失败\n\n"
                         f"{msg}\n\n"
                         "含义：日更本身可能完全正常，只是哨兵没跑通——"
-                        "今天的「产物为空 / 连续降级 / 计时倒退」三项等于没查。\n"
+                        "当天的「产物为空 / 状态变化 / 连续降级 / 心跳 / 计时」等于没查。\n"
                         "处置：看运行日志里 daily_sentinel.py 的 traceback；"
                         "不要因此判定日更失败。")
                 if not os.environ.get("GH_TOKEN"):
                     print("（无 GH_TOKEN，跳过开 issue）", flush=True)
-                elif "[哨兵] 检查自身失败" not in _open_sentinel_titles():
-                    _gh("issue", "create", "--title", "[哨兵] 检查自身失败", "--body", body)
+                else:
+                    exist = _open_sentinel_issues()
+                    num = exist.get("[哨兵] 检查自身失败")
+                    if num:
+                        _gh("issue", "comment", str(num), "--body", body)
+                    else:
+                        _gh("issue", "create", "--title", "[哨兵] 检查自身失败", "--body", body)
             except Exception:
                 pass
     return 0                          # 恒 0：绝不改变日更的结论
@@ -507,17 +651,17 @@ def _self_test() -> int:
             "run_utc": f"{today}T00:00:00Z",
         })
         for f in check_products(data, today):
-            emit(f, True, set())
+            emit(f, True, {})
             fired.add(f["key"])
 
-        # 情形 B：连续降级，昨天已 29 天，今天第 30 天 → 跨过复核期
-        state = {"degraded_days": 29, "degraded_since": "2026-10-29",
+        # 情形 B：连续降级，昨天已 89 天，今天第 90 天 → 跨过 90 天复核期
+        state = {"degraded_days": 89, "degraded_since": "2026-08-30",
                  "degraded_last_date": _yesterday(today), "last_alert_bucket": 0,
                  "last_streak_seen": 12}
         degraded = today_degraded_paths(data, _sector_chains(chains))
         days, since = update_degraded_counter(state, today, degraded, True)
         for f in check_degraded(state, today, days, since, degraded):
-            emit(f, True, set())
+            emit(f, True, {})
             fired.add(f["key"])
 
         # 情形 C：计时倒退 12 → 0
@@ -525,13 +669,49 @@ def _self_test() -> int:
                                            "last_success_utc_date": "2026-11-26",
                                            "last_run_utc": f"{today}T00:00:00Z"})
         for f in check_streak({"last_streak_seen": 12}, _load_json(data / "streak.json")):
-            emit(f, True, set())
+            emit(f, True, {})
             fired.add(f["key"])
 
-        need = {"empty", "degraded", "streak"}
+        # 情形 D：主路径恢复（前一日降级，今天 primary）
+        prev = {"today_chain_status": {"chain01": "degraded", "chain10": "degraded"},
+                "today_degraded_paths": {"chain01": "路径4 个股代理",
+                                         "chain10": "路径4 个股代理"}}
+        today_status = {"chain01": "primary", "chain10": "degraded"}
+        for f in check_changes(prev, today_status, {"chain10": "路径4 个股代理"}):
+            emit(f, True, {})
+            fired.add(f["key"])
+
+        # 情形 E：降级链数量变化（chain10 从 primary 变 degraded）
+        prev2 = {"today_chain_status": {"chain01": "degraded", "chain10": "primary"},
+                 "today_degraded_paths": {"chain01": "路径4 个股代理"}}
+        for f in check_changes(prev2, today_status,
+                               {"chain01": "路径4 个股代理", "chain10": "路径4 个股代理"}):
+            emit(f, True, {})
+            fired.add(f["key"])
+
+        # 情形 F：从降级变成完全没有数据
+        prev3 = {"today_chain_status": {"chain01": "degraded", "chain10": "degraded"},
+                 "today_degraded_paths": {"chain01": "路径4 个股代理",
+                                          "chain10": "路径4 个股代理"}}
+        for f in check_changes(prev3, {"chain01": "none", "chain10": "degraded"}, {}):
+            emit(f, True, {})
+            fired.add(f["key"])
+
+        # 情形 G：上一次心跳失败，由本次运行报出
+        _write_json(data / "heartbeat_state.json", {
+            "kind": "success", "last_ok": False,
+            "last_attempt_utc": "2026-11-27T00:00:00Z",
+            "last_error": "curl exit 6: Could not resolve host",
+        })
+        for f in check_heartbeat({}, _load_json(data / "heartbeat_state.json")):
+            emit(f, True, {})
+            fired.add(f["key"])
+
+        need = {"empty", "degraded", "streak", "change_recovered",
+                "change_new_degraded", "change_lost", "heartbeat"}
         print(f"== 自测结果：期望 {sorted(need)}，实际 {sorted(fired)} ==", flush=True)
         if fired == need:
-            print("通过：三种报警都真的叫了。", flush=True)
+            print("通过：七种报警都真的叫了。", flush=True)
             return 0
         print("失败：有报警没有叫，监控等于没做。", flush=True)
         return 1
