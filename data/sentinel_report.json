@@ -5,7 +5,7 @@
   "degraded_since": "2026-09-28",
   "last_alert_bucket": 2,
   "last_streak_seen": 12,
-  "last_checked_utc": "2026-11-27T14:38:08Z",
+  "last_checked_utc": "2026-11-27T15:48:32Z",
   "last_checked_date": "2026-11-27",
   "sector_chains": [
     "chain01",
@@ -15,11 +15,10 @@
     "chain01": "路径4 个股代理",
     "chain10": "路径4 个股代理"
   },
-  "findings": [
-    {
-      "key": "degraded",
-      "summary": "连续降级 61 天（自 2026-09-28）"
-    }
-  ],
-  "error": null
+  "findings": [],
+  "error": null,
+  "today_chain_status": {
+    "chain01": "degraded",
+    "chain10": "degraded"
+  }
 }
