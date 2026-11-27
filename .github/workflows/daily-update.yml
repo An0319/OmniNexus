@@ -11,6 +11,11 @@ on:
     paths:
       - ".github/workflows/daily-update.yml"
       - "tools/daily_update.py"
+      # 流水线实际调用的脚本必须全部列在这里，否则改它们不会触发验证
+      # （2026-11-27 漏过一次：改了 daily_sentinel.py 却没跑 CI）
+      - "tools/daily_sentinel.py"
+      - "tools/git_push_retry.py"
+      - "tools/heartbeat_ping.py"
   workflow_dispatch:
 
 permissions:
