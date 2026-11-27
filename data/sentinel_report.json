@@ -5,7 +5,7 @@
   "degraded_since": "2026-09-28",
   "last_alert_bucket": 2,
   "last_streak_seen": 12,
-  "last_checked_utc": "2026-11-27T15:48:32Z",
+  "last_checked_utc": "2026-11-27T16:02:59Z",
   "last_checked_date": "2026-11-27",
   "sector_chains": [
     "chain01",
@@ -20,5 +20,9 @@
   "today_chain_status": {
     "chain01": "degraded",
     "chain10": "degraded"
+  },
+  "today_path_levels": {
+    "chain01": 1,
+    "chain10": 1
   }
 }
