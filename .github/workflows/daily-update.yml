@@ -53,6 +53,19 @@ jobs:
           RUN_SLOT: ${{ github.event.schedule || 'adhoc' }}
         run: python tools/daily_update.py
 
+      # 旁路哨兵：专抓「跑成功了，数是空的」。三个检查——产物为空 / 连续降级满 30 天 /
+      # 计时归零或倒退；报警 issue 标题带「[哨兵]」，与「T1 日更失败：」分开。
+      # if: always() + continue-on-error：日更挂没挂都检查，哨兵自己崩了也不改日更结论。
+      # 只写不验的监控等于没有监控——本地用 python tools/daily_sentinel.py --self-test 验过。
+      # 放在「提交快照」之前：它写的 data/sentinel_report.json 由下一步一起提交，成为次日计数基线。
+      - name: 旁路哨兵 · 沉默失败检查
+        id: sentinel
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python tools/daily_sentinel.py
+
       - name: 提交快照（失败当日也提交，留痕可审计）
         if: always()
         run: |
