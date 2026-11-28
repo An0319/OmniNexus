@@ -1,7 +1,7 @@
 {
   "_comment": "中文规则集：按 phase0/timeline/event_definition_zh.md 的判据写成数据（动词表、门槛、拒绝码、正反例）。引擎不认语言，只认本文件。v1 只覆盖 A 类快讯 + B 类公告；C 类深度稿暂不接（规则在 C 类一致率 90%，低于『全判不是』基准 95%，负贡献）。",
   "lang": "zh",
-  "version": "rules_v2-zh.2",
+  "version": "rules_v2-zh.3",
   "extract_method": "rules_v2-zh",
   "default_sources": {
     "topic": ["eastmoney_news", "sina_roll", "wallstreetcn", "kr36", "google_news", "cninfo"],
@@ -14,6 +14,20 @@
       "ceid": "CN:zh-Hans",
       "source_id": "google_news_zh"
     }
+  },
+  "view": {
+    "_comment": "视图层（自足/增量），按 view_filter_definition_zh.md §2 写成数据。只产 view.* 标记，不改变 is_event，不含任何分值。",
+    "quote_pairs": [["《", "》"], ["「", "」"], ["『", "』"], ["“", "”"], ["\"", "\""], ["（", "）"], ["(", ")"]],
+    "main_clause_split": "[；;。]|暨|(?<![合兼吞])并(?![购网行举表发])",
+    "exclusions": [
+      {"key": "notice_only", "pattern": "(提示性公告|第一次提示|首次提示|提示性|预告公告|业绩预告)"},
+      {"key": "progress_only", "pattern": "(进展)"},
+      {"key": "registration_only", "pattern": "(工商变更登记|变更登记|工商登记|过户登记|完成过户|备案登记)"},
+      {"key": "aggregate", "pattern": "(达\\s*\\d+\\s*单|共\\s*\\d+\\s*单|超\\s*\\d+\\s*家|一览|汇总|盘点|成绩单)"}
+    ],
+    "generic_actor": "^(我国|全国|行业|业内|全市场|A股|科创板|多家|多股|机构|专家|分析师|巨头|龙头|这些|有关部门|某)",
+    "object_evidence": "(公司|集团|银行|证券|基金|研究院|大学|医院|事务所|交易所|委员会|协会|控股|投资|股权|股份|资产|业务|项目|产能|产品|专利|土地|矿|电站|航线|许可|董事|监事|总裁|总经理|董事长|子公司|标的|[0-9]+(\\.[0-9]+)?\\s*%|[0-9]+\\s*(亿|万|千)|[A-Za-z]{2,})",
+    "object_fallback_min_chars": 3
   },
   "actions": [
     "trial_start",

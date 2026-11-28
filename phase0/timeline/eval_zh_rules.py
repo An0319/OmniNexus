@@ -10,6 +10,7 @@
 - 窗口放到 2020-01-01 ~ 2026-12-31，只为让「时点可解析」单独显形，不拿窗口卡样本。
 - 这 80 条来自归纳规则用的 420 条，属开发集，只作回归检查，不承当准确率。
 - 只报差异，不修改任何判定去迎合标注。
+- 另报视图层 `view.self_contained` / `view.increment` 的分布；它只挂在 `is_event=是` 的条目上，不参与 is_event 统计。
 - 基准线一律按 `want != 是` 计（A 侧「说不清」并入「不是」一侧），故第一版为 60/80；`zh_samples/agreement.md` §1.2 的 57/80 只数「不是」、不含「说不清」，是另一算法，两处不可混用。
 """
 
@@ -70,6 +71,7 @@ def main() -> int:
                 "reason": reason,
                 "action": ev["action"] if ev else None,
                 "subject": ev["subject"] if ev else None,
+                "view": ev.get("view") if ev else None,
             }
         )
 
@@ -119,6 +121,37 @@ def main() -> int:
     print("matrix", {(a, b): sum(1 for r in rows if r["want"] == a and r["got"] == b) for a in ["是", "不是", "说不清"] for b in ["是", "不是", "说不清"]})
     print("按类别（严格三态）:", {c: f"{sum(r['want'] == r['got'] for r in rows if r['category'] == c)}/{sum(1 for r in rows if r['category'] == c)}" for c in sorted({r['category'] for r in rows})})
     print("拒绝码分布:", dict(Counter(r["reason"] for r in rows if r["reason"])))
+
+    # —— 视图层（自足 / 增量）：只统计引擎判「是」的条目，不参与 is_event
+    yes_rows = [r for r in rows if r["got"] == "是"]
+    sc = Counter(r["view"]["self_contained"] for r in yes_rows if r["view"])
+    inc = Counter(r["view"]["increment"] for r in yes_rows if r["view"])
+    reasons = Counter((r["view"]["reason"] or "空") for r in yes_rows if r["view"])
+    buckets: Counter = Counter()
+    for r in yes_rows:
+        v = r["view"] or {}
+        if v.get("reason") == "needs_source_doc":
+            buckets["needs_source_doc"] += 1
+        elif v.get("increment") == "否":
+            buckets["no_increment"] += 1
+        elif v.get("self_contained") == "是" and v.get("increment") == "是":
+            buckets["candidate"] += 1
+        else:
+            buckets["needs_source_doc"] += 1
+    print(f"\n[视图层] 引擎判「是」的 {len(yes_rows)} 条中：")
+    print("  self_contained:", dict(sc))
+    print("  increment:", dict(inc))
+    print("  落格:", dict(buckets))
+    print("  view.reason:", dict(reasons))
+    no_inc = [r for r in yes_rows if (r["view"] or {}).get("increment") == "否"]
+    print(f"  原判「是」里 increment=否：{len(no_inc)} 条")
+    for r in no_inc:
+        print(f"    {r['id']} [{r['category']}] reason={r['view']['reason']} | {r['title'][:70]}")
+    need = [r for r in yes_rows if (r["view"] or {}).get("reason") == "needs_source_doc"]
+    print(f"  原判「是」里 needs_source_doc：{len(need)} 条")
+    for r in need:
+        print(f"    {r['id']} [{r['category']}] view={r['view']} | {r['title'][:70]}")
+
     print("\n差异逐条：")
     for r in rows:
         if r["want"] != r["got"]:

@@ -32,6 +32,7 @@
 | `action` | enum（见 §3） | 是 | 动作类别，闭集 |
 | `action_text` | string | 是 | 触发该动作的**原文锚点**（逐字片段，≤60 字符），用于人工复核为何判成该动作 |
 | `object` | string \| null | 否 | 动作对象（药名、试验名、标的、政策文号） |
+| `view` | object | 否 | 视图层标记 `{self_contained, increment, reason}`；只挂在 `is_event=是` 的事件上，**不改变 `is_event`、不含任何分值**。定义见 [view_filter_definition_zh.md](view_filter_definition_zh.md) |
 | `value` | object | 是 | `{kind, raw, number, unit}`；无定量值时 `kind="none"`，其余为 null |
 | `source_url` | string | 是 | 条目级 URL，必须 `http(s)` 开头；分级见 `url_kind` |
 | `url_kind` | `publisher` \| `official` \| `aggregator` | 是 | 出版商原文 / 官方记录 / 聚合器页面 |

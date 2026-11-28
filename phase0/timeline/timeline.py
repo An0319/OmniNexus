@@ -81,6 +81,28 @@ class Ruleset:
         self.dedupe = data["dedupe"]
         self.reject_codes = data["reject_codes"]
         self.samples = data.get("samples", {})
+        view = data.get("view") or {}
+        self.view = (
+            {
+                "quote_pairs": [tuple(p) for p in view.get("quote_pairs", [])],
+                "main_clause_split": re.compile(view["main_clause_split"])
+                if view.get("main_clause_split")
+                else None,
+                "exclusions": [
+                    (x["key"], re.compile(x["pattern"], re.I))
+                    for x in view.get("exclusions", [])
+                ],
+                "generic_actor": re.compile(view["generic_actor"])
+                if view.get("generic_actor")
+                else None,
+                "object_evidence": re.compile(view["object_evidence"])
+                if view.get("object_evidence")
+                else None,
+                "object_fallback_min_chars": view.get("object_fallback_min_chars", 3),
+            }
+            if view
+            else None
+        )
 
     def code(self, key: str) -> str:
         return self.reject_codes[key]
@@ -764,6 +786,100 @@ def extract_subject(prefix: str, rs: Ruleset, action_start: int | None = None) -
     return cand
 
 
+# ---------------------------------------------------------------- 视图层（自足 / 增量）
+# 判据见 view_filter_definition_zh.md。只写 view.* 标记，不改变 is_event，不产分值。
+# 「无增量」是体裁代理，不是客观事实：第 4 条股权真的过户了，仍按体裁判无增量。
+
+
+def strip_quoted(text: str, pairs: list[tuple[str, str]]) -> str:
+    """剥掉成对引号/括号内的内容，支持嵌套。
+
+    只剥《》不够：第 7 条的动作在《…》里，第 1 条在《…》里，若漏剥「」或（）
+    仍会把文件里的动作当成标题断言。这里按栈逐字符处理，「《…（…）…》」也能剥干净。
+    """
+    if not pairs:
+        return text
+    openers = {o: c for o, c in pairs}
+    out: list[str] = []
+    stack: list[str] = []
+    for ch in text:
+        if stack and ch == stack[-1]:
+            stack.pop()
+            continue
+        if ch in openers:
+            stack.append(openers[ch])
+            continue
+        if not stack:
+            out.append(ch)
+    return "".join(out)
+
+
+def main_clause(text: str, rs: Ruleset) -> str:
+    """取主句：第一个完整命题。切分点由规则集给（「暨」「并」「；」「。」）。"""
+    if rs.view and rs.view["main_clause_split"]:
+        return rs.view["main_clause_split"].split(text, maxsplit=1)[0]
+    return text
+
+
+def compute_view(title: str, subject: str, rs: Ruleset) -> dict | None:
+    """按规则集的 view 段判自足 / 增量。三值，判不了显式，不用「否」代替。"""
+    cfg = rs.view
+    if not cfg:
+        return None
+    outside = strip_quoted(title, cfg["quote_pairs"])
+    main = main_clause(outside, rs)
+
+    action_outside, _a1, _p1 = detect_action(outside, rs)
+    action_main, _a2, pos_main = detect_action(main, rs)
+    reference_only = action_outside is None
+
+    subject_txt = str(subject or "")
+    named_actor = bool(subject_txt) and not re.search(r"[《》「」『』“”\"]", subject_txt)
+    if named_actor and cfg["generic_actor"] and cfg["generic_actor"].search(subject_txt):
+        named_actor = False
+
+    after = main[pos_main + len(_a2 or "") :] if pos_main is not None else main
+    after = re.sub(r"^[的之\s]+", "", after)
+    # 对象可以在动作前（「关于选举职工代表董事的公告」→ 董事在锚点前），
+    # 所以先看整条标题；但主体自身不算对象，否则「甲公司…」会被自己的「公司」蒙混过关。
+    haystack = (
+        outside.replace(subject_txt, "", 1)
+        if subject_txt and subject_txt in outside
+        else outside
+    )
+    identifiable = False
+    if cfg["object_evidence"] and cfg["object_evidence"].search(haystack):
+        identifiable = True
+    elif after:
+        # 兜底：动作后还剩一段像名字/状态的字，也算可指认；但「的公告」这类体裁尾巴不算
+        core = re.sub(r"[的了暨及与和\s]", "", after)
+        core = re.sub(r"(之?(公告|报告|意见书|意见|说明书|摘要|提示))$", "", core)
+        identifiable = (
+            len(re.findall(r"[\u4e00-\u9fff]", core)) >= cfg["object_fallback_min_chars"]
+        )
+
+    reason = ""
+    if reference_only:
+        self_contained = "否"
+        increment = "否"
+        reason = "needs_source_doc"
+    else:
+        self_contained = "是" if (named_actor and identifiable) else "判不了"
+        hit = next(((k, p.search(main)) for k, p in cfg["exclusions"] if p.search(main)), None)
+        if hit:
+            increment = "否"
+            reason = hit[0]
+        elif action_main is None:
+            increment = "判不了"
+            reason = "needs_source_doc"
+        else:
+            increment = "是"
+            if not named_actor or not identifiable:
+                reason = "needs_source_doc"
+
+    return {"self_contained": self_contained, "increment": increment, "reason": reason}
+
+
 def build_event(
     item: dict,
     start: dt.date,
@@ -850,6 +966,8 @@ def build_event(
             }
         ],
     }
+    if rs.view:
+        event["view"] = compute_view(title, subject, rs)
     reason = validate_event(event, rs)
     return (None, reason) if reason else (event, None)
 
@@ -963,7 +1081,13 @@ def write_outputs(out_dir: Path, status: str, meta: dict, events: list[dict], re
         val = ev["value"]
         val_txt = f"{val['raw']}" if val["kind"] != "none" else "—"
         edge = " ·（窗口边界保留）" if ev.get("window_edge") else ""
-        lines.append(f"- **{ev['subject']}** · `{ev['action']}` · 数值 {val_txt}{edge}")
+        view = ev.get("view") or {}
+        view_txt = ""
+        if view:
+            view_txt = f" · 自足 {view['self_contained']} / 增量 {view['increment']}"
+            if view.get("reason"):
+                view_txt += f"（{view['reason']}）"
+        lines.append(f"- **{ev['subject']}** · `{ev['action']}` · 数值 {val_txt}{view_txt}{edge}")
         lines.append(f"  > {ev['excerpt'][:200]}")
         for src in ev["sources"]:
             lines.append(

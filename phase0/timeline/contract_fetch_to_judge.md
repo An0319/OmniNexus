@@ -119,7 +119,7 @@
 - **必需键**（引擎直接索引，缺则 `KeyError`）：
   `lang`、`actions`、`action_patterns`、`value_patterns`、`subject`、`gates`、`tokenize`、`dedupe`、`reject_codes`
 - **可选键**：`version`、`extract_method`、`source_params`、`default_sources`、`filters`、`samples`、
-  `vocab_provenance`、`_comment`
+  `vocab_provenance`、`view`、`_comment`
 - **缺键行为分两级（现状，不是理想态）**：
   - 结构键缺 → `KeyError`（未包装成 `RulesetConfigError`）；
   - `source_params.<源>.<语言键>` 缺 → `RulesetConfigError`。
