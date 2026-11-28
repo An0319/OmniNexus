@@ -1,6 +1,6 @@
 # ROADMAP · 主线 / 支线地图
 
-> **最后更新：2026-11-28**（写入时 HEAD=`70d9908`，2026-11-28 20:31 +0900）
+> **最后更新：2026-11-28**（基于 `61cd6eb` 及其之前的历史；本文件自身提交不计入主线进度）
 > **更新触发条件（任一满足即改本文件）**：① 主线换站（出口达成 / 被否决 / 被替换）；② 支线新增、关闭或升级；③ 主线最后一条人工提交日期变化；④ 某条支线超过 14 天未推进需要改状态。
 > **过期规则：超过 14 天未更新，本文件即视为过期。** 过期地图比没有地图更危险——它会让人以为自己在看现状。过期后必须在标题下打 `[已过期]`，不得继续引用。
 
@@ -19,10 +19,10 @@
 |---|---|
 | **当前主线** | 中文事件判据做到能对外报数（`phase0/timeline/` 的 `event_definition_zh.md` + `rulesets/zh.json` + 评测） |
 | **主线当前卡在哪** | **M1/M2 之间**：判据补写已在 11-28 落文档（§13，15 条补句 + A2/S 层级），但 `rulesets/zh.json` 尚未同步；128 条样本已在本轮修复中被标记为 **CONSUMED**，不能再当独立样本 |
-| **主线最后人工提交** | 2026-11-28 `70d9908`「docs: establish A2/S precedence and mark zh_fresh_20261128 as consumed」 |
+| **主线最后人工提交** | 2026-11-28 `61cd6eb`「docs: record title-level cost and publish criteria audit」（`70d9908` 补写 §13；`61cd6eb` 把 `criteria_audit.md` 入库） |
 | **主线出口** | 见 §2；五条同时满足才算到站，未达到不许换主线 |
-| **最近 48 小时人工提交去向** | 11-27 共 3 条，全部不在判据出口上（日更降级记录、哨兵、取数↔判定契约）；11-28 共 12 条，其中直接服务出口 2 条（`8fcc0f6` 冻结 128 条、`70d9908` 判据补写），其余 10 条为取数层、视图层、日更/CI 与支线登记 |
-| **当前在制品（未提交）** | `zh_fresh_20261128/labels_a.json`、`labels_b.json`、`criteria_audit.md`、`event_definition_hierarchy.md` 仍是 `??`（git 未跟踪）；`agreement.md` 已入库但已被标为「已用掉」 |
+| **最近 48 小时人工提交去向** | 11-27 共 3 条，全部不在判据出口上（日更降级记录、哨兵、取数↔判定契约）；11-28 共 13 条，其中直接服务出口 3 条（`8fcc0f6` 冻结 128 条、`70d9908` 判据补写、`61cd6eb` 审计入库），其余 10 条为取数层、视图层、日更/CI 与支线登记 |
+| **当前在制品（未提交）** | `zh_fresh_20261128/labels_a.json`、`labels_b.json`、`event_definition_hierarchy.md` 仍是 `??`（git 未跟踪）；`agreement.md` 与 `criteria_audit.md` 已入库，但前者已被标为「已用掉」 |
 | **下一步唯一动作** | 先决定「新独立样本」怎么来，再动 M2；在判据版本冻结前，不要再用 128 条或 80 条改词表/阈值 |
 
 ### 1.1 为什么 11-28 看起来在推进，出口却没动
@@ -73,7 +73,7 @@
 |---|---|---|
 | `rulesets/zh.json` 尚未按 §13 同步 | `70d9908` 只改了 `event_definition_zh.md`、`zh_fresh_20261128/README.md`、`agreement.md`、`manifest.json`，未改 `rulesets/zh.json` | 文档已写 A2/S 层级，引擎仍可能按旧逻辑跑；出口第 1 条不满足 |
 | 128 条已被消耗 | `zh_fresh_20261128/README.md` 与 `agreement.md` 均标 `CONSUMED 2026-11-28T11:30:12Z` | 出口第 2 条不满足；必须另采新样本 |
-| `criteria_audit.md` 与两侧标签未入库 | `git status` 显示 `??` | 读者能在 README 看到文件名，却点不到实物；外部不可核 |
+| 两侧标签未入库 | `git status` 显示 `labels_a.json`、`labels_b.json` 仍为 `??`；`criteria_audit.md` 已由 `61cd6eb` 入库 | 读者能读到一致性报告，却点不到两侧逐条标签；外部不能复算 |
 | 两处层级冲突未裁 | `event_definition_zh.md` §13.6：`A2/Z15` 与 §2.5 `data_quality` 的管辖冲突；A（已发生）与 R12（承诺/指引）谁上位未写死 | 出口第 1 条的「文档=代码」仍可能有第二套读法 |
 | 30 条巨潮只做了人工套用 | §13.4：26 条翻、4 条留，明确「未改代码、未跑引擎」 | 这是人工验证，不是引擎结果；不能当出口数字 |
 
@@ -228,6 +228,6 @@ flowchart LR
   - 支线：`phase0/timeline/支线-未验证-外部检索与抽取工具.md`、`phase0/timeline/anchor_sources.md`、`phase0/timeline/anchor_check_b.md`、`phase0/timeline/zh_source_access.md`、`phase0/timeline/contract_fetch_to_judge.md`、`phase0/timeline/view_filter_definition_zh.md`、`phase0/数据口径-降级接受记录.md`
   - 历史：`docs/错账-已发现的错与被推翻的判断.md`（ERR-069 记 18 天空窗；ERR-054/059 记 `docs/` 无版本历史；ERR-066 记 B 池 118 条无实物）
 - **未核实项**（不编）：
-  - `anchor_sources.md`、`anchor_check_b.md`、`zh_fresh_20261128/criteria_audit.md`、`labels_a.json`、`labels_b.json`、`event_definition_hierarchy.md` 均为 git 未跟踪；其日期只能取文件系统时间，**提交时间未核实**。
+  - `anchor_sources.md`、`anchor_check_b.md`、`zh_fresh_20261128/labels_a.json`、`labels_b.json`、`event_definition_hierarchy.md` 均为 git 未跟踪；其日期只能取文件系统时间，**提交时间未核实**。
   - `docs/` 整体被 `.gitignore` 排除，`docs/` 内文档的改动时间无 git 历史可核。
   - 11-28 之后若 HEAD 继续前进，本文件的「最后人工提交」与「当前卡点」会立即过期；使用前先跑 `git log -5 --date=iso` 对照。
