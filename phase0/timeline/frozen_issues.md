@@ -9,6 +9,7 @@
 | # | 发现日期 | 条目/条文 | 问题描述 | 本轮处置 |
 |---|---|---|---|---|
 | F1 | 2026-11-28（冻结前） | §2.2 A / §2.3 R12 | 已发生的动作与「有执行权的未来承诺判是」谁上位未定（层级图 D1） | 不修；待用户裁决 |
+| F2 | 2026-11-28 | §13 / `rulesets/zh.json` | 冻结版 `.4` 的 Z15 收窄与 R3 ②/④ 从未在代码中实现：`rulesets/zh.json` 无 carrier/data_quality 键，`zh_carrier_unverified` 只出现在 `eval_zh_rules.py`；`timeline.py` 无 carrier 闸门、无 pool/attribution，`zh_generalized_subject` 只覆盖 ① 发布主体白名单 | **阻塞**：需裁决是否允许新增实现；未改规则集、未升版本号 |
 
 ## 冻结期新增
 
