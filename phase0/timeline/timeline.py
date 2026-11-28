@@ -130,6 +130,26 @@ def parse_date(value: str) -> dt.datetime | None:
     return parsed
 
 
+def tz_unmarked(value: str) -> bool:
+    """原始时间串是否没有时区标记。
+
+    只有无时区的时间戳才存在「本地日 vs UTC 日」的歧义，窗口边界要保守保留；
+    带 Z / ±hh:mm / GMT 的时间戳是精确时刻，窗口外就是窗口外。
+    """
+    s = str(value or "").strip()
+    if not s:
+        return False
+    if s.isdigit():
+        return False  # epoch 是精确时刻
+    if s.endswith(("Z", "z")):
+        return False
+    if re.search(r"[+-]\d{2}:?\d{2}$", s):
+        return False
+    if re.search(r"\b(GMT|UTC)\b", s, re.I):
+        return False
+    return True
+
+
 def clean(text: str) -> str:
     """去标签、解 HTML 实体、压空白。首版漏了解实体，摘要里残留 &nbsp;，此处修正。"""
     import html
@@ -925,6 +945,7 @@ def write_outputs(out_dir: Path, status: str, meta: dict, events: list[dict], re
         f"- 抽取器：{meta['extract_method']}",
         f"- **本次状态：{status}**（ok=全部源抓取成功；partial=部分源失败；failed=全部源失败，此表不代表「今天没有事件」）",
         f"- 入表 {len(events)} 条，拒绝 {len(rejects)} 条，合并重复 {meta['stats']['merged_duplicates']} 条",
+        f"- 窗口外（输入端剔除）{meta['stats']['window_excluded']} 条；边界保留 {meta['stats']['window_edge_kept']} 条（仅限无时区时间戳，标 `window_edge`）",
         f"- 源统计：{json.dumps(meta['sources_stats'], ensure_ascii=False)}",
         "",
     ]
@@ -941,7 +962,8 @@ def write_outputs(out_dir: Path, status: str, meta: dict, events: list[dict], re
             lines += ["", f"## {current_day}", ""]
         val = ev["value"]
         val_txt = f"{val['raw']}" if val["kind"] != "none" else "—"
-        lines.append(f"- **{ev['subject']}** · `{ev['action']}` · 数值 {val_txt}")
+        edge = " ·（窗口边界保留）" if ev.get("window_edge") else ""
+        lines.append(f"- **{ev['subject']}** · `{ev['action']}` · 数值 {val_txt}{edge}")
         lines.append(f"  > {ev['excerpt'][:200]}")
         for src in ev["sources"]:
             lines.append(
@@ -1010,10 +1032,35 @@ def run(args: argparse.Namespace) -> int:
         else:
             status = "ok"
 
+    # 窗口过滤：窗口外的条目在输入端剔除，不进判定、不进待定池。
+    # 按天粒度判。只有「时间戳无时区」的条目才留 ±1 天保守带：那种条目可能因
+    # 本地时区换算跨日，属于合法边界；带内保留并标 window_edge。带 Z/GMT/epoch
+    # 的时间戳是精确时刻，窗口外就剔除，不享受保守带。
+    margin = dt.timedelta(days=1)
+    win_lo, win_hi = start - margin, end + margin
+    kept: list[dict] = []
+    window_excluded = 0
+    window_edge = 0
+    for item in raw:
+        when = parse_date(item.get("date", ""))
+        if when is not None:
+            day = when.date()
+            if day < start or day > end:
+                raw_date = item.get("date", "")
+                if tz_unmarked(raw_date) and win_lo <= day <= win_hi:
+                    item["window_edge"] = True
+                    window_edge += 1
+                else:
+                    window_excluded += 1
+                    continue
+        kept.append(item)
+    raw = kept
+    print(f"[window] 输入剔除窗口外 {window_excluded} 条；边界保留 {window_edge} 条（仅限无时区时间戳，标 window_edge）")
+
     rejects: list[dict] = []
     events: list[dict] = []
     for item in raw:
-        ev, reason = build_event(item, start, end, entity=args.entity, ruleset=rs)
+        ev, reason = build_event(item, win_lo, win_hi, entity=args.entity, ruleset=rs)
         if ev is None:
             rejects.append(
                 {
@@ -1029,6 +1076,8 @@ def run(args: argparse.Namespace) -> int:
             stats = sources_stats.setdefault(stat_key, {"fetched": 0, "accepted": 0, "rejected": 0})
             stats["rejected"] = stats.get("rejected", 0) + 1
             continue
+        if item.get("window_edge"):
+            ev["window_edge"] = True
         ev["_title"] = item.get("title", "")
         ev["_source_id"] = item.get("source_id")
         events.append(ev)
@@ -1060,6 +1109,8 @@ def run(args: argparse.Namespace) -> int:
             "rejects": len(rejects),
             "merged_duplicates": dup_count,
             "reject_reasons": reason_counts,
+            "window_excluded": window_excluded,
+            "window_edge_kept": window_edge,
         },
     }
 
