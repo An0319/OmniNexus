@@ -1,6 +1,6 @@
 # 中文源取件路径调查
 
-> 创建日：2026-11-08 ｜ 依据代际：壳前置能力（phase0/timeline） ｜ 最后实质修订：2026-11-08
+> 创建日：2026-11-08 ｜ 依据代际：壳前置能力（phase0/timeline） ｜ 最后实质修订：2026-11-28
 > 范围：只回答「每一类中文源到底怎么取得到」——入口、形态、是否要登录/签名、有无反爬、实测结果、卡在哪一步。**不写「预期可用」**，没测过的写没测过。
 > 证据等级：下表全部为 **A 级实跑**（本机直连，HTTP 状态码 + 响应字节 + 字段名均来自当次响应）。时刻：2026-11-08 21:55–22:05 CST（新浪接口回传 `timestamp: Sun Nov 08 21:55:25 +0800 2026` 可作锚）。换网络、换时间可能不同，下表只对当次有效。
 
@@ -20,14 +20,21 @@
 
 落到本调查：36 氪 `gateway.36kr.com` 属于**公开网页自己调用的接口**，不是绕过技术措施，可以接，但随前端改版可能失效；财新 / 一财 / 澎湃的**公开 HTML 解析可以做，绕过付费墙或登录墙不可以**；财新的付费墙部分**未验证，且按边界不实现**。
 
+### 0.6 「已验证可用」的有效期（硬规矩，2026-11-28 新增）
+
+1. **任何「已验证可用」必须带最后复验日期**（`YYYY-MM-DD`）。**没有日期的一律视为未验证**，不得引用为可用源。
+2. **超过 7 天未复验即视为失效**（N=7）。理由：这批入口没有 SLA、前端改版即失效；本文件 2026-11-08 标为可用的新浪与华尔街见闻，20 天内就分别变成「空」和「DNS 不通」。7 天能在源坏掉后一周内暴露，代价是每周跑一次 `python phase0/timeline/probe_zh_sources.py`（约 15 秒）。
+3. 复验方法：跑 [probe_zh_sources.py](probe_zh_sources.py)（只探、不改），把结果与日期写进 §1.1。**单发可取 ≠ 稳定可用**：频控、封 IP、单日额度仍未测。
+4. **失效记录不删**：原记录保留，就地标注失效日期与原因——「它曾经通过、后来坏了」本身是信息。
+
 ## 1. 逐源实测表
 
 | 源 | 类别 | 入口（当次实测） | 形态 | 登录/密钥 | 反爬 | 实测结果 | 卡点 |
 |---|---|---|---|---|---|---|---|
 | 巨潮资讯 | 上市公司公告 | `POST http://www.cninfo.com.cn/new/hisAnnouncement/query` | JSON | 否 | 需 `Referer`＋`Origin`＋`X-Requested-With` | **200**，21,422B，0.9s，`totalAnnouncement=2199`，`announcements[]` 含 `secName` / `announcementTitle` / `announcementTime` / `adjunctUrl`（PDF 相对路径） | 无（PDF 正文未打开） |
 | 东方财富快讯 | 财经快讯 | `https://newsapi.eastmoney.com/kuaixun/v1/getlist_102_ajaxResult_50_1_.html` | **JSONP**（`var ajaxResult=` 前缀） | 否 | 无 | **200**，65,103B，6.2–8.6s，`LivesList` 50 条，字段 `title` / `digest` / `showtime` / `url_unique` | 需剥前缀；响应慢 |
-| 新浪财经滚动 | 财经快讯 | `https://feed.mix.sina.com.cn/api/roll/get?pageid=153&lid=2516&num=20` | JSON | 否 | 无 | **200**，42,364B，0.7s，`result.pdps[]` | 无 |
-| 华尔街见闻·快讯 | 财经快讯 | `https://api-one.wallstcn.com/apiv1/content/lives?channel=global-channel&limit=20` | JSON | 否 | 无 | **连跑 3 次全 200**，各 20 条，1.0/1.5/1.8s，字段 `title` / `content_text` / `display_time`（epoch 秒） | **无**；上一轮两次超时属瞬时故障，不是接口不可用 |
+| 新浪财经滚动 | 财经快讯 | `https://feed.mix.sina.com.cn/api/roll/get?pageid=153&lid=2516&num=20` | JSON | 否 | 无 | **200**，42,364B，0.7s，`result.pdps[]`〔**2026-11-28 复验：空**——HTTP 200 但 `result.pdps` 为空数组，原因不明；原记录保留〕 | 无 |
+| 华尔街见闻·快讯 | 财经快讯 | `https://api-one.wallstcn.com/apiv1/content/lives?channel=global-channel&limit=20` | JSON | 否 | 无 | **连跑 3 次全 200**，各 20 条，1.0/1.5/1.8s，字段 `title` / `content_text` / `display_time`（epoch 秒）〔**2026-11-28 复验：不通**——`ConnectionError … NameResolutionError … Failed to resolve 'api-one.wallstcn.com' ([Errno 11001] getaddrinfo …)`；原记录保留〕 | **无**；上一轮两次超时属瞬时故障，不是接口不可用。**2026-11-28 起该判断不成立：DNS 已解析不到** |
 | 华尔街见闻·文章 | 财经深度 | `https://api-one.wallstcn.com/apiv1/content/articles?channel=global-channel&limit=20` | JSON | 否 | 无 | **200**，26,641B，0.4s，`data.items[]` | 无 |
 | 36 氪·快讯 | 财经快讯 | `POST https://gateway.36kr.com/api/mis/nav/newsflash/flow`，body 见 §2 | JSON | 否 | 无 | **200**，15,673B，0.5–1.7s，`data.itemList` 20 条，`hasNextPage=1`；字段 `templateMaterial.widgetTitle` / `publishTime`（epoch 毫秒）/ `widgetContent` | `/feed` 与 `/newsflashes` 返回**同一份 25,361B SPA 空壳**，里面没有条目；该接口无文档，**随前端改版可能失效** |
 | 36 氪·文章流 | 财经深度 | `POST https://gateway.36kr.com/api/mis/nav/ifm/subNav/flow` | JSON | 否 | 无 | **200**，15,357B，1.0s，`data.itemList` 20 条 | 同上：只能走接口 |
@@ -41,6 +48,23 @@
 | 东方财富研报 | 研报 | `https://reportapi.eastmoney.com/report/list?cb=datatable&pageSize=20&pageNo=1&beginTime=2026-10-01&endTime=2026-11-08&qType=0&code=*` | **JSONP**（`datatable(...)`） | 否 | 无 | **200**，28,304B，2.3s，`hits=1923`，`data[]` 含 `title` / `stockName` / `orgCode` | 少 `beginTime`/`endTime`/`code=*` 任一 → **400** |
 | Google News RSS | 聚合检索 | `https://news.google.com/rss/search?q=A股&hl=zh-CN&gl=CN&ceid=CN:zh-Hans` | RSS | 否 | 无 | **200**，63 `<item>`，1.0s | 链接是聚合跳转页，解析不回原文（既有结论） |
 | 新浪 RSS 老口 | — | `http://rss.sina.com.cn/news/marquee/ddt.xml` | RSS | 否 | 无 | **200** 但只有 **1 个 item** | 废弃口，不能当源 |
+
+### 1.1 复验记录（按 §0.6，每 7 天内至少一次）
+
+脚本：`python phase0/timeline/probe_zh_sources.py`（只探、不改；单发一次，不测频控与额度）。
+
+| 复验日期 | 源 | 结果 | 证据 |
+|---|---|---|---|
+| 2026-11-28 | 巨潮资讯（公告） | 通，30 条，0.71s | `POST hisAnnouncement/query` 200 |
+| 2026-11-28 | 东方财富快讯 | 通，50 条，3.09s | JSONP 剥 `var ajaxResult=` 前缀成功 |
+| 2026-11-28 | 新浪财经滚动 | **空，0 条，1.36s** | HTTP 200，`result.pdps` 为空数组；**原因不明** |
+| 2026-11-28 | 华尔街见闻·快讯 | **不通，0.05s** | `ConnectionError: HTTPSConnectionPool(host='api-one.wallstcn.com', port=443): Max retries exceeded … (Caused by NameResolutionError(… Failed to resolve 'api-one.wallstcn.com' ([Errno 11001] getaddrinfo …` |
+| 2026-11-28 | 36氪·快讯 | 通，20 条，5.42s | `POST gateway.36kr.com` 200 |
+| 2026-11-28 | 东方财富研报 | 通，20 条，2.52s | JSONP `datatable(...)` 200 |
+| 2026-11-28 | Google News RSS | 通，102 条，1.62s | `q=A股`，`hl=zh-CN&gl=CN&ceid=CN:zh-Hans` |
+
+失效的两家：**新浪财经滚动（空）**、**华尔街见闻·快讯（DNS 不通）**。其余 5 个当次通。
+复验日期即上表日期；超过 7 天未再复验，按 §0.6 视为失效——包括这次「通」的 5 个。
 
 ## 2. 两个 POST 口的请求体（可直接复用）
 
@@ -66,7 +90,7 @@ curl -s -o NUL -w "%{http_code} %{size_download} %{time_total}\n" -A "Mozilla/5.
 
 ## 4. 对第三段的意义（先说结论，不写「预期」）
 
-1. **可进样本的源（已验证）**：巨潮（公告，B 类）；东财快讯、新浪滚动、华尔街见闻、36 氪 gateway（快讯，A 类）；东财研报（可替代 C 类深度稿的「研报体」）；Google News（D 类聚合）。
+1. **可进样本的源（2026-11-08 验证；2026-11-28 复验见 §1.1）**：巨潮（公告，B 类）；东财快讯、36 氪 gateway（快讯，A 类，2026-11-28 仍通）；~~新浪滚动~~（**2026-11-28：空**）、~~华尔街见闻~~（**2026-11-28：DNS 不通**）；东财研报（可替代 C 类深度稿的「研报体」）；Google News（D 类聚合）。原记录保留，只加失效标注。
 2. **不可用、且原因各不相同**：财联社（签名）、澎湃（403）、证券时报（TLS 超时）、财新（无 RSS）、第一财经（无可用列表口）。**不能合并成一句「这几个站挂了」**——五种卡点对应五种不同的代价与翻案条件。
 3. **对既有判断的两处更正**：
    - 「华尔街见闻超时」是**瞬时故障**，接口现在稳定可用，应把它列入可用源，但要带重试（1 次超时不算该源失效）。
