@@ -1,0 +1,117 @@
+{
+  "sample_version": "zh_fresh_20261128",
+  "frozen_at_utc": "2026-11-28T09:48:19Z",
+  "window_start_utc": "2026-11-27T09:47:50Z",
+  "window_end_utc": "2026-11-28T09:47:50Z",
+  "sampling_command": "python phase0/timeline/sample_fresh_zh.py --start 2026-11-27T09:47:50Z --end 2026-11-28T09:47:50Z --out-dir phase0/timeline/zh_fresh_20261128 --target 0",
+  "sources_requested": [
+    "eastmoney_news",
+    "sina_roll",
+    "wallstreetcn",
+    "kr36",
+    "google_news",
+    "cninfo"
+  ],
+  "source_stats": {
+    "eastmoney_news": {
+      "fetched": 50,
+      "in_window": 50,
+      "undated": 0,
+      "out_of_window": 0,
+      "tz_assumed": 50,
+      "tz_unmarked_band": 0,
+      "elapsed_s": 2.88
+    },
+    "sina_roll": {
+      "fetched": 0,
+      "in_window": 0,
+      "undated": 0,
+      "out_of_window": 0,
+      "tz_assumed": 0,
+      "tz_unmarked_band": 0,
+      "elapsed_s": 6.01
+    },
+    "wallstreetcn": {
+      "fetched": 0,
+      "in_window": 0,
+      "undated": 0,
+      "out_of_window": 0,
+      "elapsed_s": 0.02,
+      "error": "ConnectionError: HTTPSConnectionPool(host='api-one.wallstcn.com', port=443): Max retries exceeded with url: /apiv1/content/lives?channel=global-channel&limit=50 (Caused by NameResolutionError(\"HTTPSConnection(host='api-one.wallstcn.com', port=443): Failed to resolve 'api-one.wallstcn.com' ([Errno 11001] getaddrinfo "
+    },
+    "kr36": {
+      "fetched": 30,
+      "in_window": 30,
+      "undated": 0,
+      "out_of_window": 0,
+      "tz_assumed": 0,
+      "tz_unmarked_band": 0,
+      "elapsed_s": 6.44
+    },
+    "google_news": {
+      "fetched": 26,
+      "in_window": 24,
+      "undated": 0,
+      "out_of_window": 2,
+      "tz_assumed": 0,
+      "tz_unmarked_band": 0,
+      "elapsed_s": 5.74
+    },
+    "cninfo": {
+      "fetched": 30,
+      "in_window": 30,
+      "undated": 0,
+      "out_of_window": 0,
+      "tz_assumed": 0,
+      "tz_unmarked_band": 0,
+      "elapsed_s": 0.53
+    }
+  },
+  "raw_fetched_total": 136,
+  "in_window_total": 134,
+  "undated_excluded": 0,
+  "out_of_window_excluded": 2,
+  "tz_assumed_items": 50,
+  "tz_unmarked_band_items": 0,
+  "before_dedupe": 134,
+  "duplicates_merged": 6,
+  "after_dedupe": 128,
+  "target": 0,
+  "sampled_out": 0,
+  "random_seed": null,
+  "items_count": 128,
+  "items_sha256": "90fbd0cda0931c8687cb0b447ecf625a185b299d4e9b86d3127e18df370a3b58",
+  "items_bytes": 103607,
+  "per_source_items": {
+    "cninfo": 30,
+    "eastmoney_news": 50,
+    "google_news_zh": 23,
+    "kr36": 25
+  },
+  "fetched_at_utc_first": "2026-11-28T09:47:54Z",
+  "fetched_at_utc_last": "2026-11-28T09:48:18Z",
+  "dedupe": {
+    "params": {
+      "merge_sources": [
+        "google_news_zh",
+        "eastmoney_news",
+        "sina_roll",
+        "wallstreetcn",
+        "kr36"
+      ],
+      "day_tolerance": 3,
+      "jaccard_min": 0.6
+    },
+    "note": "沿用 rulesets/zh.json 的 dedupe 参数；动作锚点只作标题同一事的文本特征，不产生 is_event 判定"
+  },
+  "engine_results_included": false,
+  "representativeness_caveats": [
+    "四个源有贡献、两个源无贡献：sina_roll 返回空、wallstreetcn DNS 解析失败；本批不是六源均衡样本，eastmoney/kr36/cninfo/google 的占比高于预期。",
+    "各源取的是「最新 N 条」而非窗口内均匀抽样：条目集中在窗口末段，早段被源的分页上限截断。",
+    "Google News 用的是中文头条 RSS（无查询词），含时政/社会/文娱等非财经条目；若产品实际用主题查询，这批 Google 条目与线上流不一致。",
+    "cninfo 只查了深市（column=szse）第 1 页 30 条，未覆盖沪市，B 类公告偏深市、偏最新。",
+    "东财 showtime 无时区，按北京 UTC+8 还原；其余源无时区条目 0 条。若东财改用其它时区，窗口归属会错。",
+    "去重只用标题字符 Jaccard + 动作锚点文本特征，未走完整事件判定；与生产管线的事后去重可能不完全一致（本次合并 6 条）。"
+  ],
+  "freeze_rule": "此后不得增删；任何改动必须新建版本（新目录 + 新 manifest + 新 SHA-256）"
+}
