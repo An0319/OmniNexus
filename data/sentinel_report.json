@@ -1,12 +1,12 @@
 {
   "degraded_bootstrapped_from_history": 60,
-  "degraded_days": 61,
-  "degraded_last_date": "2026-11-27",
+  "degraded_days": 62,
+  "degraded_last_date": "2026-11-28",
   "degraded_since": "2026-09-28",
   "last_alert_bucket": 2,
-  "last_streak_seen": 12,
-  "last_checked_utc": "2026-11-27T21:35:38Z",
-  "last_checked_date": "2026-11-27",
+  "last_streak_seen": 13,
+  "last_checked_utc": "2026-11-28T08:11:38Z",
+  "last_checked_date": "2026-11-28",
   "sector_chains": [
     "chain01",
     "chain10"
