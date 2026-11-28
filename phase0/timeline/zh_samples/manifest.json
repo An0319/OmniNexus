@@ -55,6 +55,11 @@
   "sina": "2026-11-08T12:48:43Z"
  },
  "note": "冻结后 items.json 不得增删改；labels_a.json 的标注对象必须与本文件逐 id 对应",
+ "regression_only_since": {
+  "date": "2026-11-28",
+  "reason": "新增视图层 view.self_contained / view.increment 后，按 view_filter_definition_zh.md 重判 80 条；重判即再次使用开发集",
+  "rule": "80 条自今日起只作回归集，不再承当任何准确率；重判结果只能用于版本间漂移比对；不得据重判结果调词表或阈值"
+ },
  "derived_files": {
   "labels_a.json": {
    "sha256": "2d317845eb2ef947376c1a7656ad172c19837e16785b7544e94317874915de36",

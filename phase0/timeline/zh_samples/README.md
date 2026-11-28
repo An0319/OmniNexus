@@ -6,6 +6,8 @@ python -c "import json;from collections import Counter;A={x['id']:x['is_event'] 
 
 > **封存（2026-11-08）**：这 80 条取自归纳规则用的那 420 条，属**开发集**。从此只作回归检查，不再承当任何「准确率」；扩动词表不得看着这 80 条的失败项往里加。要谈准确率必须另采独立样本。
 
+> **降级为回归集（2026-11-28）**：同日新增视图层 `view.self_contained` / `view.increment`（定义见 [view_filter_definition_zh.md](../view_filter_definition_zh.md)），并按该定义对 80 条重判。**重判即第二次使用开发集**，所以 80 条自今日起只作**回归集**：不再承当任何准确率，重判结果只能用于「版本之间是否漂移」的比对。**不得**用这次重判的分布去调词表或阈值。要谈准确率必须另采独立样本。
+
 | 文件 | 内容 |
 |---|---|
 | `items.json` | 80 条样本（标题、URL、类别），审计冻结，SHA-256 见 `manifest.json` |
