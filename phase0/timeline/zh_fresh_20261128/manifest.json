@@ -1,5 +1,12 @@
 {
   "sample_version": "zh_fresh_20261128",
+  "sample_status": {
+    "status": "consumed_dev_set",
+    "consumed_at_utc": "2026-11-28T11:30:12Z",
+    "consumed_for": "发现并修复 A2/S 层级缺陷；审计见 criteria_audit.md，补写见 event_definition_zh.md §13",
+    "statement": "本批已用于发现并修复 A2/S 层级缺陷，自本日起不再是独立样本，不得用于任何准确率或一致率结论。",
+    "agreement_note": "agreement.md 的 108/128 = 84.4% 与 kappa 0.711 自此只能作为「修复前的历史读数」，不能对外引用。"
+  },
   "frozen_at_utc": "2026-11-28T09:48:19Z",
   "window_start_utc": "2026-11-27T09:47:50Z",
   "window_end_utc": "2026-11-28T09:47:50Z",
