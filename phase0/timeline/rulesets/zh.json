@@ -33,6 +33,13 @@
     "missing_publisher_code": "zh_generalized_subject",
     "missing_scope_code": "zh_aggregate_unverifiable"
   },
+  "future_commitment": {
+    "_comment": "2026-11-28 用户裁决 D1：具名主体的未来承诺算事件，产 future=true。追踪状态由用户手动开关，系统不自作主张（应用层，不在本文件）。调度类（召开/发布/披露等）不算承诺。",
+    "marker_pattern": "(将|拟|有望|或将|计划|预计|在即|酝酿|剑指|谋求|考虑|择机)",
+    "collective_pattern": "^(我国|全国|行业|业内|全市场|A股|多家|多股|机构|专家|分析师|巨头|龙头|这些|有关部门|某)",
+    "question_pattern": "^(谁|什么|如何|为何|哪些|哪家|是否)",
+    "schedule_pattern": "(召开|举行|举办|发布|披露|公布|生效|实施|上线)"
+  },
   "view": {
     "_comment": "视图层（自足/增量），按 view_filter_definition_zh.md §2 写成数据。只产 view.* 标记，不改变 is_event，不含任何分值。",
     "quote_pairs": [["《", "》"], ["「", "」"], ["『", "』"], ["“", "”"], ["\"", "\""], ["（", "）"], ["(", ")"]],

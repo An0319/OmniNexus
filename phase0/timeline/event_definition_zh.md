@@ -1025,7 +1025,7 @@ python -c "import json,re;rows=json.load(open(r'C:\Users\24063\AppData\Local\Tem
 
 **D2 已裁决（2026-11-28）：§2.5 上位，Z15 收窄。** 载体核不核过影响的是证据质量，不是世界有没有变；让数据质量否决事件判定，等于把「我们没核实」伪装成「它没发生」。原则：**看不清 ≠ 没发生。** Z15 只影响 `data_quality`，不再把 `is_event` 翻成「判不了」。
 
-**D1 仍待用户裁决：A（已发生）与 R12（承诺/指引）谁上位。** A 要求「消息发布前已经完成」，R12 把有执行权的未来承诺判 `是`；§1.3 的「已公开的拟议」只覆盖有公告载体的情形，管不到高管口头指引。这是产品判断，不在本轮定。
+**D1 已裁决（2026-11-28，用户）：未来承诺算事件。** 具名主体对未来的承诺/指引判 `is_event=是`，并打 `future=true`；**追踪状态由用户手动开关，系统不自作主张**（存在应用层 `data/tracking_state.json`，默认关、可逆）；本轮不做提醒或兑现核验。**这是用户裁决，不是技术结论。**
 
 ### 13.7 纪律与边界
 
@@ -1060,6 +1060,7 @@ python -c "import json,re;rows=json.load(open(r'C:\Users\24063\AppData\Local\Tem
 | R3 ② | 时段/单位可查（读标题判断） | `time_or_unit_pattern`：月份/年份/季度/同比/环比/本周等，或数字+单位；缺 → `zh_aggregate_unverifiable` | **近似**：正则闭集，未做语义解析；「时段或单位」按任一命中处理 |
 | R3 ④ | 统计范围可查（地区/品类/分母） | `scope_pattern`：地区/行业/品类/市场/央企/规模以上/其中/占比等；缺 → `zh_aggregate_unverifiable` | **近似**：闭集词表，覆盖不到全部品类 |
 | R3 ③ | 归属只挂 sector/region，归分池 | **无实现**：代码无 `pool` / `attribution`；不发明 | **不等同**；登记 F3 |
+| D1 未来承诺 | 具名主体的未来承诺/指引算事件，打 `future=true` | `future_commitment_candidate`：具名 head + 未来标记；集体/问句/调度类排除；`future` 写入事件 | **近似**：调度类排除是闭集；**用户裁决，不是技术结论**；追踪在应用层，见 `phase0/timeline/tracking_state_definition.md` |
 | 版本号 | `rules_v2-zh.4` | `version = rules_v2-zh.4` | 等同 |
 
 **明确做不到 / 做了近似的**：
@@ -1067,6 +1068,7 @@ python -c "import json,re;rows=json.load(open(r'C:\Users\24063\AppData\Local\Tem
 1. ②/④ 是闭集正则，不是语义判断；换一批品类词可能漏判。
 2. ③ 没有落点；`is_event` 不受影响只是因为它根本不存在，不是「已正确归池」。
 3. `data_quality` 已产出，但 `pool`（`unverified` 不进 `primary`）仍无落点，由下游/后续实现。
+4. D1 的 `future` 只是事件标记；追踪状态不在判定层，本轮无任何兑现核验/提醒。
 
 
 

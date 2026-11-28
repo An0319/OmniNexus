@@ -127,6 +127,23 @@ class Ruleset:
             if r3
             else None
         )
+        fc = data.get("future_commitment") or {}
+        self.future_commitment = (
+            {
+                "marker": re.compile(fc["marker_pattern"]) if fc.get("marker_pattern") else None,
+                "collective": re.compile(fc["collective_pattern"])
+                if fc.get("collective_pattern")
+                else None,
+                "question": re.compile(fc["question_pattern"])
+                if fc.get("question_pattern")
+                else None,
+                "schedule": re.compile(fc["schedule_pattern"])
+                if fc.get("schedule_pattern")
+                else None,
+            }
+            if fc
+            else None
+        )
 
     def code(self, key: str) -> str:
         return self.reject_codes[key]
@@ -930,6 +947,27 @@ def r3_check(text: str, subject: str, rs: Ruleset) -> str | None:
     return "PASS"
 
 
+def future_commitment_candidate(title: str, rs: Ruleset) -> bool:
+    """D1（用户裁决）：具名主体对未来的承诺/指引算事件，产 future=true。
+
+    只看标题；集体主体、问句、调度类（召开/发布/披露等）不算承诺。
+    追踪状态由用户在应用层手动开关，系统不自作主张；本轮不实现后续行为。
+    """
+    cfg = rs.future_commitment
+    if not cfg or not cfg["marker"] or not cfg["marker"].search(title):
+        return False
+    head = re.split(r"[：:，,；;、|｜]", title)[0].strip()
+    if not (2 <= len(head) <= rs.gates["subject_max_len"]):
+        return False
+    if cfg["collective"] and cfg["collective"].search(head):
+        return False
+    if cfg["question"] and cfg["question"].search(head):
+        return False
+    if cfg["schedule"] and cfg["schedule"].search(title):
+        return False
+    return True
+
+
 def build_event(
     item: dict,
     start: dt.date,
@@ -957,7 +995,13 @@ def build_event(
     text = f"{title}. {excerpt}"
     if entity and entity.lower() not in text.lower():
         return None, rs.code("subject_not_in_text")
-    key = apply_filters("title", title.strip(), rs)
+    future_candidate = future_commitment_candidate(title, rs)
+    key = apply_filters(
+        "title",
+        title.strip(),
+        rs,
+        skip={"zh_future_not_happened"} if future_candidate else None,
+    )
     if key:
         return None, rs.code(key)
     key = apply_filters("text", text, rs)
@@ -970,7 +1014,9 @@ def build_event(
     if action is None:
         action, anchor, action_start = detect_action(text, rs)
         if action is None:
-            return None, rs.code("unparsed_action")
+            return None, rs.code(
+                "zh_future_not_happened" if future_candidate else "unparsed_action"
+            )
     else:
         anchor = title[:60] or action
 
@@ -978,7 +1024,9 @@ def build_event(
     if not subject:
         subject = extract_subject(title, rs, action_start)
         if not subject:
-            return None, rs.code("unparsed_subject")
+            return None, rs.code(
+                "zh_future_not_happened" if future_candidate else "unparsed_subject"
+            )
     r3 = r3_check(text, str(subject), rs)
     if r3 == "PASS":
         key = apply_filters("subject", str(subject), rs, skip={"zh_generalized_subject"})
@@ -999,6 +1047,7 @@ def build_event(
         ).hexdigest()[:16],
         "time": day.isoformat(),
         "time_precision": "day" if not re.search(r"\d{2}:\d{2}", item.get("date", "")) else "minute",
+        "future": future_candidate,
         "subject": subject,
         "action": action,
         "action_text": anchor,

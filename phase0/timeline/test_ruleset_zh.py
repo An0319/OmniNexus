@@ -7,6 +7,7 @@
 """
 
 import datetime as dt
+import json
 import os
 import sys
 import unittest
@@ -89,6 +90,49 @@ class AttributionTest(unittest.TestCase):
         for ev in (ev1, ev2):
             self.assertNotIn("pool", ev)
             self.assertNotIn("attribution", ev)
+
+
+class FutureCommitmentTest(unittest.TestCase):
+    """D1（用户裁决）：具名主体的未来承诺算事件，future=true；集体/调度类不算。"""
+
+    def test_future_commitment_is_event(self):
+        ev, code = timeline.build_event(
+            make_item("中铝国际拟收购几内亚氧化铝项目"), START, END
+        )
+        self.assertIsNone(code, f"未来承诺应算事件，实际 code={code}")
+        self.assertIsNotNone(ev)
+        self.assertTrue(ev["future"])
+        self.assertNotIn("tracking", ev)  # 追踪属应用层，不进判定输出
+
+    def test_future_price_guidance_is_event(self):
+        ev, code = timeline.build_event(make_item("苹果将涨价"), START, END)
+        self.assertIsNone(code)
+        self.assertTrue(ev["future"])
+
+    def test_collective_future_is_not_event(self):
+        ev, code = timeline.build_event(make_item("我国光伏将新增装机"), START, END)
+        self.assertIsNone(ev)
+        self.assertEqual(code, "zh_future_not_happened")
+
+    def test_scheduled_meeting_is_not_commitment(self):
+        ev, _code = timeline.build_event(
+            make_item("中国石化将于11月28日召开股东大会"), START, END
+        )
+        self.assertIsNone(ev)
+
+
+class TrackingStateTest(unittest.TestCase):
+    """追踪是应用层状态：默认关、不写进规则集、不存在即关。"""
+
+    def test_tracking_state_schema_and_default(self):
+        path = os.path.join(HERE, "..", "..", "data", "tracking_state.json")
+        with open(path, encoding="utf-8") as fh:
+            state = json.load(fh)
+        self.assertEqual(state["version"], 1)
+        self.assertEqual(state["layer"], "application")
+        self.assertFalse(state["default_tracking"])
+        self.assertEqual(state["items"], {})
+        self.assertFalse(state["items"].get("not-exist", {}).get("tracking", False))
 
 
 if __name__ == "__main__":
