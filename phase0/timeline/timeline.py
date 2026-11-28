@@ -103,6 +103,30 @@ class Ruleset:
             if view
             else None
         )
+        self.data_quality = data.get("data_quality", {})
+        r3 = data.get("r3") or {}
+        self.r3 = (
+            {
+                "collective": re.compile(r3["collective_pattern"])
+                if r3.get("collective_pattern")
+                else None,
+                "publisher": re.compile(r3["publisher_pattern"])
+                if r3.get("publisher_pattern")
+                else None,
+                "time_or_unit": re.compile(r3["time_or_unit_pattern"])
+                if r3.get("time_or_unit_pattern")
+                else None,
+                "scope": re.compile(r3["scope_pattern"]) if r3.get("scope_pattern") else None,
+                "missing_publisher_code": r3.get(
+                    "missing_publisher_code", "zh_generalized_subject"
+                ),
+                "missing_scope_code": r3.get(
+                    "missing_scope_code", "zh_aggregate_unverifiable"
+                ),
+            }
+            if r3
+            else None
+        )
 
     def code(self, key: str) -> str:
         return self.reject_codes[key]
@@ -688,9 +712,11 @@ def filter_hit(flt: dict, text: str) -> bool:
     return not any(u.search(text) for u in flt["unless"])
 
 
-def apply_filters(stage: str, text: str, rs: Ruleset) -> str | None:
+def apply_filters(stage: str, text: str, rs: Ruleset, skip: set[str] | None = None) -> str | None:
     """按规则集的过滤表判；命中返回拒绝码键，否则 None。"""
     for flt in rs.filters:
+        if skip and flt["key"] in skip:
+            continue
         if flt["stage"] == stage and filter_hit(flt, text):
             return flt["key"]
     return None
@@ -880,6 +906,30 @@ def compute_view(title: str, subject: str, rs: Ruleset) -> dict | None:
     return {"self_contained": self_contained, "increment": increment, "reason": reason}
 
 
+def compute_data_quality(url_kind: str, rs: Ruleset) -> str:
+    """载体闸门：url_kind 只产出 data_quality，不否决 is_event（§2.5 上位）。"""
+    cfg = rs.data_quality or {}
+    return (cfg.get("by_url_kind") or {}).get(url_kind, cfg.get("default", "unverified"))
+
+
+def r3_check(text: str, subject: str, rs: Ruleset) -> str | None:
+    """R3 例外：集体主体仅当 ①发布主体、②时段/单位、④统计范围齐备时可通过 S。
+
+    返回 None=不适用；"PASS"=通过并跳过 zh_generalized_subject；否则拒绝码键。
+    ③ 归属不在本函数：代码无分池，见 frozen_issues F3。
+    """
+    cfg = rs.r3
+    if not cfg or not cfg["collective"] or not cfg["collective"].search(subject):
+        return None
+    if cfg["publisher"] and not cfg["publisher"].search(text):
+        return cfg["missing_publisher_code"]
+    if cfg["time_or_unit"] and not cfg["time_or_unit"].search(text):
+        return cfg["missing_scope_code"]
+    if cfg["scope"] and not cfg["scope"].search(text):
+        return cfg["missing_scope_code"]
+    return "PASS"
+
+
 def build_event(
     item: dict,
     start: dt.date,
@@ -929,7 +979,13 @@ def build_event(
         subject = extract_subject(title, rs, action_start)
         if not subject:
             return None, rs.code("unparsed_subject")
-    key = apply_filters("subject", str(subject), rs)
+    r3 = r3_check(text, str(subject), rs)
+    if r3 == "PASS":
+        key = apply_filters("subject", str(subject), rs, skip={"zh_generalized_subject"})
+    elif r3:
+        return None, rs.code(r3)
+    else:
+        key = apply_filters("subject", str(subject), rs)
     if key:
         return None, rs.code(key)
 
@@ -950,6 +1006,7 @@ def build_event(
         "value": value,
         "source_url": url,
         "url_kind": item.get("url_kind", "publisher"),
+        "data_quality": compute_data_quality(item.get("url_kind", "publisher"), rs),
         "source_name": item.get("source_name") or "unknown",
         "fetched_at_utc": item.get("fetched_at_utc"),
         "excerpt": excerpt[:400],

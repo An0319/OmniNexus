@@ -11,7 +11,7 @@
 
 > 冻结令是文档条款，不是说明。自本节写入起，`event_definition_zh.md` 进入冻结期。
 
-1. **冻结版本号：`rules_v2-zh.4`（定义层）。** 现有 `rulesets/zh.json` 为 `rules_v2-zh.3`；本轮只改定义、不同步代码，故文档=代码的差异按 §1.3「判据落代码有滞后」处理——**不算冻结违规，但出口第 1 条仍未满足**（见 `ROADMAP.md` §2.2）。
+1. **冻结版本号：`rules_v2-zh.4`（定义层）。** 现有 `rulesets/zh.json` 为 `rules_v2-zh.3`；本轮只改定义、不同步代码，故文档=代码的差异按 §1.3「判据落代码有滞后」处理——**不算冻结违规，但出口第 1 条仍未满足**（见 `ROADMAP.md` §2.2）。（2026-11-28 晚：代码已追至 `.4`，见 §13.9；本句保留为冻结当时状态。）
 2. **冻结期只允许两类改动**：① 会让程序崩溃的错；② 与上位关系直接矛盾的自相矛盾（如 §1.3 与 §1 冲突）。**其余一律只记不改**——包括「发现某条判得不对」「某个词表漏了」「某条样例不一致」。
 3. **记录位置**：冻结期内发现的问题写进 `phase0/timeline/frozen_issues.md`，每条含：发现日期、具体条目或条文、问题描述、**不允许在本轮修**。攒到下一轮一次性处理。
 4. **解冻条件**：第三批样本采完、标完、测完之后，才允许批量修；**修完必须重新采样，不得用第三批样本验证修复效果**。
@@ -1047,6 +1047,26 @@ python -c "import json,re;rows=json.load(open(r'C:\Users\24063\AppData\Local\Tem
   - **S049**：① 不过（只有「数据显示」＋媒体，无具名发布主体）→ `不是`。
   - **S044**：① 不过（只有「我国」）→ `不是`。
 - **结论同、机制不同**：S041 卡在 A，S049 与 S044 卡在 ①。不是同一条规则在管它们。
+
+### 13.9 2026-11-28 裁决三：`.4` 落码与差异清单
+
+- 版本：`rules_v2-zh.4`（`rulesets/zh.json`）；引擎 `timeline.py`。
+- 测试：`python -m unittest test_ruleset_zh -v` → 7 passed；`python -m compileall -q .` → exit 0。
+
+| 项 | 文档怎么写 | 代码怎么做 | 是否逐条等同 |
+|---|---|---|---|
+| 载体闸门（Z15） | 载体未核只改 `data_quality`，不改 `is_event`；取值 full/partial/unverified | `compute_data_quality(url_kind)`：`official→full`、`publisher→partial`、`aggregator→unverified`；只写入 `event.data_quality`，判定路径不读它 | 等同 |
+| R3 ① | 发布主体可指认（机械可核：白名单逐字命中） | `r3_check` 用 `publisher_pattern` 在 `text` 上命中；不命中 → `zh_generalized_subject` | 等同（白名单为闭集） |
+| R3 ② | 时段/单位可查（读标题判断） | `time_or_unit_pattern`：月份/年份/季度/同比/环比/本周等，或数字+单位；缺 → `zh_aggregate_unverifiable` | **近似**：正则闭集，未做语义解析；「时段或单位」按任一命中处理 |
+| R3 ④ | 统计范围可查（地区/品类/分母） | `scope_pattern`：地区/行业/品类/市场/央企/规模以上/其中/占比等；缺 → `zh_aggregate_unverifiable` | **近似**：闭集词表，覆盖不到全部品类 |
+| R3 ③ | 归属只挂 sector/region，归分池 | **无实现**：代码无 `pool` / `attribution`；不发明 | **不等同**；登记 F3 |
+| 版本号 | `rules_v2-zh.4` | `version = rules_v2-zh.4` | 等同 |
+
+**明确做不到 / 做了近似的**：
+
+1. ②/④ 是闭集正则，不是语义判断；换一批品类词可能漏判。
+2. ③ 没有落点；`is_event` 不受影响只是因为它根本不存在，不是「已正确归池」。
+3. `data_quality` 已产出，但 `pool`（`unverified` 不进 `primary`）仍无落点，由下游/后续实现。
 
 
 
